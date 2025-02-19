@@ -1,12 +1,14 @@
+require('dotenv').config()
+
 const express = require('express');
 const { connectDatabase } = require('./database');
 const cookieParser = require('cookie-parser');
 
-const PORT = 8000;
-const MONGODB_URL = 'mongodb://127.0.0.1:27017/chimsales'
+const PORT = process.env.PORT || 8000;
+const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017/chimsales';
 const app = express();
 
-connectDatabase(MONGOURL)
+connectDatabase(MONGODB_URL)
   .then(()=> {console.log('MongoDB connected successfully')})
   .error((error)=>{console.error(`Error connecting to Database: ${error}`)});
 
