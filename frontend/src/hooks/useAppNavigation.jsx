@@ -8,6 +8,7 @@ const useAppNavigation = () => {
         goToSignup: () => navigate('/signup'),
         goToHome: () => navigate('/'),
         goToDashboard: () => navigate('/dashboard'),
+        goToReview: () => navigate('/review'),
         // Add more routes as needed
     };
 };
