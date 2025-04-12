@@ -1,28 +1,29 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
 
-const AuthLogin = () => {
+const AuthRegister = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { goToSignup } = useAppNavigation();
-
-    const handleLogin = () => {
-        alert(`Logging in with Email: ${email}`);
-    };
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const { goToLogin } = useAppNavigation();
 
     const handleSignup = () => {
-        goToSignup();
+        if (password !== confirmPassword) {
+            alert('Passwords do not match!');
+        } else {
+            alert(`Registered with Email: ${email}`);
+        }
     };
 
-    const handleForgotPassword = () => {
-        alert('Forgot Password Flow');
+    const handleLoginRedirect = () => {
+        goToLogin();
     };
 
     return (
         <div className="min-h-screen w-full bg-black flex items-center justify-center px-4 py-6">
             <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-lg text-black transition-all duration-300">
                 <h2 className="text-3xl font-bold text-center mb-6 uppercase tracking-widest">
-                    WELCOME
+                    Join Us
                 </h2>
 
                 <div className="space-y-5">
@@ -41,34 +42,22 @@ const AuthLogin = () => {
                         <label className="block text-sm font-medium text-left mb-1">Password</label>
                         <input
                             type="password"
-                            placeholder="••••••••"
+                            placeholder="Create a password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-4 py-2 border border-black rounded-md bg-white text-black focus:outline-none focus:ring-2 focus:ring-black transition"
                         />
                     </div>
 
-                    {/* Login Button */}
-                    <button
-                        onClick={handleLogin}
-                        className="w-full border border-black bg-white text-black py-2 rounded-md hover:bg-black hover:text-white active:scale-95 transition-all duration-200 font-semibold tracking-wide"
-                    >
-                        Login
-                    </button>
-
-                    {/* Forgot Password Link */}
-                    <div className="text-right text-sm">
-                        <button
-                            onClick={handleForgotPassword}
-                            className="text-black hover:underline transition"
-                        >
-                            Forgot password?
-                        </button>
-                    </div>
-
-                    {/* Signup Message */}
-                    <div className="text-center text-sm text-black mt-4">
-                        <span>Don’t have an account?</span>
+                    <div>
+                        <label className="block text-sm font-medium text-left mb-1">Confirm Password</label>
+                        <input
+                            type="password"
+                            placeholder="Confirm your password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full px-4 py-2 border border-black rounded-md bg-white text-black focus:outline-none focus:ring-2 focus:ring-black transition"
+                        />
                     </div>
 
                     {/* Sign Up Button */}
@@ -77,6 +66,19 @@ const AuthLogin = () => {
                         className="w-full border border-black bg-white text-black py-2 rounded-md hover:bg-black hover:text-white active:scale-95 transition-all duration-200 font-semibold tracking-wide"
                     >
                         Sign Up
+                    </button>
+
+                    {/* Already have account message */}
+                    <div className="text-center text-sm text-black mt-4">
+                        <span>Already have an account?</span>
+                    </div>
+
+                    {/* Redirect to Login */}
+                    <button
+                        onClick={handleLoginRedirect}
+                        className="w-full border border-black bg-white text-black py-2 rounded-md hover:bg-black hover:text-white active:scale-95 transition-all duration-200 font-semibold tracking-wide"
+                    >
+                        Login
                     </button>
                 </div>
 
@@ -89,4 +91,4 @@ const AuthLogin = () => {
     );
 };
 
-export default AuthLogin;
+export default AuthRegister;
