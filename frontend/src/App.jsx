@@ -10,12 +10,12 @@ import ReviewBeforeCheckout from "./pages/shopping-view/review-before-checkout.j
 import AdminRoutes from "./routes/admin-routes.jsx";
 import ProfilePage from "./pages/user/profile.jsx";
 import {useDispatch} from "react-redux";
-import {checkAuth} from "./redux/slices/authSlice.jsx";
+import { checkAuth } from "./redux/slices/authSlice.jsx";
 
 function App() {
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(checkAuth())
+        dispatch(checkAuth());
     }, [])
 
   return (

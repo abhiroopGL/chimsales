@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
-import {loginUser} from "../../api/authentication.js";
+import {loginUser} from "../../redux/slices/authSlice.jsx"
 import { useDispatch } from "react-redux";
 import {loginSuccess} from "../../redux/slices/authSlice.jsx";
 
@@ -12,14 +12,11 @@ const AuthLogin = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        try{
-            const response = await loginUser({email, password});
-            dispatch(loginSuccess(response.user));
-            console.log("Logged In successfully:", response);
-            goToDashboard();
-        } catch (error) {
-            console.log(error);
-        }
+        dispatch(loginUser({email, password})).then((data) => {
+            if (data?.payload?.success) {
+                goToDashboard()
+            }
+        });
     };
 
     const handleSignup = () => {
