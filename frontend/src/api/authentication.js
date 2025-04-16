@@ -30,3 +30,13 @@ export const logoutUser = async () => {
     }
 };
 
+export const fetchLoggedInUser = async () => {
+    try {
+        const res = await axiosInstance.get("/api/auth/check-auth");
+        console.log("Result is:", res);
+        return res.user;
+    } catch (error) {
+        console.log(error);
+    }
+}
+

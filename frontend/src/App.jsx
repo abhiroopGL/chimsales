@@ -1,7 +1,5 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { Route, Routes } from "react-router-dom";
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import NotFound from './pages/not-found';
 import AuthLogin from "./pages/auth/login.jsx";
@@ -11,8 +9,14 @@ import ItemDetails from "./pages/shopping-view/item-details.jsx";
 import ReviewBeforeCheckout from "./pages/shopping-view/review-before-checkout.jsx";
 import AdminRoutes from "./routes/admin-routes.jsx";
 import ProfilePage from "./pages/user/profile.jsx";
+import {useDispatch} from "react-redux";
+import {checkAuth} from "./redux/slices/authSlice.jsx";
 
 function App() {
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(checkAuth())
+    }, [])
 
   return (
     <div className="flex flex-col overflow-hidden bg-white">

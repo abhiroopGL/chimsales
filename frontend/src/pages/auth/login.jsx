@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
 import {loginUser} from "../../api/authentication.js";
+import { useDispatch } from "react-redux";
+import {loginSuccess} from "../../redux/slices/authSlice.jsx";
 
 const AuthLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { goToSignup, goToDashboard } = useAppNavigation();
+    const dispatch = useDispatch();
 
     const handleLogin = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         try{
             const response = await loginUser({email, password});
+            dispatch(loginSuccess(response.user));
             console.log("Logged In successfully:", response);
             goToDashboard();
         } catch (error) {
