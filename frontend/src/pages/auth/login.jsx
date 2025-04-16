@@ -2,7 +2,6 @@ import { useState } from 'react';
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
 import {loginUser} from "../../redux/slices/authSlice.jsx"
 import { useDispatch } from "react-redux";
-import {loginSuccess} from "../../redux/slices/authSlice.jsx";
 
 const AuthLogin = () => {
     const [email, setEmail] = useState('');

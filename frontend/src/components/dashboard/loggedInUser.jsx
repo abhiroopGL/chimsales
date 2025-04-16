@@ -1,8 +1,7 @@
 import { useState } from "react";
 import {useDispatch, useSelector} from "react-redux";
 import useAppNavigation from "../../hooks/useAppNavigation.jsx"
-import { logoutUser } from "../../api/authentication.js"
-import { logoutSuccess } from "../../redux/slices/authSlice.jsx"
+import { logoutUser } from "../../redux/slices/authSlice.jsx"
 
 const LoggedInUser = () => {
     const isLoggedIn = useSelector((state) => state.authorization.isAuthenticated);
@@ -15,14 +14,7 @@ const LoggedInUser = () => {
 
     const handleLogout = async (e) => {
         e.preventDefault();
-        try {
-            const response = await logoutUser();
-            console.log(response);
-            dispatch(logoutSuccess());
-        } catch (error) {
-            console.error(error);
-
-        }
+        dispatch(logoutUser());
     }
 
     return (
@@ -31,7 +23,7 @@ const LoggedInUser = () => {
             <>
                 <button onClick={() => setDropdownOpen(!dropdownOpen)}>
                     <img
-                        src="/user-icon.svg" // use any user icon here
+                        src="/src/assets/react.svg" // use any user icon here
                         alt="User"
                         className="w-8 h-8 rounded-full border border-black"
                     />
