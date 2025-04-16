@@ -10,9 +10,9 @@ import UserDashboard from "./pages/shopping-view/dashboard.jsx";
 import ItemDetails from "./pages/shopping-view/item-details.jsx";
 import ReviewBeforeCheckout from "./pages/shopping-view/review-before-checkout.jsx";
 import AdminRoutes from "./routes/admin-routes.jsx";
+import ProfilePage from "./pages/user/profile.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <div className="flex flex-col overflow-hidden bg-white">
@@ -24,6 +24,7 @@ function App() {
           <Route path="review" element={<ReviewBeforeCheckout/>} />
           <Route path="/*" element={<AdminRoutes />} />
           <Route path="*" element={<NotFound/>}/>
+          <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </div>
   )

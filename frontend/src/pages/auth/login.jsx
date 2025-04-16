@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
+import {loginUser} from "../../api/authentication.js";
 
 const AuthLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { goToSignup } = useAppNavigation();
+    const { goToSignup, goToDashboard } = useAppNavigation();
 
-    const handleLogin = () => {
-        alert(`Logging in with Email: ${email}`);
+    const handleLogin = async (e) => {
+        e.preventDefault()
+        try{
+            const response = await loginUser({email, password});
+            console.log("Logged In successfully:", response);
+            goToDashboard();
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const handleSignup = () => {

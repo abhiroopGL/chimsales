@@ -6,8 +6,7 @@ const useAppNavigation = () => {
     return {
         goToLogin: () => navigate('/login'),
         goToSignup: () => navigate('/signup'),
-        goToHome: () => navigate('/'),
-        goToDashboard: () => navigate('/dashboard'),
+        goToDashboard: () => navigate('/'),
         goToReview: () => navigate('/review'),
         // Add more routes as needed
     };

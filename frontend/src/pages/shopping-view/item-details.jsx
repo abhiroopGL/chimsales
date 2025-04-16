@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Footer from "../../components/footer.jsx";
 import ImageSection from "../../components/product-details/image-section.jsx";
 import ProductInfo from "../../components/product-details/product-info.jsx";
@@ -12,6 +12,7 @@ const ItemDetails = () => {
     const [product, setProduct] = useState(null);
     const [mainImage, setMainImage] = useState('');
     const {goToReview} = useAppNavigation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const dummyProducts = [
@@ -53,7 +54,15 @@ const ItemDetails = () => {
 
     return (
         <div className="min-h-screen bg-white text-black p-6">
-            <header className="mb-10 text-4xl font-bold text-center">Chimney Store</header>
+            <div className="mb-6 flex justify-start">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="px-4 py-2 border border-black rounded-md hover:bg-black hover:text-white transition"
+                >
+                    ← Back
+                </button>
+            </div>
+            {/*<header className="mb-10 text-4xl font-bold text-center">Chimney Store</header>*/}
 
             <div className="grid md:grid-cols-2 gap-10">
                 <ImageSection images={product.images} />

@@ -11,7 +11,7 @@ import EditProduct from "../pages/admin/edit-product.jsx";
 const AdminRoutes = () => {
     return (
         <Routes>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/products" element={<ManageProducts />} />
             <Route path="/admin/users" element={<ManageUsers />} />
             <Route path="/admin/orders" element={<ManageOrders />} />

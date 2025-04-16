@@ -1,17 +1,24 @@
 import { useState } from 'react';
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
+import {registerUser} from "../../api/authentication.js";
 
 const AuthRegister = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const { goToLogin } = useAppNavigation();
+    const { goToLogin, goToDashboard } = useAppNavigation();
 
-    const handleSignup = () => {
-        if (password !== confirmPassword) {
-            alert('Passwords do not match!');
-        } else {
-            alert(`Registered with Email: ${email}`);
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        try{
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+            } else {
+                await registerUser({email, password});
+                goToDashboard();
+            }
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -73,7 +80,7 @@ const AuthRegister = () => {
                         <span>Already have an account?</span>
                     </div>
 
-                    {/* Redirect to Login */}
+                    {/* Redirect to log in */}
                     <button
                         onClick={handleLoginRedirect}
                         className="w-full border border-black bg-white text-black py-2 rounded-md hover:bg-black hover:text-white active:scale-95 transition-all duration-200 font-semibold tracking-wide"

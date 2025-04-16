@@ -2,7 +2,6 @@ import HeroBanner from "../../components/dashboard/hero-banner.jsx";
 import FilterChips from "../../components/dashboard/filter-chips.jsx";
 import ItemCardsGrid from "../../components/dashboard/item-cards-grid.jsx";
 import SuggestedCarousel from "../../components/dashboard/suggested-carousel.jsx";
-import InfoSection from "../../components/dashboard/info-section.jsx";
 import Footer from "../../components/footer.jsx";
 export default function Dashboard() {
     return (
