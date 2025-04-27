@@ -5,7 +5,7 @@ const AdminNavbar = () => (
         <h1 className="text-xl font-bold">Admin Panel</h1>
         <Link className="text-xl font-bold" to="/">User Dashboard</Link>
         <div className="space-x-4">
-            <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link>
+            <Link to="/admin" className="hover:underline">Dashboard</Link>
             <Link to="/admin/products" className="hover:underline">Products</Link>
             <Link to="/admin/users" className="hover:underline">Users</Link>
             <Link to="/admin/orders" className="hover:underline">Orders</Link>
