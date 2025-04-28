@@ -7,6 +7,7 @@ const ProductSchema = new mongoose.Schema({
     images: [String], // Array of image URLs
     status: { type: String, enum: ['draft', 'deploy'], default: 'draft' },
     deleted: { type: Boolean, default: false },
+    stock: { type: Number, default: 0 },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', ProductSchema);

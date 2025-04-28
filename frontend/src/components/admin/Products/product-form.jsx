@@ -6,7 +6,8 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const categories = ["Kitchen", "Living Room", "Bedroom", "Outdoor"];
 
-const ProductForm = ({ existingProduct = null }) => {
+const ProductForm = ({ initialData = null }) => {
+    console.log("Existing Product:", initialData);
     const [formData, setFormData] = useState({
         name: "",
         price: "",
@@ -23,19 +24,19 @@ const ProductForm = ({ existingProduct = null }) => {
     const { id } = useParams(); // used in edit mode
 
     useEffect(() => {
-        if (existingProduct) {
+        if (initialData) {
             setFormData({
-                name: existingProduct.name || "",
-                price: existingProduct.price || "",
-                description: existingProduct.description || "",
-                stock: existingProduct.stock || "",
-                category: existingProduct.category || "",
-                status: existingProduct.status || "draft",
+                name: initialData.name || "",
+                price: initialData.price || "",
+                description: initialData.description || "",
+                stock: initialData.stock || "",
+                category: initialData.category || "",
+                status: initialData.status || "draft",
                 images: [], // images will be handled separately
             });
-            setPreviewImages(existingProduct.images || []); // assuming images are URLs
+            setPreviewImages(initialData.images || []); // assuming images are URLs
         }
-    }, [existingProduct]);
+    }, [initialData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -86,8 +87,8 @@ const ProductForm = ({ existingProduct = null }) => {
             submitFormData.append("images", img);
         });
 
-        if (existingProduct) {
-            dispatch(updateProduct({ id: existingProduct._id, formData: submitFormData })).then((data) => {
+        if (initialData) {
+            dispatch(updateProduct({ id: initialData._id, formData: submitFormData })).then((data) => {
                 if (data.payload?.success) navigate("/admin/products");
             });
         } else {
@@ -99,7 +100,7 @@ const ProductForm = ({ existingProduct = null }) => {
 
     return (
         <div className="min-h-screen p-4 sm:p-8 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">{existingProduct ? "Edit Product" : "Add New Product"}</h2>
+            <h2 className="text-2xl font-bold mb-6">{initialData ? "Edit Product" : "Add New Product"}</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <input
@@ -201,7 +202,7 @@ const ProductForm = ({ existingProduct = null }) => {
                     type="submit"
                     className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
                 >
-                    {existingProduct ? "Update Product" : "Add Product"}
+                    {initialData ? "Update Product" : "Add Product"}
                 </button>
             </form>
         </div>

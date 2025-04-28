@@ -11,7 +11,6 @@ import AdminRoutes from "./routes/admin-routes.jsx";
 import ProfilePage from "./pages/user/profile.jsx";
 import {useDispatch} from "react-redux";
 import { checkAuth } from "./redux/slices/authSlice.jsx";
-import AddEditProductPage from "./pages/admin/add-edit-product-page.jsx";
 
 function App() {
     const dispatch = useDispatch();

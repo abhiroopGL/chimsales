@@ -24,10 +24,6 @@ const ManageProducts = () => {
         goToAddNewProduct()
     };
 
-    const handleEditProduct = (id) => {
-        // navigate(`/admin/products/${id}/edit`);
-    };
-
     return (
         <>
             <AdminNavbar />
@@ -51,7 +47,6 @@ const ManageProducts = () => {
                                 key={product._id}
                                 product={product}
                                 onDelete={handleDelete}
-                                onEdit={handleEditProduct}
                             />
                         ))}
                     </div>
