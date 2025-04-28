@@ -11,6 +11,7 @@ import AdminRoutes from "./routes/admin-routes.jsx";
 import ProfilePage from "./pages/user/profile.jsx";
 import {useDispatch} from "react-redux";
 import { checkAuth } from "./redux/slices/authSlice.jsx";
+import AddEditProductPage from "./pages/admin/add-edit-product-page.jsx";
 
 function App() {
     const dispatch = useDispatch();
@@ -29,6 +30,7 @@ function App() {
           <Route path="/*" element={<AdminRoutes />} />
           <Route path="*" element={<NotFound/>}/>
           <Route path="/profile" element={<ProfilePage />} />
+
       </Routes>
     </div>
   )

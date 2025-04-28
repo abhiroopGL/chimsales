@@ -1,0 +1,211 @@
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { createProduct, updateProduct } from "../../../redux/slices/productSlice";
+import { FiPlus, FiX } from "react-icons/fi"; // Feather icons
+import { useNavigate, useParams } from "react-router-dom";
+
+const categories = ["Kitchen", "Living Room", "Bedroom", "Outdoor"];
+
+const ProductForm = ({ existingProduct = null }) => {
+    const [formData, setFormData] = useState({
+        name: "",
+        price: "",
+        description: "",
+        stock: "",
+        category: "",
+        status: "draft",
+        images: [],
+    });
+
+    const [previewImages, setPreviewImages] = useState([]);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { id } = useParams(); // used in edit mode
+
+    useEffect(() => {
+        if (existingProduct) {
+            setFormData({
+                name: existingProduct.name || "",
+                price: existingProduct.price || "",
+                description: existingProduct.description || "",
+                stock: existingProduct.stock || "",
+                category: existingProduct.category || "",
+                status: existingProduct.status || "draft",
+                images: [], // images will be handled separately
+            });
+            setPreviewImages(existingProduct.images || []); // assuming images are URLs
+        }
+    }, [existingProduct]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleImageUpload = (e) => {
+        const files = Array.from(e.target.files);
+        setFormData((prev) => ({
+            ...prev,
+            images: [...prev.images, ...files],
+        }));
+        console.log("FormData", formData);
+
+        // Show preview
+        const newPreviews = files.map((file) => URL.createObjectURL(file));
+        setPreviewImages((prev) => [...prev, ...newPreviews]);
+    };
+
+    const removeImage = (index) => {
+        setFormData((prev) => {
+            const newImages = [...prev.images];
+            newImages.splice(index, 1);
+            return { ...prev, images: newImages };
+        });
+        setPreviewImages((prev) => {
+            const newPreviews = [...prev];
+            newPreviews.splice(index, 1);
+            return newPreviews;
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const submitFormData = new FormData();
+        submitFormData.append("name", formData.name);
+        submitFormData.append("price", formData.price);
+        submitFormData.append("description", formData.description);
+        submitFormData.append("stock", formData.stock);
+        submitFormData.append("category", formData.category);
+        submitFormData.append("status", formData.status);
+
+        formData.images.forEach((img) => {
+            submitFormData.append("images", img);
+        });
+
+        if (existingProduct) {
+            dispatch(updateProduct({ id: existingProduct._id, formData: submitFormData })).then((data) => {
+                if (data.payload?.success) navigate("/admin/products");
+            });
+        } else {
+            dispatch(createProduct(submitFormData)).then((data) => {
+                if (data.payload?.success) navigate("/admin/products");
+            });
+        }
+    };
+
+    return (
+        <div className="min-h-screen p-4 sm:p-8 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6">{existingProduct ? "Edit Product" : "Add New Product"}</h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Product Name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg p-3 focus:outline-none"
+                        required
+                    />
+                    <input
+                        type="number"
+                        name="price"
+                        placeholder="Price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg p-3 focus:outline-none"
+                        required
+                    />
+                    <textarea
+                        name="description"
+                        placeholder="Description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg p-3 focus:outline-none sm:col-span-2"
+                        rows={3}
+                        required
+                    />
+                    <input
+                        type="number"
+                        name="stock"
+                        placeholder="Stock Quantity"
+                        value={formData.stock}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg p-3 focus:outline-none"
+                        required
+                    />
+                    <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg p-3 focus:outline-none"
+                        required
+                    >
+                        <option value="">Select Category</option>
+                        {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {cat}
+                            </option>
+                        ))}
+                    </select>
+                    <select
+                        name="status"
+                        value={formData.status}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg p-3 focus:outline-none"
+                        required
+                    >
+                        <option value="draft">Draft</option>
+                        <option value="active">Active</option>
+                    </select>
+                </div>
+
+                {/* Image Upload Section */}
+                <div>
+                    <div className="flex flex-wrap gap-4">
+                        {previewImages.map((img, idx) => (
+                            <div key={idx} className="relative w-24 h-24 border rounded-lg overflow-hidden">
+                                <img
+                                    src={img}
+                                    alt={`preview-${idx}`}
+                                    className="w-full h-full object-cover"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeImage(idx)}
+                                    className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                                >
+                                    <FiX size={16} />
+                                </button>
+                            </div>
+                        ))}
+                        <label className="w-24 h-24 flex items-center justify-center border rounded-lg cursor-pointer hover:bg-gray-100">
+                            <FiPlus size={24} />
+                            <input
+                                type="file"
+                                name="images"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImageUpload}
+                                className="hidden"
+                            />
+                        </label>
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+                >
+                    {existingProduct ? "Update Product" : "Add Product"}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+export default ProductForm;

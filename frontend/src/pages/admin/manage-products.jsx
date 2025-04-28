@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, deleteProduct } from "../../redux/slices/productSlice.jsx";
+import useAppNavigation from '../../hooks/useAppNavigation.jsx';
 import AdminNavbar from "../../components/admin/admin-navbar.jsx";
 import FilterTabs from "../../components/admin/Products/filter-tabs.jsx";
 import ProductCard from "../../components/admin/Products/product-card.jsx";
-import AddProductModal from "../../components/admin/Products/add-product-modal.jsx";
 
 const ManageProducts = () => {
     const dispatch = useDispatch();
+    const { goToAddNewProduct } = useAppNavigation();
     const items = useSelector((state) => state.products.allProducts);
     const loading = useSelector((state) => state.products.isLoading);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    console.log("Items are:", items)
 
     useEffect(() => {
         dispatch(fetchProducts());
@@ -21,29 +20,42 @@ const ManageProducts = () => {
         dispatch(deleteProduct(id));
     };
 
+    const handleAddProduct = () => {
+        goToAddNewProduct()
+    };
+
+    const handleEditProduct = (id) => {
+        // navigate(`/admin/products/${id}/edit`);
+    };
+
     return (
         <>
             <AdminNavbar />
             <div className="p-6 bg-gray-50 min-h-screen">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">Manage Products</h2>
-                    <button onClick={() => setIsModalOpen(true)} className="bg-black text-white px-4 py-2 rounded">
+                    <button
+                        onClick={handleAddProduct}
+                        className="bg-black text-white px-4 py-2 rounded"
+                    >
                         Add Product
                     </button>
                 </div>
                 <FilterTabs />
-                {loading ? <p>Loading...</p> : (
+                {loading ? (
+                    <p>Loading...</p>
+                ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        { items && items.map(product => (
-                            <ProductCard key={product._id} product={product} onDelete={handleDelete} />
+                        {items && items.map((product) => (
+                            <ProductCard
+                                key={product._id}
+                                product={product}
+                                onDelete={handleDelete}
+                                onEdit={handleEditProduct}
+                            />
                         ))}
                     </div>
                 )}
-                {isModalOpen &&
-                    <AddProductModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                    />}
             </div>
         </>
     );

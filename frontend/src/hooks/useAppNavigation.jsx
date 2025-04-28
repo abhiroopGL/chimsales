@@ -9,6 +9,7 @@ const useAppNavigation = () => {
         goToDashboard: () => navigate('/'),
         goToReview: () => navigate('/review'),
         goToProfile: () => navigate('/profile'),
+        goToAddNewProduct: () => navigate('/admin/products/new'),
         // Add more routes as needed
     };
 };
