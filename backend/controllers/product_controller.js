@@ -58,22 +58,25 @@ const updateProduct = async (req, res) => {
             }
         }
 
-
         // Handle images separately if you're receiving uploaded files
+        let imagesToKeep = Array.isArray(req.body.images) ? req.body.images : (req.body.images ? [req.body.images] : []);
 
-        const imagesToKeep = req.body.images;
         if (req.files && req.files.length > 0) {
             const newImages = req.files.map(file => `/uploads/products/${file.filename}`);
             updates.images = [
                 ...(imagesToKeep || []),
                 ...newImages
             ];
+        } else {
+            if (existingProduct.images.length != imagesToKeep.length) {
+                updates.images = [...(imagesToKeep || [])];
+            }
         }
 
         // If there are updates, update the document
         if (Object.keys(updates).length > 0) {
-            await Product.findByIdAndUpdate(id, updates, { new: true });
-            return res.status(200).json({ success: true, message: "Product updated successfully" });
+            product = await Product.findByIdAndUpdate(id, updates, { new: true });
+            return res.status(200).json({ success: true, message: "Product updated successfully", product });
         } else {
             return res.status(200).json({ success: true, message: "No changes detected" });
         }
@@ -83,5 +86,29 @@ const updateProduct = async (req, res) => {
     }
 };
 
+const deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
 
-module.exports = { createProduct, getProducts, fetchProductById, updateProduct };
+        const product = await Product.findById(id);
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        if (product.deleted) {
+            return res.status(400).json({ success: false, message: "Product already deleted" });
+        }
+
+        product.deleted = true;
+        await product.save();
+
+        return res.status(200).json({ success: true, message: "Product deleted successfully (soft delete)", id });
+    } catch (error) {
+        console.error("Soft delete error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+
+module.exports = { createProduct, getProducts, fetchProductById, updateProduct, deleteProduct };

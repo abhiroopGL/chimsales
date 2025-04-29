@@ -55,7 +55,7 @@ export const updateProduct = createAsyncThunk(
 export const deleteProduct = createAsyncThunk(
     "/products/delete",
     async (productId) => {
-        const response = await axiosInstance.delete(`/api/products/${productId}`);
+        const response = await axiosInstance.delete(`/api/products/delete/${productId}`);
         return response.data;
     }
 );
@@ -110,10 +110,10 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(updateProduct.fulfilled, (state, action) => {
-                // const index = state.products.findIndex(p => p.id === action.payload.id);
-                // if (index !== -1) {
-                //     state.allProducts[index] = action.payload;
-                // }
+                const index = state.allProducts.findIndex(p => p._id === action.payload.product._id);
+                if (index !== -1) {
+                    state.allProducts[index] = action.payload.product;
+                }
                 state.isLoading = false;
             })
             .addCase(updateProduct.rejected, (state, action) => {
@@ -125,7 +125,7 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(deleteProduct.fulfilled, (state, action) => {
-                state.allProducts = state.products.filter(p => p.id !== action.payload.id);
+                state.allProducts = state.allProducts.filter(p => p._id !== action.payload.id);
                 state.isLoading = false;
             })
             .addCase(deleteProduct.rejected, (state, action) => {

@@ -139,7 +139,6 @@ const ProductForm = ({ initialData = null }) => {
                         value={formData.category}
                         onChange={handleChange}
                         className="w-full border rounded-lg p-3 focus:outline-none"
-                        required
                     >
                         <option value="">Select Category</option>
                         {categories.map((cat) => (
