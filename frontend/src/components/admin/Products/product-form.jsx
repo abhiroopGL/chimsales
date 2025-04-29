@@ -7,7 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 const categories = ["Kitchen", "Living Room", "Bedroom", "Outdoor"];
 
 const ProductForm = ({ initialData = null }) => {
-    console.log("Existing Product:", initialData);
+
     const [formData, setFormData] = useState({
         name: "",
         price: "",
@@ -32,7 +32,7 @@ const ProductForm = ({ initialData = null }) => {
                 stock: initialData.stock || "",
                 category: initialData.category || "",
                 status: initialData.status || "draft",
-                images: [], // images will be handled separately
+                images: initialData.images || [], // images will be handled separately
             });
             setPreviewImages(initialData.images || []); // assuming images are URLs
         }
@@ -52,7 +52,6 @@ const ProductForm = ({ initialData = null }) => {
             ...prev,
             images: [...prev.images, ...files],
         }));
-        console.log("FormData", formData);
 
         // Show preview
         const newPreviews = files.map((file) => URL.createObjectURL(file));
@@ -72,35 +71,31 @@ const ProductForm = ({ initialData = null }) => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const submitFormData = new FormData();
-        submitFormData.append("name", formData.name);
-        submitFormData.append("price", formData.price);
-        submitFormData.append("description", formData.description);
-        submitFormData.append("stock", formData.stock);
-        submitFormData.append("category", formData.category);
-        submitFormData.append("status", formData.status);
-
-        formData.images.forEach((img) => {
-            submitFormData.append("images", img);
-        });
+        const data = new FormData();
+        for (const [key, value] of Object.entries(formData)) {
+            if (key === "images" && Array.isArray(value)) {
+                for (const img of value) {
+                    data.append("images", img);
+                }
+            } else {
+                data.append(key, value);
+            }
+        }
 
         if (initialData) {
-            dispatch(updateProduct({ id: initialData._id, formData: submitFormData })).then((data) => {
-                if (data.payload?.success) navigate("/admin/products");
-            });
+            const res = await dispatch(updateProduct({ id: initialData._id, updatedData: data }));
+            if (res.payload?.success) navigate("/admin/products");
         } else {
-            dispatch(createProduct(submitFormData)).then((data) => {
-                if (data.payload?.success) navigate("/admin/products");
-            });
+            const res = await dispatch(createProduct(data));
+            if (res.payload?.success) navigate("/admin/products");
         }
     };
 
     return (
         <div className="min-h-screen p-4 sm:p-8 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">{initialData ? "Edit Product" : "Add New Product"}</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <input

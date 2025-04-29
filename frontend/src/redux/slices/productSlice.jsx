@@ -45,7 +45,8 @@ export const createProduct = createAsyncThunk(
 export const updateProduct = createAsyncThunk(
     "/products/update",
     async ({ id, updatedData }) => {
-        const response = await axiosInstance.put(`/api/products/${id}`, updatedData);
+
+        const response = await axiosInstance.put(`/api/products/update/${id}`, updatedData);
         return response.data;
     }
 );
@@ -109,10 +110,10 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(updateProduct.fulfilled, (state, action) => {
-                const index = state.products.findIndex(p => p.id === action.payload.id);
-                if (index !== -1) {
-                    state.allProducts[index] = action.payload;
-                }
+                // const index = state.products.findIndex(p => p.id === action.payload.id);
+                // if (index !== -1) {
+                //     state.allProducts[index] = action.payload;
+                // }
                 state.isLoading = false;
             })
             .addCase(updateProduct.rejected, (state, action) => {
