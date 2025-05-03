@@ -5,7 +5,7 @@ const ItemCard = ({ product }) => {
         <Link to={`/item/${product.id}`} className="block">
             <div className="bg-white text-black p-6 rounded-lg shadow-md hover:scale-105 transform transition duration-300">
                 <img
-                    src={product.image}
+                    src={product.images?.[0]}
                     alt={product.name}
                     className="w-full h-48 object-cover rounded-lg mb-4"
                 />

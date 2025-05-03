@@ -155,7 +155,7 @@ const ProductForm = ({ initialData = null }) => {
                         required
                     >
                         <option value="draft">Draft</option>
-                        <option value="active">Active</option>
+                        <option value="deployed">Deployed</option>
                     </select>
                 </div>
 

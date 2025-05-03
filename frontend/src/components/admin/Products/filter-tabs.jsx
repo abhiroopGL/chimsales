@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "../../../redux/slices/productSlice.jsx";
+import { fetchPublicProducts } from "../../../redux/slices/productSlice.jsx";
 
 const FilterTabs = () => {
     const dispatch = useDispatch();
@@ -7,7 +7,7 @@ const FilterTabs = () => {
 
     const handleFilterChange = (newFilter) => {
         dispatch(setFilter(newFilter));
-        dispatch(fetchProducts(newFilter));
+        dispatch(fetchPublicProducts(newFilter));
     };
 
     return (

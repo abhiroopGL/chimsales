@@ -27,9 +27,9 @@ const ProductCard = ({ product, onDelete }) => {
 
             {/* Status Tag */}
             <div className={`absolute top-3 left-3 px-3 py-1 text-xs font-semibold rounded-full 
-                ${product.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}
+                ${product.status === 'deployed' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}
             `}>
-                {product.status === 'active' ? 'Active' : 'Draft'}
+                {product.status === 'deployed' ? 'Active' : 'Draft'}
             </div>
 
             {/* Delete Button */}

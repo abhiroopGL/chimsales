@@ -2,7 +2,8 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axios-instance.js";
 
 const initialState = {
-    allProducts: [],
+    adminProducts: [],
+    publicProducts: [],
     product: null,
     isLoading: true,
     error: null,
@@ -10,10 +11,19 @@ const initialState = {
 };
 
 // Fetch all products
-export const fetchProducts = createAsyncThunk(
+export const fetchAdminProducts = createAsyncThunk(
     "/products/fetchAll",
     async () => {
-        const response = await axiosInstance.get("/api/products");
+        const response = await axiosInstance.get("/api/products/admin");
+        return response.data;
+    }
+);
+
+export const fetchPublicProducts = createAsyncThunk(
+    "products/fetchPublic",
+    async () => {
+        const response = await axiosInstance.get("/api/products/public");
+        console.log("Respomse", response);
         return response.data;
     }
 );
@@ -70,14 +80,21 @@ const productSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchProducts.pending, (state) => {
+            .addCase(fetchPublicProducts.pending, (state) => {
                 state.isLoading = true;
             })
-            .addCase(fetchProducts.fulfilled, (state, action) => {
-                state.allProducts = action.payload;
+            .addCase(fetchPublicProducts.fulfilled, (state, action) => {
+                state.publicProducts = action.payload;
                 state.isLoading = false;
             })
-            .addCase(fetchProducts.rejected, (state, action) => {
+            .addCase(fetchAdminProducts.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchAdminProducts.fulfilled, (state, action) => {
+                state.adminProducts = action.payload;
+                state.isLoading = false;
+            })
+            .addCase(fetchAdminProducts.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error.message;
             })
@@ -98,7 +115,7 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(createProduct.fulfilled, (state, action) => {
-                state.allProducts.push(action.payload);
+                state.adminProducts.push(action.payload);
                 state.isLoading = false;
             })
             .addCase(createProduct.rejected, (state, action) => {
@@ -110,9 +127,9 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(updateProduct.fulfilled, (state, action) => {
-                const index = state.allProducts.findIndex(p => p._id === action.payload.product._id);
+                const index = state.adminProducts.findIndex(p => p._id === action.payload.product._id);
                 if (index !== -1) {
-                    state.allProducts[index] = action.payload.product;
+                    state.adminProducts[index] = action.payload.product;
                 }
                 state.isLoading = false;
             })
@@ -125,7 +142,7 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(deleteProduct.fulfilled, (state, action) => {
-                state.allProducts = state.allProducts.filter(p => p._id !== action.payload.id);
+                state.adminProducts = state.adminProducts.filter(p => p._id !== action.payload.id);
                 state.isLoading = false;
             })
             .addCase(deleteProduct.rejected, (state, action) => {

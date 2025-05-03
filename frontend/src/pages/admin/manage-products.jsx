@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts, deleteProduct } from "../../redux/slices/productSlice.jsx";
+import { fetchAdminProducts, deleteProduct } from "../../redux/slices/productSlice.jsx";
 import useAppNavigation from '../../hooks/useAppNavigation.jsx';
 import AdminNavbar from "../../components/admin/admin-navbar.jsx";
 import FilterTabs from "../../components/admin/Products/filter-tabs.jsx";
@@ -9,11 +9,11 @@ import ProductCard from "../../components/admin/Products/product-card.jsx";
 const ManageProducts = () => {
     const dispatch = useDispatch();
     const { goToAddNewProduct } = useAppNavigation();
-    const items = useSelector((state) => state.products.allProducts);
+    const items = useSelector((state) => state.products.adminProducts);
     const loading = useSelector((state) => state.products.isLoading);
 
     useEffect(() => {
-        dispatch(fetchProducts());
+        dispatch(fetchAdminProducts());
     }, [dispatch]);
 
     const handleDelete = (id) => {

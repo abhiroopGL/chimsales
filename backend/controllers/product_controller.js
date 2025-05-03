@@ -12,7 +12,21 @@ const createProduct = async (req, res) => {
     }
 };
 
-const getProducts = async (req, res) => {
+const getPublicProducts = async (req, res) => {
+    try {
+        const products = await Product.find({
+            status: "deployed",
+            deleted: { $ne: true },
+        });
+
+        res.json(products);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+const getAdminProducts = async (req, res) => {
     try {
         const { filter } = req.query;
         const query = { deleted: filter === 'deleted' };
@@ -111,4 +125,4 @@ const deleteProduct = async (req, res) => {
 };
 
 
-module.exports = { createProduct, getProducts, fetchProductById, updateProduct, deleteProduct };
+module.exports = { createProduct, getAdminProducts, getPublicProducts, fetchProductById, updateProduct, deleteProduct };
