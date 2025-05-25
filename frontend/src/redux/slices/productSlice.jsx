@@ -7,7 +7,7 @@ const initialState = {
     product: null,
     isLoading: true,
     error: null,
-    filter: "draft"
+    filter: "all"
 };
 
 // Fetch all products
@@ -23,7 +23,6 @@ export const fetchPublicProducts = createAsyncThunk(
     "products/fetchPublic",
     async () => {
         const response = await axiosInstance.get("/api/products/public");
-        console.log("Respomse", response);
         return response.data;
     }
 );
@@ -69,6 +68,15 @@ export const deleteProduct = createAsyncThunk(
         return response.data;
     }
 );
+
+export const restoreProduct = createAsyncThunk(
+    "/products/restore",
+    async (productId) => {
+        const response = await axiosInstance.patch(`/api/products/restore/${productId}`);
+        return response.data;
+    }
+);
+
 
 const productSlice = createSlice({
     name: "products",
@@ -142,14 +150,37 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(deleteProduct.fulfilled, (state, action) => {
-                state.adminProducts = state.adminProducts.filter(p => p._id !== action.payload.id);
+                const index = state.adminProducts.findIndex(p => p._id === action.payload.id);
+                if (index !== -1) {
+                    state.adminProducts[index] = {
+                        ...state.adminProducts[index],
+                        deleted: true,
+                        deletedAt: new Date().toISOString(),
+                        status: "deleted"
+                    };
+                }
                 state.isLoading = false;
+
             })
             .addCase(deleteProduct.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error.message;
+            })
+            .addCase(restoreProduct.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(restoreProduct.fulfilled, (state, action) => {
+                const index = state.adminProducts.findIndex(p => p._id === action.payload.id);
+                if (index !== -1) {
+                    state.adminProducts[index].deleted = false;
+                    state.adminProducts[index].deletedAt = null;
+                }
+                state.isLoading = false;
             });
+
     },
 });
+
+export const { setFilter } = productSlice.actions; // Add this line to export the action
 
 export default productSlice.reducer;

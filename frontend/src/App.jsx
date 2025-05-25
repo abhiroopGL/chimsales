@@ -11,6 +11,7 @@ import AdminRoutes from "./routes/admin-routes.jsx";
 import ProfilePage from "./pages/user/profile.jsx";
 import {useDispatch} from "react-redux";
 import { checkAuth } from "./redux/slices/authSlice.jsx";
+import Notification from "./components/common/NotificationComponent.jsx";
 
 function App() {
     const dispatch = useDispatch();
@@ -19,19 +20,22 @@ function App() {
     }, [])
 
   return (
-    <div className="flex flex-col overflow-hidden bg-white">
-      <Routes>
-          <Route path="login" element={<AuthLogin/>}/>
-          <Route path="signup" element={<AuthRegister/>}/>
-          <Route path="/" element={<UserDashboard/>}/>
-          <Route path="/item/:id" element={<ItemDetails />} />
-          <Route path="review" element={<ReviewBeforeCheckout/>} />
-          <Route path="/*" element={<AdminRoutes />} />
-          <Route path="*" element={<NotFound/>}/>
-          <Route path="/profile" element={<ProfilePage />} />
+      <>
+        <Notification/>
+        <div className="flex flex-col overflow-hidden bg-white">
+          <Routes>
+              <Route path="login" element={<AuthLogin/>}/>
+              <Route path="signup" element={<AuthRegister/>}/>
+              <Route path="/" element={<UserDashboard/>}/>
+              <Route path="/item/:id" element={<ItemDetails />} />
+              <Route path="review" element={<ReviewBeforeCheckout/>} />
+              <Route path="/*" element={<AdminRoutes />} />
+              <Route path="*" element={<NotFound/>}/>
+              <Route path="/profile" element={<ProfilePage />} />
 
-      </Routes>
-    </div>
+          </Routes>
+        </div>
+    </>
   )
 }
 

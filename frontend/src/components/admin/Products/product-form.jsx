@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { createProduct, updateProduct } from "../../../redux/slices/productSlice";
 import { FiPlus, FiX } from "react-icons/fi"; // Feather icons
 import { useNavigate, useParams } from "react-router-dom";
+import {showNotification} from "../../../redux/slices/notificationSlice.js";
 
 const categories = ["Kitchen", "Living Room", "Bedroom", "Outdoor"];
 
@@ -85,13 +86,43 @@ const ProductForm = ({ initialData = null }) => {
             }
         }
 
-        if (initialData) {
-            const res = await dispatch(updateProduct({ id: initialData._id, updatedData: data }));
-            if (res.payload?.success) navigate("/admin/products");
-        } else {
-            const res = await dispatch(createProduct(data));
-            if (res.payload?.success) navigate("/admin/products");
+        try {
+            if (initialData) {
+                const res = await dispatch(updateProduct({ id: initialData._id, updatedData: data })).unwrap();
+                if (res.success) {
+                    dispatch(showNotification({
+                        message: 'Product updated successfully',
+                        type: 'success'
+                    }));
+                    navigate("/admin/products");
+                } else {
+                    dispatch(showNotification({
+                        message: res.message || 'Failed to update product',
+                        type: 'error'
+                    }));
+                }
+            } else {
+                const res = await dispatch(createProduct(data)).unwrap();
+                if (res.success) {
+                    dispatch(showNotification({
+                        message: 'Product created successfully',
+                        type: 'success'
+                    }));
+                    navigate("/admin/products");
+                } else {
+                    dispatch(showNotification({
+                        message: res.message || 'Failed to create product',
+                        type: 'error'
+                    }));
+                }
+            }
+        } catch (error) {
+            dispatch(showNotification({
+                message: error.message || 'An error occurred while processing your request',
+                type: 'error'
+            }));
         }
+
     };
 
     return (
@@ -155,7 +186,7 @@ const ProductForm = ({ initialData = null }) => {
                         required
                     >
                         <option value="draft">Draft</option>
-                        <option value="deployed">Deployed</option>
+                        <option value="published">Published</option>
                     </select>
                 </div>
 

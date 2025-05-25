@@ -2,6 +2,7 @@ import { useState } from 'react';
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
 import {loginUser} from "../../redux/slices/authSlice.jsx"
 import { useDispatch } from "react-redux";
+import {showNotification} from "../../redux/slices/notificationSlice.js";
 
 const AuthLogin = () => {
     const [email, setEmail] = useState('');
@@ -13,7 +14,17 @@ const AuthLogin = () => {
         e.preventDefault();
         dispatch(loginUser({email, password})).then((data) => {
             if (data?.payload?.success) {
+                dispatch(showNotification({
+                    message: 'Login Successful',
+                    type: 'success'
+                }));
                 goToDashboard()
+            } else {
+                console.log(data);
+                dispatch(showNotification({
+                    message: data.payload.message || 'Login Failed',
+                    type: 'error'
+                }));
             }
         });
     };

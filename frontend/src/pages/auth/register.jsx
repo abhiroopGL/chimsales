@@ -2,6 +2,7 @@ import { useState } from 'react';
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
 import { registerUser } from "../../redux/slices/authSlice.jsx";
 import {useDispatch} from "react-redux";
+import {showNotification} from "../../redux/slices/notificationSlice.js";
 
 const AuthRegister = () => {
     const [email, setEmail] = useState('');
@@ -14,10 +15,17 @@ const AuthRegister = () => {
         e.preventDefault();
         try{
             if (password !== confirmPassword) {
-                alert('Passwords do not match!');
+                dispatch(showNotification({
+                    message: 'Passwords do not match',
+                    type: 'error'
+                }));
             } else {
                 dispatch(registerUser({email, password}));
-                goToDashboard();
+                dispatch(showNotification({
+                    message: 'User Registered Successfully',
+                    type: 'success'
+                }));
+                goToLogin();
             }
         } catch (error) {
             console.log(error);

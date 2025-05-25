@@ -2,7 +2,9 @@ const path = require('path');
 const multer = require("multer");
 const express = require("express");
 const router = express.Router();
-const { createProduct, getAdminProducts, getPublicProducts, fetchProductById, updateProduct, deleteProduct} = require("../controllers/product_controller")
+const { createProduct, getAdminProducts, getPublicProducts, fetchProductById, updateProduct, deleteProduct,
+    restoreProduct
+} = require("../controllers/product_controller")
 
 // Configure storage
 const storage = multer.diskStorage({
@@ -11,7 +13,6 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const fileName = `${Date.now() + '-' + Math.round(Math.random() * 1E9)}.png`;
-        console.log("FileName is: ", fileName);
         cb(null, fileName);
     }
 });
@@ -25,6 +26,7 @@ router.get("/public", getPublicProducts);
 router.get("/find/:id", fetchProductById);
 router.put("/update/:id", upload.array('images', 10), updateProduct)
 router.delete("/delete/:id", deleteProduct);
+router.patch("/restore/:id", restoreProduct);
 
 
 module.exports = router;

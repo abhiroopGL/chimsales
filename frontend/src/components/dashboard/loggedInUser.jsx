@@ -2,6 +2,7 @@ import { useState } from "react";
 import {useDispatch, useSelector} from "react-redux";
 import useAppNavigation from "../../hooks/useAppNavigation.jsx"
 import { logoutUser } from "../../redux/slices/authSlice.jsx"
+import {showNotification} from "../../redux/slices/notificationSlice.js";
 
 const LoggedInUser = () => {
     const isLoggedIn = useSelector((state) => state.authorization.isAuthenticated);
@@ -15,6 +16,10 @@ const LoggedInUser = () => {
     const handleLogout = async (e) => {
         e.preventDefault();
         dispatch(logoutUser());
+        dispatch(showNotification({
+            message: 'Logged out successfully',
+            type: 'success'
+        }));
     }
 
     return (
