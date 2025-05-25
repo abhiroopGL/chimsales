@@ -16,7 +16,7 @@ const AuthRegister = () => {
             if (password !== confirmPassword) {
                 alert('Passwords do not match!');
             } else {
-                dispatch(registerUser(email, password));
+                dispatch(registerUser({email, password}));
                 goToDashboard();
             }
         } catch (error) {

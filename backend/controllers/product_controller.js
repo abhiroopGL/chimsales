@@ -6,7 +6,7 @@ const createProduct = async (req, res) => {
         const images = req.files.map(file => `/uploads/products/${file.filename}`);
         const product = new Product({ name, description, price, images, stock });
         await product.save();
-        res.status(201).json(product);
+        res.status(201).json({success: true, ...product});
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
