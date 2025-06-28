@@ -9,7 +9,8 @@ const { createProduct, getAdminProducts, getPublicProducts, fetchProductById, up
 // Configure storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.resolve('/Users/abhiroop.panchal/Documents/Node/ChimSales/frontend/public/uploads/products'));    // Folder to save
+        // Replace this below path with wherever you want to store images
+        cb(null, path.resolve('/Users/abhiroop.panchal/Documents/Node/Projects/chimsales/frontend/public/uploads/products'));    // Folder to save
     },
     filename: function (req, file, cb) {
         const fileName = `${Date.now() + '-' + Math.round(Math.random() * 1E9)}.png`;
