@@ -25,11 +25,11 @@ export const fetchCart = createAsyncThunk(
 // Add to cart (backend)
 export const addToCart = createAsyncThunk(
     "cart/add",
-    async (product, { rejectWithValue }) => {
+    async (productId, { rejectWithValue }) => {
         try {
-            console.log("product:", product);
+            console.log("product:", productId);
             const response = await axiosInstance.post("/api/cart/add", {
-                productId: product._id,
+                productId: productId,
                 quantity: 1,
             });
             return response.data;
@@ -44,7 +44,7 @@ export const removeFromCart = createAsyncThunk(
     "cart/remove",
     async (productId, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete(`/api/cart/${productId}`);
+            const response = await axiosInstance.delete(`/api/cart/remove/${productId}`);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || error.message);
@@ -52,12 +52,27 @@ export const removeFromCart = createAsyncThunk(
     }
 );
 
-// Sync entire cart (optional, on checkout or login)
-export const syncCart = createAsyncThunk(
-    "cart/sync",
-    async (items, { rejectWithValue }) => {
+export const updateCart = createAsyncThunk(
+    "cart/updateQuantity",
+    async ({ productId, quantity }, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put("/api/cart", { items });
+            const response = await axiosInstance.patch("/api/cart/update", {
+                productId,
+                quantity,
+            });
+            console.log("Update cart response:", response.data);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const clearCart = createAsyncThunk(
+    "cart/clear",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.delete("/api/cart/clear");
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || error.message);
@@ -68,18 +83,7 @@ export const syncCart = createAsyncThunk(
 const cartSlice = createSlice({
     name: "cart",
     initialState,
-    reducers: {
-        updateQuantity: (state, action) => {
-            const { productId, quantity } = action.payload;
-            const item = state.items.find(item => item.productId === productId);
-            if (item) {
-                item.quantity = quantity;
-            }
-        },
-        clearCart: (state) => {
-            state.items = [];
-        },
-    },
+    reducers: {},
     extraReducers: (builder) => {
         builder
             // Fetch
@@ -101,6 +105,7 @@ const cartSlice = createSlice({
                 state.loading = true;
             })
             .addCase(addToCart.fulfilled, (state, action) => {
+                console.log("Add to cart response:", action.payload.item);
                 const newItem = action.payload.item;
                 const existing = state.items.find(i => i.productId === newItem.productId);
                 if (existing) {
@@ -122,7 +127,7 @@ const cartSlice = createSlice({
             })
             .addCase(removeFromCart.fulfilled, (state, action) => {
                 state.items = state.items.filter(
-                    item => item.productId !== action.payload.productId
+                    item => item.productId !== action.payload.data.items[0]._id
                 );
                 state.loading = false;
                 state.lastSynced = Date.now();
@@ -131,22 +136,35 @@ const cartSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-
-            // Sync
-            .addCase(syncCart.pending, (state) => {
+            .addCase(updateCart.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(syncCart.fulfilled, (state, action) => {
-                state.items = action.payload.items || [];
+            .addCase(updateCart.fulfilled, (state, action) => {
+                const updatedItem = action.payload.data.items[0];
+                const existing = state.items.find(i => i.productId === updatedItem.productId);
+                if (existing) {
+                    existing.quantity = updatedItem.quantity;
+                }
                 state.loading = false;
                 state.lastSynced = Date.now();
             })
-            .addCase(syncCart.rejected, (state, action) => {
+            .addCase(updateCart.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
-            });
+            })
+            .addCase(clearCart.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(clearCart.fulfilled, (state) => {
+                state.items = [];
+                state.loading = false;
+                state.lastSynced = Date.now();
+            })
+            .addCase(clearCart.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
     }
 });
 
-export const { updateQuantity, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

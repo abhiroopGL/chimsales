@@ -37,7 +37,7 @@ const ProductDetail = () => {
       }))
       return
     }
-    dispatch(addToCart({ product, quantity }))
+    dispatch(addToCart(product._id))
     dispatch(showNotification({
       type: "success",
       message: `Added ${quantity} item(s) to cart!`

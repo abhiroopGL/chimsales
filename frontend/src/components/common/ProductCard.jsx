@@ -19,7 +19,7 @@ const ProductCard = ({ product }) => {
             }));
             return
         }
-        dispatch(addToCart({ product, quantity: 1 }))
+        dispatch(addToCart(product._id))
         dispatch(showNotification({
             message: 'Added to cart!',
             type: 'success'

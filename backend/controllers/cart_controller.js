@@ -38,7 +38,7 @@ const addToCart = async (req, res) => {
     if (!cart) {
         console.log("Creating new cart");
         cart = new Cart({ user: req.user._id, items: [] });
-        console.log("Cart:",cart)
+        console.log("Cart:",cart);
     }
 
     // Check if product already exists in cart
@@ -84,7 +84,7 @@ const updateCartItem = async (req, res) => {
         console.log('Quantity must be at least 1');
     }
 
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: req.user.id })
 
     if (!cart) {
         console.log('Cart not found');
@@ -110,7 +110,7 @@ const updateCartItem = async (req, res) => {
 const removeFromCart = async (req, res) => {
     const { productId } = req.params;
 
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: req.user.id });
 
     if (!cart) {
         console.log('Cart not found');
@@ -129,7 +129,7 @@ const removeFromCart = async (req, res) => {
 }
 
 const clearCart = async (req, res) => {
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: req.user.id });
 
     if (!cart) {
         console.log('Cart not found');

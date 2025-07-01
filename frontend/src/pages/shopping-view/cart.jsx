@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from "react-redux"
 import { Link, useNavigate } from "react-router-dom"
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react"
-import { removeFromCart, updateQuantity, clearCart } from "../../redux/slices/cartSlice.js"
+import { clearCart, removeFromCart, updateCart } from "../../redux/slices/cartSlice.js"
 
 const Cart = () => {
     const dispatch = useDispatch()
@@ -10,20 +10,23 @@ const Cart = () => {
     const products = useSelector((state) => state.products.publicProducts)
 
     const cartItemsWithDetails = items.map(item => {
-        const product = products.find(p => p.id === item.productId || p.id === item.product._id);
+        console.log("Cart item:", item)
+        console.log("Products:", products)
+        const product = products.find(p => p._id === item.product);
         return {
             ...item,
             product, // This will include price, name, etc.
         };
     });
-
-    console.log("Cart items with details:", cartItemsWithDetails)
+    const total = cartItemsWithDetails.reduce(
+    (sum, item) => sum + (item.product?.price || 0) * item.quantity, 0
+    );
 
     const handleUpdateQuantity = (productId, newQuantity) => {
         if (newQuantity === 0) {
             dispatch(removeFromCart(productId))
         } else {
-            dispatch(updateQuantity({ productId, quantity: newQuantity }))
+            dispatch(updateCart({ productId, quantity: newQuantity }))
         }
     }
 
@@ -39,7 +42,7 @@ const Cart = () => {
         navigate("/review")
     }
 
-    if (items.length === 0) {
+    if (cartItemsWithDetails.length === 0) {
         return (
             <div className="min-h-screen bg-gray-50 py-8">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,6 +58,7 @@ const Cart = () => {
             </div>
         )
     }
+    console.log("Cart items with details:", cartItemsWithDetails)
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
@@ -78,9 +82,14 @@ const Cart = () => {
                                         className="w-20 h-20 object-cover rounded-lg"
                                     />
                                     <div className="flex-1">
-                                        <h3 className="font-semibold text-lg">{item.product.name}</h3>
-                                        <p className="text-gray-600 text-sm">{item.product.category}</p>
-                                        <p className="text-lg font-bold mt-2">{item.product.price.toFixed(3)} KWD</p>
+                                        <Link
+                                            to={`/item/${item.product._id}`}
+                                            className="font-semibold text-lg text-black hover:underline hover:text-gray-700 transition-colors duration-200"
+                                        >
+                                            {item?.product?.name}
+                                        </Link>
+                                        <p className="text-gray-600 text-sm">{item?.product?.category}</p>
+                                        <p className="text-lg font-bold mt-2">{item?.product?.price.toFixed(3)} KWD</p>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <button
@@ -114,7 +123,7 @@ const Cart = () => {
                             <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
                             <div className="space-y-3 mb-6">
                                 <div className="flex justify-between">
-                                    <span>Subtotal ({items.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                                    <span>Subtotal ({cartItemsWithDetails.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
                                     <span>{total.toFixed(3)} KWD</span>
                                 </div>
                                 <div className="flex justify-between">
