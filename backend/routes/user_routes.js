@@ -1,17 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { registerUser, loginUser, logoutUser, authMiddleware} = require("../controllers/auth_controller");
+const { registerUser, loginUser, logoutUser, authMiddleware, updateProfile, checkAuth} = require("../controllers/auth_controller");
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);
-router.get("/check-auth", authMiddleware, (req, res) => {
-    const user = req.user;
-    res.status(200).json({
-        success: true,
-        message: 'Authenticated user!',
-        user
-    });
-});
+router.get("/check-auth", authMiddleware, checkAuth);
+router.put('/profile', authMiddleware, updateProfile);
+
 
 module.exports = router;

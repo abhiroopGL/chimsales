@@ -52,6 +52,7 @@ const ManageProducts = () => {
             case "archived":
                 return product.deleted;
             case "all":
+                return product;
             default:
                 return !product.deleted; // Show all non-deleted products
         }

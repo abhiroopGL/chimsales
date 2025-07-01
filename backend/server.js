@@ -6,6 +6,9 @@ const { connectDatabase } = require('./database');
 const cookieParser = require('cookie-parser');
 const userRouter = require('./routes/user_routes');
 const productRouter = require('./routes/product_routes');
+const cartRouter = require('./routes/cart_routes');
+const adminRouter = require('./routes/admin_routes');
+const { authMiddleware } = require('./controllers/auth_controller')
 // const {checkForAuthentication} = require("./middlewares/auth");
 
 const PORT = process.env.PORT || 8000;
@@ -23,10 +26,22 @@ app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
 }));
+app.use('/api/auth', userRouter);
+app.use(authMiddleware);
+console.log("Request received");
 // app.use(checkForAuthentication);
 app.use('/uploads', express.static('uploads'));
-app.use("/api/auth", userRouter);
-app.use("/api/products", productRouter);
+app.use('/api/products', productRouter);
+app.use('/api/cart', cartRouter);
+app.use("/api/admin", adminRouter);
 
+app.use((err, req, res, next) => {
+    console.error('💥 Error caught:', err); // Full backtrace in console
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+        stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+    });
+});
 
 app.listen(PORT, ()=> {console.log(`Express server started successfully on PORT: ${PORT}`)});

@@ -107,10 +107,20 @@ const authMiddleware = async (req, res, next) => {
         });
 
     try {
+        console.log("Verifying token:",token);
         const decoded = jwt.verify(token, "abhiroop");
+        console.log("Decoded:",decoded);
         req.user = decoded;
         next();
     } catch (error) {
+        console.log("Error:",error);
+        if (error.name === "TokenExpiredError") {
+            res.clearCookie("token");
+            return res.status(401).json({
+                success: false,
+                message: "Session expired. Please login again.",
+            });
+        }
         res.status(401).json({
             success: false,
             message: "Unauthorised user!",
@@ -118,4 +128,45 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 
-module.exports = { registerUser, loginUser, logoutUser, authMiddleware };
+const updateProfile = async (req, res) => {
+    const userId = req.user.id;
+    const { fullName, dateOfBirth, profilePicture } = req.body;
+    console.log("Updating profile for user:", userId, "with data:", req.body);
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { fullName, dateOfBirth, profilePicture },
+            { new: true, runValidators: true }
+        );
+        console.log("Updated user:", updatedUser);
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        res.json({
+            success: true,
+            message: "Profile updated successfully",
+            user: {
+                id: updatedUser._id,
+                email: updatedUser.email,
+                userName: updatedUser.userName,
+            },
+        });
+    } catch (e) {
+        console.error("Error updating profile:", e);
+        res.status(500).json({ success: false, message: "Error updating profile" });
+    }
+};
+
+const checkAuth = async (req, res) => {
+    try {
+            console.log("User ID from request:", req.user.id);
+            const user = await User.findById(req.user.id).select('-password');
+            console.log("Fetched user:", user);
+            if (!user) return res.status(404).json({ success: false, message: "User not found" });
+            res.json({ success: true, user });
+        } catch (e) {
+            res.status(500).json({ success: false, message: "Error fetching user" });
+        }
+    }
+
+module.exports = { registerUser, loginUser, logoutUser, authMiddleware, updateProfile, checkAuth };
