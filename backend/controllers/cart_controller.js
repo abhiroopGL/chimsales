@@ -3,6 +3,12 @@ const Cart = require('../models/cart');
 const Product = require('../models/product');
 
 const getCart = async (req, res) => {
+    if (!req.user || !req.user.id) {
+        return res.status(200).json({
+            status: 'success',
+            message: 'Login to see your cart'
+        });
+    }
     const cart = await Cart.findOne({ user: req.user.id });
 
     if (!cart) {

@@ -27,7 +27,7 @@ app.use(cors({
     credentials: true,
 }));
 app.use('/api/auth', userRouter);
-app.use(authMiddleware);
+// app.use(authMiddleware);
 console.log("Request received");
 // app.use(checkForAuthentication);
 app.use('/uploads', express.static('uploads'));
