@@ -32,7 +32,7 @@ console.log("Request received");
 // app.use(checkForAuthentication);
 app.use('/uploads', express.static('uploads'));
 app.use('/api/products', productRouter);
-app.use('/api/cart', cartRouter);
+app.use('/api/cart', authMiddleware, cartRouter);
 app.use("/api/admin", adminRouter);
 
 app.use((err, req, res, next) => {

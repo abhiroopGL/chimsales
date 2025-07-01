@@ -38,6 +38,7 @@ const addToCart = async (req, res) => {
     }
 
     // Find existing cart or create new one
+    console.log("User ID:", req.user);
     let cart = await Cart.findOne({ user: req.user.id });
     console.log("Cart:",cart);
     console.log("User:",req.user);
