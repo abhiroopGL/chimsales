@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { showNotification } from "../../redux/slices/notificationSlice"
 import { MapPin, Phone, CreditCard, Truck } from "lucide-react"
 import { clearCart } from "../../redux/slices/cartSlice"
-import axios from "axios"
+import axiosInstance from "../../api/axios-instance"
 
 const Review = () => {
   const navigate = useNavigate()
@@ -13,17 +13,17 @@ const Review = () => {
   const user = useSelector((state) => state.authorization.user)
   const products = useSelector((state) => state.products.publicProducts)
 
-    const cartItemsWithDetails = items.map(item => {
-        const product = products.find(p => p._id === item.product);
-        return {
-            ...item,
-            product, // This will include price, name, etc.
-        };
-    });
-    console.log("Cart items with details:", cartItemsWithDetails)
-    const total = cartItemsWithDetails.reduce(
-    (sum, item) => sum + (item.product?.price || 0) * item.quantity, 0
-    );
+  const cartItemsWithDetails = items.map(item => {
+      const product = products.find(p => p._id === item.product);
+      return {
+          ...item,
+          product, // This will include price, name, etc.
+      };
+  });
+  console.log("Cart items with details:", cartItemsWithDetails)
+  const total = cartItemsWithDetails.reduce(
+  (sum, item) => sum + (item.product?.price || 0) * item.quantity, 0
+  );
 
   const [loading, setLoading] = useState(false)
   const [orderData, setOrderData] = useState({
@@ -39,6 +39,8 @@ const Review = () => {
     paymentMethod: "cash",
     notes: "",
   })
+
+  console.log("Order data:", orderData);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -61,10 +63,10 @@ const Review = () => {
 
   const handlePlaceOrder = async () => {
     setLoading(true)
-
+    
     try {
       const orderPayload = {
-        items: items.map((item) => ({
+        items: cartItemsWithDetails.map((item) => ({
           product: item.product._id,
           quantity: item.quantity,
           price: item.product.price,
@@ -75,14 +77,13 @@ const Review = () => {
         notes: orderData.notes,
       }
 
-      const response = await axios.post("/api/orders", orderPayload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      console.log("Placing order with payload:", orderPayload)
+
+      const response = await axiosInstance.post("/api/orders", orderPayload);
+      console.log("Order response:", response.data)
 
       if (response.data.success) {
-        dispatch(clearCart())
+        // dispatch(clearCart())
         toast.success("Order placed successfully!")
         dispatch(showNotification({
           type: "success",
@@ -91,6 +92,7 @@ const Review = () => {
         navigate("/")
       }
     } catch (error) {
+      console.error("Error placing order:", error)
       dispatch(showNotification({
         type: "error",
         message: error.response?.data?.message || "Failed to place order",

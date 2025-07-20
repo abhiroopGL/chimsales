@@ -94,13 +94,15 @@ const AdminDashboard = () => {
             //     axiosInstance.get("/api/invoices"),
             // ])
 
-            const [usersRes, productsRes] = await Promise.all([
+            const [usersRes, productsRes, orderRes] = await Promise.all([
                 await axiosInstance.get("/api/admin/users"),
                 await axiosInstance.get("/api/products/admin"),
+                await axiosInstance.get("/api/orders/admin"),
             ])
 
             console.log("Users",usersRes);
             console.log("Products",productsRes);
+            console.log("Orders",orderRes);
 
             setData({
                 stats: statsRes.data.stats || {
