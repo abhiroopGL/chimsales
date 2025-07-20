@@ -2,25 +2,64 @@ const Order = require("../models/order");
 const User = require("../models/User");
 const Product = require("../models/product");
 const Invoice = require("../models/invoice");
-const orders = []
+
 const getOrders = async (req, res) => {
     try {
+        console.log("Fetching orders for user:", req.user.id);
         const userOrders = await Order.find({
             deleted: { $ne: true }
         });
-        console.log("User orders are: ",userOrders);
+        console.log("User orders are: ", userOrders);
         res.json({
           success: true,
           orders: userOrders,
         })
   } catch (error) {
     console.error("Get orders error:", error)
+    console.error("Error fetching orders:", req.user);
     res.status(500).json({
       success: false,
       message: "Failed to fetch orders",
     })
   }
 }
+
+const getOrderById = async (req, res) => {
+  try {
+    console.log("Fetching order with ID:", req.params);
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({
+      _id: orderId,
+      deleted: { $ne: true },
+    }).populate({
+      path: "customer",
+      select: "fullName phone email",
+    }).populate({
+        path: "items.product",
+        select: "name",
+      });;
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("Get order by ID error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch the order",
+    });
+  }
+};
+
 
 const createNewOrder = async (req, res) => {
     try {
@@ -103,5 +142,49 @@ const createNewOrder = async (req, res) => {
         }
 }
 
+const updateOrderById = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const updates = req.body;
 
-module.exports = { getOrders, createNewOrder };
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    const { status, paymentStatus, notes } = updates;
+
+    if (status) order.status = status;
+    if (paymentStatus) order.paymentStatus = paymentStatus;
+    if (notes !== undefined) order.notes = notes;
+
+    order.updatedAt = new Date();
+    await order.save();
+
+    await order.populate([
+      { path: "customer", select: "fullName phoneNumber email" },
+      { path: "items.product", select: "name price images" },
+      { path: "invoice" },
+    ]);
+
+    res.json({
+      success: true,
+      message: "Order updated successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("Update order error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order",
+    });
+  }
+};
+
+
+
+
+module.exports = { getOrders, createNewOrder, getOrderById, updateOrderById };

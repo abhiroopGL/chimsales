@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { ShoppingCart, ArrowLeft} from "lucide-react"
 import { showNotification } from "../../redux/slices/notificationSlice"
-import { addToCart } from "../../redux/slices/cartSlice"
+import { addToCart } from "../../redux/slices/cartSlice.jsx"
 import { fetchProductById } from "../../redux/slices/productSlice"
 import { FaBolt } from "react-icons/fa"
 import ProductDescription from "../../components/product-details/product-description.jsx";

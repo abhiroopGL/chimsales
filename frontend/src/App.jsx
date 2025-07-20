@@ -18,7 +18,7 @@ import Cart from "./pages/shopping-view/cart.jsx";
 import Navbar from './components/common/Navbar.jsx';
 import Products from "./pages/shopping-view/products.jsx";
 import ProductDetail from './pages/shopping-view/product-details.jsx';
-import { fetchCart } from './redux/slices/cartSlice.js';
+import { fetchCart } from './redux/slices/cartSlice.jsx';
 import { fetchPublicProducts } from './redux/slices/productSlice.jsx';
 
 function App() {

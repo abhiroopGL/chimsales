@@ -1,15 +1,13 @@
-import express from "express"
-import { body, query, validationResult } from "express-validator"
-import Invoice from "../models/invoice.js"
-import Order from "../models/order.js"
-import auth from "../middleware/auth.js"
-import admin from "../middleware/admin.js"
-import { getAllInvoices, getSingleInvoice, updateInvoice } from "../controllers/invoice_controller.js"
+const express = require('express');
+const Invoice = require("../models/invoice.js")
+const Order = require("../models/order.js")
+const { admin } = require('../middleware/checkAdmin.js');
+const { getAllInvoices, getSingleInvoice, updateInvoice, createNewInvoice } = require("../controllers/invoice_controller.js")
 
 const router = express.Router()
 
 // Get all invoices
-router.get("/", getAllInvoices)
+router.get("/", admin, getAllInvoices)
 
 // Get single invoice
 router.get("/:id", getSingleInvoice)
@@ -79,7 +77,7 @@ router.post("/:id/send", admin, async (req, res) => {
 })
 
 // Download invoice as PDF
-router.get("/:id/download", auth, async (req, res) => {
+router.get("/:id/download", async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
 
@@ -180,4 +178,4 @@ router.post("/from-order/:orderId", admin, async (req, res) => {
   }
 })
 
-export default router
+module.exports = router;

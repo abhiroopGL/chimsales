@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { showNotification } from "../../redux/slices/notificationSlice"
 import { MapPin, Phone, CreditCard, Truck } from "lucide-react"
-import { clearCart } from "../../redux/slices/cartSlice"
+import { clearCart } from "../../redux/slices/cartSlice.jsx"
 import axiosInstance from "../../api/axios-instance"
 
 const Review = () => {

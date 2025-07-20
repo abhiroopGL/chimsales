@@ -4,7 +4,7 @@ import { Link } from "react-router-dom"
 import { Search, ShoppingCart } from "lucide-react"
 import { showNotification } from "../../redux/slices/notificationSlice"
 import { fetchPublicProducts } from "../../redux/slices/productSlice"
-import { addToCart } from "../../redux/slices/cartSlice"
+import { addToCart } from "../../redux/slices/cartSlice.jsx"
 
 const Products = () => {
   const dispatch = useDispatch()

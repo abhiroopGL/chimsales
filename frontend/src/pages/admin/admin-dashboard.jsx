@@ -48,12 +48,14 @@ import {
 import {showNotification} from "../../redux/slices/notificationSlice.js";
 import axios from "axios"
 import axiosInstance from "../../api/axios-instance.js";
-// import InvoiceForm from "../components/invoices/InvoiceForm"
-// import InvoiceView from "../components/invoices/InvoiceView"
+import OrderEdit from "../../components/admin/order/orderEdit.jsx";
+import OrderView from "../../components/admin/order/orderView.jsx";
+import InvoiceForm from "../../components/admin/invoice/invoice-form.jsx"
+import InvoiceView from "../../components/admin/invoice/invoice-view.jsx"
 
 const AdminDashboard = () => {
     const { token } = useSelector((state) => state.authorization.isAuthenticated)
-    const [activeTab, setActiveTab] = useState("overview")
+    const [activeTab, setActiveTab] = useState("orders")
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const [data, setData] = useState({
@@ -73,6 +75,9 @@ const AdminDashboard = () => {
     const [showModal, setShowModal] = useState(false)
     const [modalType, setModalType] = useState("")
     const [selectedItem, setSelectedItem] = useState(null)
+
+    const [showOrderView, setShowOrderView] = useState(false)
+    const [showOrderEdit, setShowOrderEdit] = useState(false)
 
     const [showInvoiceForm, setShowInvoiceForm] = useState(false)
     const [showInvoiceView, setShowInvoiceView] = useState(false)
@@ -94,27 +99,30 @@ const AdminDashboard = () => {
             //     axiosInstance.get("/api/invoices"),
             // ])
 
-            const [usersRes, productsRes, orderRes] = await Promise.all([
+            const [usersRes, productsRes, ordersRes, invoicesRes] = await Promise.all([
                 await axiosInstance.get("/api/admin/users"),
                 await axiosInstance.get("/api/products/admin"),
                 await axiosInstance.get("/api/orders/admin"),
+                await axiosInstance.get("/api/invoice"),
             ])
 
-            console.log("Users",usersRes);
-            console.log("Products",productsRes);
-            console.log("Orders",orderRes);
-
             setData({
-                stats: statsRes.data.stats || {
-                    totalUsers: usersRes.data.users?.length || 0,
-                    totalProducts: productsRes.data.products?.length || 0,
-                    totalOrders: ordersRes.data.orders?.length || 0,
-                    totalRevenue: ordersRes.data.orders?.reduce((sum, order) => sum + order.total, 0) || 0,
+                // stats: statsRes.data.stats || {
+                //     totalUsers: usersRes.data.users?.length || 0,
+                //     totalProducts: productsRes.data.products?.length || 0,
+                //     totalOrders: ordersRes.data.orders?.length || 0,
+                //     totalRevenue: ordersRes.data.orders?.reduce((sum, order) => sum + order.total, 0) || 0,
+                // },
+                stats: {
+                    totalUsers: 156,
+                    totalProducts: 24,
+                    totalOrders: 89,
+                    totalRevenue: 12450.5,
                 },
-                users: usersRes.data|| [],
-                products: productsRes.data.products || [],
+                users: usersRes.data || [],
+                products: productsRes.data || [],
                 orders: ordersRes.data.orders || [],
-                queries: queriesRes.data.queries || [],
+                queries: [],
                 invoices: invoicesRes.data.invoices || [],
             })
         } catch (error) {
@@ -268,7 +276,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Sales Chart */}
-                {activeTab === "overview" && (
+                {/* {activeTab === "overview" && (
                     <div className="bg-white rounded-lg p-6 shadow-sm mb-8">
                         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                             <TrendingUp size={20} />
@@ -282,11 +290,11 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Navigation Tabs */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                    <TabButton id="overview" label="Overview" icon={TrendingUp} />
+                    {/* <TabButton id="overview" label="Overview" icon={TrendingUp} /> */}
                     <TabButton id="users" label="Users" icon={Users} />
                     <TabButton id="products" label="Products" icon={Package} />
                     <TabButton id="orders" label="Orders" icon={FileText} />
@@ -483,10 +491,19 @@ const AdminDashboard = () => {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div className="flex gap-2">
-                                                    <button className="text-blue-600 hover:text-blue-800">
+                                                    <button className="text-blue-600 hover:text-blue-800"
+                                                    onClick={() => {
+                                                    setSelectedItem(order)
+                                                    setShowOrderView(true)
+                                                    }}>
                                                         <Eye size={16} />
                                                     </button>
-                                                    <button className="text-green-600 hover:text-green-800">
+                                                    <button className="text-green-600 hover:text-green-800"
+                                                    onClick={() => {
+                                                        setSelectedItem(order)
+                                                        setShowOrderEdit(true)
+                                                    }}
+                                                    >
                                                         <Edit size={16} />
                                                     </button>
                                                 </div>
@@ -627,40 +644,67 @@ const AdminDashboard = () => {
                         </div>
                     )}
                 </div>
+
+                {showOrderView && selectedItem && (
+                    <OrderView
+                        orderId={selectedItem._id}
+                        onClose={() => {
+                        setShowOrderView(false)
+                        setSelectedItem(null)
+                        }}
+                    />
+                )}
+
+
+                {showOrderEdit && selectedItem && (
+                    <OrderEdit
+                        orderId={selectedItem._id}
+                        onClose={() => {
+                        setShowOrderEdit(false)
+                        setSelectedItem(null)
+                        }}
+                        onSuccess={() => {
+                        fetchDashboardData()
+                        setSelectedItem(null)
+                        }}
+                    />
+                )}
+
+
+
                 {/* Invoice Form Modal */}
-                {/*{showInvoiceForm && (*/}
-                {/*    <InvoiceForm*/}
-                {/*        invoice={selectedInvoice}*/}
-                {/*        onClose={() => {*/}
-                {/*            setShowInvoiceForm(false)*/}
-                {/*            setSelectedInvoice(null)*/}
-                {/*        }}*/}
-                {/*        onSuccess={() => {*/}
-                {/*            fetchDashboardData()*/}
-                {/*            setSelectedInvoice(null)*/}
-                {/*        }}*/}
-                {/*    />*/}
-                {/*)}*/}
+                {showInvoiceForm && (
+                    <InvoiceForm
+                        invoice={selectedInvoice}
+                        onClose={() => {
+                            setShowInvoiceForm(false)
+                            setSelectedInvoice(null)
+                        }}
+                        onSuccess={() => {
+                            fetchDashboardData()
+                            setSelectedInvoice(null)
+                        }}
+                    />
+                )}
 
                 {/*/!* Invoice View Modal *!/*/}
-                {/*{showInvoiceView && selectedInvoice && (*/}
-                {/*    <InvoiceView*/}
-                {/*        invoiceId={selectedInvoice._id}*/}
-                {/*        onClose={() => {*/}
-                {/*            setShowInvoiceView(false)*/}
-                {/*            setSelectedInvoice(null)*/}
-                {/*        }}*/}
-                {/*        onEdit={(invoice) => {*/}
-                {/*            setShowInvoiceView(false)*/}
-                {/*            setSelectedInvoice(invoice)*/}
-                {/*            setShowInvoiceForm(true)*/}
-                {/*        }}*/}
-                {/*    />*/}
-                {/*)}*/}
+                {showInvoiceView && selectedInvoice && (
+                    <InvoiceView
+                        invoiceId={selectedInvoice._id}
+                        onClose={() => {
+                            setShowInvoiceView(false)
+                            setSelectedInvoice(null)
+                        }}
+                        onEdit={(invoice) => {
+                            setShowInvoiceView(false)
+                            setSelectedInvoice(invoice)
+                            setShowInvoiceForm(true)
+                        }}
+                    />
+                )}
             </div>
         </div>
     )
 }
 
 export default AdminDashboard
-

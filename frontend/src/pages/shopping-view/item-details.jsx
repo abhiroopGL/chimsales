@@ -10,7 +10,7 @@ import ProductReviews from "../../components/product-details/product-reviews.jsx
 import useAppNavigation from "../../hooks/useAppNavigation.jsx";
 import { fetchProductById } from "../../redux/slices/productSlice.jsx";
 import { useDispatch } from "react-redux";
-import {addToCart} from "../../redux/slices/cartSlice.js";
+import {addToCart} from "../../redux/slices/cartSlice.jsx";
 
 const ItemDetails = () => {
     const { id } = useParams();

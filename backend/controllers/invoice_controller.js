@@ -2,78 +2,88 @@ const Invoice = require("../models/invoice.js")
 const Order = require("../models/order.js")
 
 const getAllInvoices = async (req, res) => {
-    try {
-          const errors = validationResult(req)
-          if (!errors.isEmpty()) {
-            return res.status(400).json({
-              success: false,
-              message: "Validation error",
-              errors: errors.array(),
-            })
-          }
+    // try {
+          // const errors = validationResult(req)
+          // if (!errors.isEmpty()) {
+          //   return res.status(400).json({
+          //     success: false,
+          //     message: "Validation error",
+          //     errors: errors.array(),
+          //   })
+          // }
     
-          const { page = 1, limit = 20, status, search } = req.query
+          // const { page = 1, limit = 20, status, search } = req.query
     
-          // Build query
-          const query = {}
+          // // Build query
+          // const query = {}
     
-          // Only admins can see all invoices, users see their own
-          if (req.user.role !== "admin") {
-            query["customer.phoneNumber"] = req.userDoc.phoneNumber
-          }
+          // // Only admins can see all invoices, users see their own
+          // if (req.user.role !== "admin") {
+          //   query["customer.phoneNumber"] = req.userDoc.phoneNumber
+          // }
     
-          if (status) query.status = status
+          // if (status) query.status = status
     
-          if (search) {
-            query.$or = [
-              { invoiceNumber: { $regex: search, $options: "i" } },
-              { "customer.fullName": { $regex: search, $options: "i" } },
-              { "customer.phoneNumber": { $regex: search, $options: "i" } },
-            ]
-          }
+          // if (search) {
+          //   query.$or = [
+          //     { invoiceNumber: { $regex: search, $options: "i" } },
+          //     { "customer.fullName": { $regex: search, $options: "i" } },
+          //     { "customer.phoneNumber": { $regex: search, $options: "i" } },
+          //   ]
+          // }
     
-          const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
+          // const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
     
-          const [invoices, total] = await Promise.all([
-            Invoice.find(query)
-              .sort({ createdAt: -1 })
-              .skip(skip)
-              .limit(Number.parseInt(limit))
-              .populate("createdBy", "fullName")
-              .populate("order"),
-            Invoice.countDocuments(query),
-          ])
+          // const [invoices, total] = await Promise.all([
+          //   Invoice.find(query)
+          //     .sort({ createdAt: -1 })
+          //     .skip(skip)
+          //     .limit(Number.parseInt(limit))
+          //     .populate("createdBy", "fullName")
+          //     .populate("order"),
+          //   Invoice.countDocuments(query),
+          // ])
     
-          // Calculate stats for admin
-          let stats = null
-          if (req.user.role === "admin") {
-            const [totalInvoices, paidInvoices, pendingInvoices, overdueInvoices] = await Promise.all([
-              Invoice.countDocuments(),
-              Invoice.countDocuments({ status: "paid" }),
-              Invoice.countDocuments({ status: { $in: ["draft", "sent"] } }),
-              Invoice.countDocuments({ status: "overdue" }),
-            ])
+          // // Calculate stats for admin
+          // let stats = null
+          // if (req.user.role === "admin") {
+          //   const [totalInvoices, paidInvoices, pendingInvoices, overdueInvoices] = await Promise.all([
+          //     Invoice.countDocuments(),
+          //     Invoice.countDocuments({ status: "paid" }),
+          //     Invoice.countDocuments({ status: { $in: ["draft", "sent"] } }),
+          //     Invoice.countDocuments({ status: "overdue" }),
+          //   ])
     
-            stats = {
-              total: totalInvoices,
-              paid: paidInvoices,
-              pending: pendingInvoices,
-              overdue: overdueInvoices,
-            }
-          }
+          //   stats = {
+          //     total: totalInvoices,
+          //     paid: paidInvoices,
+          //     pending: pendingInvoices,
+          //     overdue: overdueInvoices,
+          //   }
+          // }
     
+          // res.json({
+          //   success: true,
+          //   invoices,
+          //   pagination: {
+          //     currentPage: Number.parseInt(page),
+          //     totalPages: Math.ceil(total / Number.parseInt(limit)),
+          //     totalInvoices: total,
+          //     hasNext: skip + invoices.length < total,
+          //     hasPrev: Number.parseInt(page) > 1,
+          //   },
+          //   stats,
+          // })
+        try {
+          const invoices = await Invoice.find()
+            .sort({ createdAt: -1 })
+            .populate("createdBy", "fullName")
+            .populate("order");
+
           res.json({
             success: true,
             invoices,
-            pagination: {
-              currentPage: Number.parseInt(page),
-              totalPages: Math.ceil(total / Number.parseInt(limit)),
-              totalInvoices: total,
-              hasNext: skip + invoices.length < total,
-              hasPrev: Number.parseInt(page) > 1,
-            },
-            stats,
-          })
+          });
         } catch (error) {
           console.error("Get invoices error:", error)
           res.status(500).json({

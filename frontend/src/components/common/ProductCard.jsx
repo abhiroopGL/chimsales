@@ -3,7 +3,7 @@
 import { Link } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { ShoppingCart } from "lucide-react"
-import { addToCart } from "../../redux/slices/cartSlice.js"
+import { addToCart } from "../../redux/slices/cartSlice.jsx"
 import {showNotification} from "../../redux/slices/notificationSlice.js";
 
 const ProductCard = ({ product }) => {
