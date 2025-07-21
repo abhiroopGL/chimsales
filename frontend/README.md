@@ -13,3 +13,6 @@ Currently, two official plugins are available:
 
 This can be used for invoice pdf
 @apandresipm/pdf-invoice
+
+to run it on ngrok
+ngrok http --url=crucial-escargot-concrete.ngrok-free.app 5173
