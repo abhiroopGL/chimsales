@@ -39,3 +39,26 @@
 .read-the-docs {
   color: #888;
 }
+
+
+.underline-grow {
+  position: relative;
+  display: inline-block;
+}
+
+.underline-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 0;
+  background-color: white; /* change to black or your desired color */
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.underline-grow:hover::after {
+  width: 100%;
+}
+

@@ -16,3 +16,5 @@ This can be used for invoice pdf
 
 to run it on ngrok
 ngrok http --url=crucial-escargot-concrete.ngrok-free.app 5173
+
+Use spree for rails, it has drag drop functionality
