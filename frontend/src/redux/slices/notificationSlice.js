@@ -1,4 +1,3 @@
-// src/redux/slices/notificationSlice.jsx
 import { createSlice } from '@reduxjs/toolkit';
 
 const notificationSlice = createSlice({

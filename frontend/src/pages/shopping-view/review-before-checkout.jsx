@@ -14,15 +14,15 @@ const Review = () => {
   const products = useSelector((state) => state.products.publicProducts)
 
   const cartItemsWithDetails = items.map(item => {
-      const product = products.find(p => p._id === item.product);
-      return {
-          ...item,
-          product, // This will include price, name, etc.
-      };
+    const product = products.find(p => p._id === item.product);
+    return {
+      ...item,
+      product, // This will include price, name, etc.
+    };
   });
   console.log("Cart items with details:", cartItemsWithDetails)
   const total = cartItemsWithDetails.reduce(
-  (sum, item) => sum + (item.product?.price || 0) * item.quantity, 0
+    (sum, item) => sum + (item.product?.price || 0) * item.quantity, 0
   );
 
   const [loading, setLoading] = useState(false)
@@ -63,7 +63,7 @@ const Review = () => {
 
   const handlePlaceOrder = async () => {
     setLoading(true)
-    
+
     try {
       const orderPayload = {
         items: cartItemsWithDetails.map((item) => ({
@@ -108,23 +108,27 @@ const Review = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-white py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Review Your Order</h1>
-          <p className="text-gray-600">Please review your order details before placing your order</p>
+          <h1 className="text-3xl font-bold mb-2 text-black sm:text-2xl xs:text-xl">
+            Review Your Order
+          </h1>
+          <p className="text-gray-600">
+            Please review your order details before placing your order
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Order Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Customer Information */}
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-300">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-black">
                 <Phone size={20} />
                 Customer Information
               </h2>
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-800">
                 <div>
                   <span className="font-medium">Name:</span>
                   <span className="ml-2">{user?.fullName}</span>
@@ -143,19 +147,20 @@ const Review = () => {
             </div>
 
             {/* Delivery Address */}
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-300">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-black">
                 <MapPin size={20} />
                 Delivery Address
               </h2>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4 text-gray-900">
+                {/* governorate */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Governorate *</label>
                   <select
                     name="deliveryAddress.governorate"
                     value={orderData.deliveryAddress.governorate}
                     onChange={handleInputChange}
-                    className="input-field"
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
                     required
                   >
                     <option value="">Select Governorate</option>
@@ -167,6 +172,7 @@ const Review = () => {
                     <option value="Farwaniya">Farwaniya</option>
                   </select>
                 </div>
+                {/* area */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Area *</label>
                   <input
@@ -174,10 +180,11 @@ const Review = () => {
                     name="deliveryAddress.area"
                     value={orderData.deliveryAddress.area}
                     onChange={handleInputChange}
-                    className="input-field"
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
                     required
                   />
                 </div>
+                {/* street */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Street</label>
                   <input
@@ -185,9 +192,10 @@ const Review = () => {
                     name="deliveryAddress.street"
                     value={orderData.deliveryAddress.street}
                     onChange={handleInputChange}
-                    className="input-field"
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
                   />
                 </div>
+                {/* block */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Block</label>
                   <input
@@ -195,9 +203,10 @@ const Review = () => {
                     name="deliveryAddress.block"
                     value={orderData.deliveryAddress.block}
                     onChange={handleInputChange}
-                    className="input-field"
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
                   />
                 </div>
+                {/* building */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Building</label>
                   <input
@@ -205,9 +214,10 @@ const Review = () => {
                     name="deliveryAddress.building"
                     value={orderData.deliveryAddress.building}
                     onChange={handleInputChange}
-                    className="input-field"
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
                   />
                 </div>
+                {/* floor */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Floor</label>
                   <input
@@ -215,9 +225,10 @@ const Review = () => {
                     name="deliveryAddress.floor"
                     value={orderData.deliveryAddress.floor}
                     onChange={handleInputChange}
-                    className="input-field"
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
                   />
                 </div>
+                {/* apartment */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-2">Apartment</label>
                   <input
@@ -225,20 +236,20 @@ const Review = () => {
                     name="deliveryAddress.apartment"
                     value={orderData.deliveryAddress.apartment}
                     onChange={handleInputChange}
-                    className="input-field"
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
                   />
                 </div>
               </div>
             </div>
 
             {/* Payment Method */}
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-300">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-black">
                 <CreditCard size={20} />
                 Payment Method
               </h2>
               <div className="space-y-3">
-                <label className="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-black">
+                <label className="flex items-center p-3 border-2 border-gray-400 rounded-lg cursor-pointer hover:border-black">
                   <input
                     type="radio"
                     name="paymentMethod"
@@ -248,16 +259,16 @@ const Review = () => {
                     className="mr-3"
                   />
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-green-600 rounded mr-3 flex items-center justify-center">
+                    <div className="w-8 h-8 bg-black rounded mr-3 flex items-center justify-center">
                       <span className="text-white text-xs font-bold">💵</span>
                     </div>
                     <span>Cash on Delivery</span>
                   </div>
                 </label>
-                <label className="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-black opacity-50">
+                <label className="flex items-center p-3 border-2 border-gray-400 rounded-lg cursor-not-allowed opacity-50">
                   <input type="radio" name="paymentMethod" value="card" disabled className="mr-3" />
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-blue-600 rounded mr-3 flex items-center justify-center">
+                    <div className="w-8 h-8 bg-gray-700 rounded mr-3 flex items-center justify-center">
                       <span className="text-white text-xs font-bold">💳</span>
                     </div>
                     <span>Credit/Debit Card (Coming Soon)</span>
@@ -267,14 +278,14 @@ const Review = () => {
             </div>
 
             {/* Order Notes */}
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Order Notes</h2>
+            <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-300">
+              <h2 className="text-xl font-semibold mb-4 text-black">Order Notes</h2>
               <textarea
                 name="notes"
                 value={orderData.notes}
                 onChange={handleInputChange}
                 rows={4}
-                className="input-field resize-none"
+                className="input-field resize-none bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
                 placeholder="Any special instructions for delivery or installation..."
               />
             </div>
@@ -282,11 +293,11 @@ const Review = () => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg p-6 shadow-sm sticky top-8">
-              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-300 sticky top-8">
+              <h2 className="text-xl font-semibold mb-4 text-black">Order Summary</h2>
 
               {/* Items */}
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 max-h-[400px] overflow-y-auto">
                 {cartItemsWithDetails.map((item) => (
                   <div key={item.product._id} className="flex justify-between items-center text-sm">
                     <div className="flex-1">
@@ -306,7 +317,7 @@ const Review = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery</span>
-                  <span className="text-green-600">Free</span>
+                  <span className="text-gray-700 font-semibold">Free</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total</span>
@@ -315,18 +326,18 @@ const Review = () => {
               </div>
 
               {/* Delivery Info */}
-              <div className="mb-6 p-3 bg-blue-50 rounded-lg">
-                <div className="flex items-center gap-2 text-blue-800 mb-2">
+              <div className="mb-6 p-3 bg-gray-200 rounded-lg">
+                <div className="flex items-center gap-2 text-gray-900 mb-2">
                   <Truck size={16} />
                   <span className="font-medium">Free Delivery</span>
                 </div>
-                <p className="text-sm text-blue-700">Estimated delivery: 2-3 business days</p>
+                <p className="text-sm text-gray-800">Estimated delivery: 2-3 business days</p>
               </div>
 
               <button
                 onClick={handlePlaceOrder}
                 disabled={loading || !orderData.deliveryAddress.governorate || !orderData.deliveryAddress.area}
-                className="w-full btn-primary"
+                className="w-full bg-black text-white font-semibold py-3 rounded-md hover:bg-gray-900 disabled:opacity-50 transition"
               >
                 {loading ? "Placing Order..." : "Place Order"}
               </button>

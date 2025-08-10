@@ -36,7 +36,7 @@ const OrderEdit = ({ orderId, onClose, onSuccess }) => {
           })
         }
       })
-      
+
     } catch (error) {
       dispatch(showNotification({
         type: "error",
@@ -112,16 +112,27 @@ const OrderEdit = ({ orderId, onClose, onSuccess }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Edit Order - {order.orderNumber}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-lg border border-gray-300
+                    sm:max-w-xl sm:p-4
+                    xs:max-w-full xs:mx-2 xs:p-3">
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center
+                      sm:px-4 sm:py-3 xs:px-3 xs:py-2">
+          <h2 className="text-2xl font-bold
+                       sm:text-xl xs:text-lg truncate">
+            Edit Order - {order.orderNumber}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+            aria-label="Close modal"
+          >
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6
+                                               sm:p-4 sm:space-y-5 xs:p-3 xs:space-y-4">
           {/* Order Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Order Status</label>
@@ -176,7 +187,8 @@ const OrderEdit = ({ orderId, onClose, onSuccess }) => {
           {/* Order Details (Read-only) */}
           <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="font-semibold mb-2">Order Details</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm
+                          sm:grid-cols-1 sm:gap-2">
               <div>
                 <span className="text-gray-600">Customer:</span>
                 <span className="ml-2 font-medium">{order.customer?.fullName}</span>
@@ -197,18 +209,21 @@ const OrderEdit = ({ orderId, onClose, onSuccess }) => {
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end gap-4 pt-6 border-t">
+          <div className="flex justify-end gap-4 pt-6 border-t
+                        sm:flex-col sm:gap-3 sm:pt-4 xs:gap-2 xs:pt-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50
+                       sm:w-full"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50
+                       sm:w-full"
             >
               {saving ? "Saving..." : "Update Order"}
             </button>
@@ -217,6 +232,7 @@ const OrderEdit = ({ orderId, onClose, onSuccess }) => {
       </div>
     </div>
   )
+
 }
 
 export default OrderEdit
