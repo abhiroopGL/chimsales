@@ -192,6 +192,36 @@ const InvoicesTab = ({ data }) => {
                     />
                 )}
             </div>
+            {/* Invoice Form Modal */}
+            {showInvoiceForm && (
+                <InvoiceForm
+                    invoice={selectedInvoice}
+                    onClose={() => {
+                        setShowInvoiceForm(false)
+                        setSelectedInvoice(null)
+                    }}
+                    onSuccess={() => {
+                        fetchDashboardData()
+                        setSelectedInvoice(null)
+                    }}
+                />
+            )}
+
+            {/*/!* Invoice View Modal *!/*/}
+            {showInvoiceView && selectedInvoice && (
+                <InvoiceView
+                    invoiceId={selectedInvoice._id}
+                    onClose={() => {
+                        setShowInvoiceView(false)
+                        setSelectedInvoice(null)
+                    }}
+                    onEdit={(invoice) => {
+                        setShowInvoiceView(false)
+                        setSelectedInvoice(invoice)
+                        setShowInvoiceForm(true)
+                    }}
+                />
+            )}
         </div>
     )
 }

@@ -17,10 +17,6 @@ import {
 import { showNotification } from "../../redux/slices/notificationSlice.js";
 import axios from "axios"
 import axiosInstance from "../../api/axios-instance.js";
-import OrderEdit from "../../components/admin/order/orderEdit.jsx";
-import OrderView from "../../components/admin/order/orderView.jsx";
-import InvoiceForm from "../../components/admin/invoice/invoice-form.jsx"
-import InvoiceView from "../../components/admin/invoice/invoice-view.jsx"
 import QueryTab from "./dashboard-tabs/query-tab.jsx";
 import OrdersTab from "./dashboard-tabs/ordersTab.jsx";
 import UsersTab from "./dashboard-tabs/users.jsx";
@@ -217,6 +213,13 @@ const AdminDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
+            { loading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-8 shadow-lg">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    </div>
+                </div>
+            )}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
@@ -308,64 +311,6 @@ const AdminDashboard = () => {
                     )}
 
                 </div>
-
-                {/* {showOrderView && selectedItem && (
-                    <OrderView
-                        orderId={selectedItem._id}
-                        onClose={() => {
-                            setShowOrderView(false)
-                            setSelectedItem(null)
-                        }}
-                    />
-                )} */}
-
-
-                {showOrderEdit && selectedItem && (
-                    <OrderEdit
-                        orderId={selectedItem._id}
-                        onClose={() => {
-                            setShowOrderEdit(false)
-                            setSelectedItem(null)
-                        }}
-                        onSuccess={() => {
-                            fetchDashboardData()
-                            setSelectedItem(null)
-                        }}
-                    />
-                )}
-
-
-
-                {/* Invoice Form Modal */}
-                {showInvoiceForm && (
-                    <InvoiceForm
-                        invoice={selectedInvoice}
-                        onClose={() => {
-                            setShowInvoiceForm(false)
-                            setSelectedInvoice(null)
-                        }}
-                        onSuccess={() => {
-                            fetchDashboardData()
-                            setSelectedInvoice(null)
-                        }}
-                    />
-                )}
-
-                {/*/!* Invoice View Modal *!/*/}
-                {showInvoiceView && selectedInvoice && (
-                    <InvoiceView
-                        invoiceId={selectedInvoice._id}
-                        onClose={() => {
-                            setShowInvoiceView(false)
-                            setSelectedInvoice(null)
-                        }}
-                        onEdit={(invoice) => {
-                            setShowInvoiceView(false)
-                            setSelectedInvoice(invoice)
-                            setShowInvoiceForm(true)
-                        }}
-                    />
-                )}
             </div>
         </div>
     )
