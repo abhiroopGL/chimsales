@@ -309,7 +309,7 @@ const AdminDashboard = () => {
 
                 </div>
 
-                {showOrderView && selectedItem && (
+                {/* {showOrderView && selectedItem && (
                     <OrderView
                         orderId={selectedItem._id}
                         onClose={() => {
@@ -317,7 +317,7 @@ const AdminDashboard = () => {
                             setSelectedItem(null)
                         }}
                     />
-                )}
+                )} */}
 
 
                 {showOrderEdit && selectedItem && (

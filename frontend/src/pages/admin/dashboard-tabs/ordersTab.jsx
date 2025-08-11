@@ -133,32 +133,31 @@ const OrdersTab = ({ data }) => {
                         </div>
                     </div>
                 ))}
-
-                {showOrderView && selectedItem && (
-                    <OrderView
-                        orderId={selectedItem._id}
-                        onClose={() => {
-                            setShowOrderView(false)
-                            setSelectedItem(null)
-                        }}
-                    />
-                )}
-
-
-                {showOrderEdit && selectedItem && (
-                    <OrderEdit
-                        orderId={selectedItem._id}
-                        onClose={() => {
-                            setShowOrderEdit(false)
-                            setSelectedItem(null)
-                        }}
-                        onSuccess={() => {
-                            fetchDashboardData()
-                            setSelectedItem(null)
-                        }}
-                    />
-                )}
             </div>
+            {showOrderView && selectedItem && (
+                <OrderView
+                    orderId={selectedItem._id}
+                    onClose={() => {
+                        setShowOrderView(false)
+                        setSelectedItem(null)
+                    }}
+                />
+            )}
+
+
+            {showOrderEdit && selectedItem && (
+                <OrderEdit
+                    orderId={selectedItem._id}
+                    onClose={() => {
+                        setShowOrderEdit(false)
+                        setSelectedItem(null)
+                    }}
+                    onSuccess={() => {
+                        fetchDashboardData()
+                        setSelectedItem(null)
+                    }}
+                />
+            )}
         </div>
     )
 }
