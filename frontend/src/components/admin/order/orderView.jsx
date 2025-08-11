@@ -22,11 +22,11 @@ const OrderView = ({ orderId, onClose }) => {
             const orderData = res.payload
             debugger
             setOrder(orderData)
-            setFormData({
-              status: orderData.status || "",
-              paymentStatus: orderData.paymentStatus || "",
-              notes: orderData.notes || "",
-            })
+            // setFormData({
+            //   status: orderData.status || "",
+            //   paymentStatus: orderData.paymentStatus || "",
+            //   notes: orderData.notes || "",
+            // })
           }
         })
         

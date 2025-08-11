@@ -60,12 +60,12 @@ const ProductDetail = () => {
       <div className="min-h-screen flex items-center justify-center bg-white p-4">
         <div className="text-center max-w-md">
           <h2 className="text-2xl font-bold mb-4 text-black">Product not found</h2>
-          <button
+          {/* <button
             onClick={() => navigate("/products")}
             className="inline-block bg-black text-white font-semibold py-3 px-6 rounded-md hover:bg-gray-900 transition"
           >
             Back to Products
-          </button>
+          </button> */}
         </div>
       </div>
     )
@@ -74,13 +74,13 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen bg-white py-10 px-4 sm:px-6 lg:px-12">
       <div className="max-w-7xl mx-auto">
-        <button
+        {/* <button
           onClick={() => navigate("/products")}
           className="flex items-center gap-2 text-gray-600 hover:text-black mb-8 transition"
         >
           <ArrowLeft size={20} />
           Back to Products
-        </button>
+        </button> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left side: Product Images */}
@@ -179,7 +179,7 @@ const ProductDetail = () => {
                   className="flex-1 bg-white border border-black text-black py-4 rounded-md font-semibold flex items-center justify-center gap-3 hover:bg-gray-100 transition"
                 >
                   <FaBolt size={24} />
-                  Buy Now
+                  Book Now
                 </button>
               </div>
             )}

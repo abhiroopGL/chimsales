@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { X } from "lucide-react"
-import axios from "axios"
 import { showNotification } from "../../../redux/slices/notificationSlice"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchOrderById, updateOrder } from "../../../redux/slices/orderSlice"

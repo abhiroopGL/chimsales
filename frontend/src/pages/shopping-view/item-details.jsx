@@ -124,7 +124,7 @@ const ItemDetails = () => {
                                 onClick={handleBuyNow}
                                 className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-500 flex items-center justify-center gap-2 transition-colors"
                             >
-                                <FaBolt /> Buy Now
+                                <FaBolt /> Book Now
                             </motion.button>
                         </div>
                     </motion.div>

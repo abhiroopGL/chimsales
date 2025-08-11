@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { showNotification } from "../redux/slices/notificationSlice.js";
 import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../api/axios-instance.js";
 import { useDispatch } from "react-redux";
 
 const Contact = () => {
@@ -29,7 +29,7 @@ const Contact = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post("/api/contact", formData);
+            const response = await axiosInstance.post("/api/queries", formData);
             if (response.data.success) {
                 dispatch(
                     showNotification({

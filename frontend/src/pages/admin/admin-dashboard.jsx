@@ -21,6 +21,11 @@ import OrderEdit from "../../components/admin/order/orderEdit.jsx";
 import OrderView from "../../components/admin/order/orderView.jsx";
 import InvoiceForm from "../../components/admin/invoice/invoice-form.jsx"
 import InvoiceView from "../../components/admin/invoice/invoice-view.jsx"
+import QueryTab from "./dashboard-tabs/query-tab.jsx";
+import OrdersTab from "./dashboard-tabs/ordersTab.jsx";
+import UsersTab from "./dashboard-tabs/users.jsx";
+import ProductsTab from "./dashboard-tabs/productsTab.jsx";
+import InvoicesTab from "./dashboard-tabs/invoicesTab.jsx";
 
 const AdminDashboard = () => {
     const { token } = useSelector((state) => state.authorization.isAuthenticated)
@@ -68,11 +73,12 @@ const AdminDashboard = () => {
             //     axiosInstance.get("/api/invoices"),
             // ])
 
-            const [usersRes, productsRes, ordersRes, invoicesRes] = await Promise.all([
+            const [usersRes, productsRes, ordersRes, invoicesRes, queryRes] = await Promise.all([
                 await axiosInstance.get("/api/admin/users"),
                 await axiosInstance.get("/api/products/admin"),
                 await axiosInstance.get("/api/orders/admin"),
                 await axiosInstance.get("/api/invoice"),
+                await axiosInstance.get("/api/queries/admin"),
             ])
 
             setData({
@@ -91,7 +97,7 @@ const AdminDashboard = () => {
                 users: usersRes.data || [],
                 products: productsRes.data || [],
                 orders: ordersRes.data.orders || [],
-                queries: [],
+                queries: queryRes.data.queries || [],
                 invoices: invoicesRes.data.invoices || [],
             })
         } catch (error) {
@@ -274,572 +280,31 @@ const AdminDashboard = () => {
                 <div className="bg-white rounded-lg shadow-sm">
                     {/* Users Tab */}
                     {activeTab === "users" && (
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-semibold">Users Management</h2>
-                                <button className="btn-primary flex items-center gap-2">
-                                    <Plus size={18} />
-                                    Add User
-                                </button>
-                            </div>
-
-                            {/* Desktop Table */}
-                            <div className="hidden sm:block overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {data.users.map((user) => (
-                                            <tr key={user._id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="font-medium text-gray-900">{user.fullName}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.phoneNumber}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email || "N/A"}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === "admin" ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800"
-                                                            }`}
-                                                    >
-                                                        {user.role}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                    {new Date(user.createdAt).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <div className="flex gap-2">
-                                                        <button className="text-blue-600 hover:text-blue-800" aria-label={`View user ${user.fullName}`}>
-                                                            <Eye size={16} />
-                                                        </button>
-                                                        <button className="text-green-600 hover:text-green-800" aria-label={`Edit user ${user.fullName}`}>
-                                                            <Edit size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteItem("users", user._id)}
-                                                            className="text-red-600 hover:text-red-800"
-                                                            aria-label={`Delete user ${user.fullName}`}
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Mobile Card/List View */}
-                            <div className="sm:hidden space-y-4">
-                                {data.users.map((user) => (
-                                    <div key={user._id} className="bg-white shadow rounded p-4">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h3 className="font-semibold text-lg">{user.fullName}</h3>
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === "admin" ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800"
-                                                    }`}
-                                            >
-                                                {user.role}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-900 font-medium">{user.phoneNumber}</p>
-                                        <p className="text-sm text-gray-600 mb-1">{user.email || "N/A"}</p>
-                                        <p className="text-sm text-gray-600 mb-3">Joined: {new Date(user.createdAt).toLocaleDateString()}</p>
-
-                                        <div className="flex gap-4">
-                                            <button className="text-blue-600 hover:text-blue-800" aria-label={`View user ${user.fullName}`}>
-                                                <Eye size={20} />
-                                            </button>
-                                            <button className="text-green-600 hover:text-green-800" aria-label={`Edit user ${user.fullName}`}>
-                                                <Edit size={20} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteItem("users", user._id)}
-                                                className="text-red-600 hover:text-red-800"
-                                                aria-label={`Delete user ${user.fullName}`}
-                                            >
-                                                <Trash2 size={20} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <UsersTab data={data} />
                     )}
 
 
                     {/* Products Tab */}
                     {activeTab === "products" && (
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-semibold">Products Management</h2>
-                                <button className="btn-primary flex items-center gap-2">
-                                    <Plus size={18} />
-                                    Add Product
-                                </button>
-                            </div>
-
-                            {/* Desktop Table */}
-                            <div className="hidden sm:block overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {data.products.map((product) => (
-                                            <tr key={product._id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="font-medium text-gray-900">{product.name}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize">{product.category}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.price.toFixed(3)} KWD</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.stock}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.status === "published"
-                                                                ? "bg-green-100 text-green-800"
-                                                                : product.status === "draft"
-                                                                    ? "bg-yellow-100 text-yellow-800"
-                                                                    : "bg-red-100 text-red-800"
-                                                            }`}
-                                                    >
-                                                        {product.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <div className="flex gap-2">
-                                                        <button className="text-blue-600 hover:text-blue-800" aria-label={`View ${product.name}`}>
-                                                            <Eye size={16} />
-                                                        </button>
-                                                        <button className="text-green-600 hover:text-green-800" aria-label={`Edit ${product.name}`}>
-                                                            <Edit size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteItem("products", product._id)}
-                                                            className="text-red-600 hover:text-red-800"
-                                                            aria-label={`Delete ${product.name}`}
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Mobile Card/List View */}
-                            <div className="sm:hidden space-y-4">
-                                {data.products.map((product) => (
-                                    <div key={product._id} className="bg-white shadow rounded p-4">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h3 className="font-semibold text-lg">{product.name}</h3>
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.status === "published"
-                                                        ? "bg-green-100 text-green-800"
-                                                        : product.status === "draft"
-                                                            ? "bg-yellow-100 text-yellow-800"
-                                                            : "bg-red-100 text-red-800"
-                                                    }`}
-                                            >
-                                                {product.status}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-600 capitalize mb-1">Category: {product.category}</p>
-                                        <p className="text-sm text-gray-600 mb-1">Price: {product.price.toFixed(3)} KWD</p>
-                                        <p className="text-sm text-gray-600 mb-3">Stock: {product.stock}</p>
-
-                                        <div className="flex gap-4">
-                                            <button className="text-blue-600 hover:text-blue-800" aria-label={`View ${product.name}`}>
-                                                <Eye size={20} />
-                                            </button>
-                                            <button className="text-green-600 hover:text-green-800" aria-label={`Edit ${product.name}`}>
-                                                <Edit size={20} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteItem("products", product._id)}
-                                                className="text-red-600 hover:text-red-800"
-                                                aria-label={`Delete ${product.name}`}
-                                            >
-                                                <Trash2 size={20} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                       <ProductsTab data={data} />
                     )}
 
 
                     {/* Orders Tab */}
                     {activeTab === "orders" && (
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-semibold">Orders Management</h2>
-                            </div>
-
-                            {/* Desktop Table */}
-                            <div className="hidden sm:block overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {data.orders.map((order) => (
-                                            <tr key={order._id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="font-medium text-gray-900">{order.orderNumber}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{order.customer.fullName}</div>
-                                                    <div className="text-sm text-gray-500">{order.customer.phoneNumber}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.total.toFixed(3)} KWD</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === "completed"
-                                                                ? "bg-green-100 text-green-800"
-                                                                : order.status === "pending"
-                                                                    ? "bg-yellow-100 text-yellow-800"
-                                                                    : "bg-red-100 text-red-800"
-                                                            }`}
-                                                    >
-                                                        {order.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                    {new Date(order.createdAt).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            className="text-blue-600 hover:text-blue-800"
-                                                            aria-label={`View order ${order.orderNumber}`}
-                                                            onClick={() => {
-                                                                setSelectedItem(order);
-                                                                setShowOrderView(true);
-                                                            }}
-                                                        >
-                                                            <Eye size={16} />
-                                                        </button>
-                                                        <button
-                                                            className="text-green-600 hover:text-green-800"
-                                                            aria-label={`Edit order ${order.orderNumber}`}
-                                                            onClick={() => {
-                                                                setSelectedItem(order);
-                                                                setShowOrderEdit(true);
-                                                            }}
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Mobile Card/List View */}
-                            <div className="sm:hidden space-y-4">
-                                {data.orders.map((order) => (
-                                    <div key={order._id} className="bg-white shadow rounded p-4">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h3 className="font-semibold text-lg">Order #{order.orderNumber}</h3>
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === "completed"
-                                                        ? "bg-green-100 text-green-800"
-                                                        : order.status === "pending"
-                                                            ? "bg-yellow-100 text-yellow-800"
-                                                            : "bg-red-100 text-red-800"
-                                                    }`}
-                                            >
-                                                {order.status}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-900 font-medium">{order.customer.fullName}</p>
-                                        <p className="text-sm text-gray-500 mb-1">{order.customer.phoneNumber}</p>
-                                        <p className="text-sm text-gray-600 mb-1">Total: {order.total.toFixed(3)} KWD</p>
-                                        <p className="text-sm text-gray-600 mb-3">Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-
-                                        <div className="flex gap-4">
-                                            <button
-                                                className="text-blue-600 hover:text-blue-800"
-                                                aria-label={`View order ${order.orderNumber}`}
-                                                onClick={() => {
-                                                    setSelectedItem(order);
-                                                    setShowOrderView(true);
-                                                }}
-                                            >
-                                                <Eye size={20} />
-                                            </button>
-                                            <button
-                                                className="text-green-600 hover:text-green-800"
-                                                aria-label={`Edit order ${order.orderNumber}`}
-                                                onClick={() => {
-                                                    setSelectedItem(order);
-                                                    setShowOrderEdit(true);
-                                                }}
-                                            >
-                                                <Edit size={20} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <OrdersTab data={data} />
                     )}
 
 
                     {/* Queries Tab */}
                     {activeTab === "queries" && (
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-semibold">Customer Queries</h2>
-                            </div>
-
-                            {/* Desktop List */}
-                            <div className="hidden sm:block space-y-4">
-                                {data.queries.map((query) => (
-                                    <div key={query._id} className="border border-gray-200 rounded-lg p-4">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <div>
-                                                <h3 className="font-semibold text-lg">{query.fullName}</h3>
-                                                <p className="text-sm text-gray-600">{query.phoneNumber}</p>
-                                            </div>
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${query.status === "resolved"
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-yellow-100 text-yellow-800"
-                                                    }`}
-                                            >
-                                                {query.status}
-                                            </span>
-                                        </div>
-                                        <div className="mb-3">
-                                            <p className="font-medium text-sm text-gray-700">Subject: {query.subject}</p>
-                                            <p className="text-sm text-gray-600 mt-1">{query.message}</p>
-                                        </div>
-                                        <div className="flex justify-between items-center text-xs text-gray-500">
-                                            <span>{new Date(query.createdAt).toLocaleString()}</span>
-                                            <div className="flex gap-2">
-                                                <button className="text-blue-600 hover:text-blue-800">Reply</button>
-                                                <button className="text-green-600 hover:text-green-800">Mark Resolved</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Mobile List */}
-                            <div className="sm:hidden space-y-4">
-                                {data.queries.map((query) => (
-                                    <div key={query._id} className="border border-gray-200 rounded-lg p-4">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <div>
-                                                <h3 className="font-semibold text-lg">{query.fullName}</h3>
-                                                <p className="text-sm text-gray-600">{query.phoneNumber}</p>
-                                            </div>
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${query.status === "resolved"
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-yellow-100 text-yellow-800"
-                                                    }`}
-                                            >
-                                                {query.status}
-                                            </span>
-                                        </div>
-                                        <div className="mb-3">
-                                            <p className="font-medium text-sm text-gray-700">Subject: {query.subject}</p>
-                                            <p className="text-sm text-gray-600 mt-1">{query.message}</p>
-                                        </div>
-                                        <div className="flex justify-between items-center text-xs text-gray-500">
-                                            <span>{new Date(query.createdAt).toLocaleString()}</span>
-                                            <div className="flex gap-2">
-                                                <button className="text-blue-600 hover:text-blue-800">Reply</button>
-                                                <button className="text-green-600 hover:text-green-800">Mark Resolved</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <QueryTab data={data} />
                     )}
 
 
                     {/* Invoices Tab */}
                     {activeTab === "invoices" && (
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-semibold">Invoice Management</h2>
-                                <button
-                                    onClick={() => setShowInvoiceForm(true)}
-                                    className="btn-primary flex items-center gap-2"
-                                >
-                                    <Plus size={18} />
-                                    Create Invoice
-                                </button>
-                            </div>
-
-                            {/* Desktop Table */}
-                            <div className="hidden sm:block overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice #</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {data.invoices.map((invoice) => (
-                                            <tr key={invoice._id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="font-medium text-gray-900">{invoice.invoiceNumber}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{invoice.customer.fullName}</div>
-                                                    <div className="text-sm text-gray-500">{invoice.customer.phoneNumber}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.total.toFixed(3)} KWD</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.status === "paid"
-                                                                ? "bg-green-100 text-green-800"
-                                                                : invoice.status === "sent"
-                                                                    ? "bg-blue-100 text-blue-800"
-                                                                    : invoice.status === "overdue"
-                                                                        ? "bg-red-100 text-red-800"
-                                                                        : "bg-yellow-100 text-yellow-800"
-                                                            }`}
-                                                    >
-                                                        {invoice.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                    {new Date(invoice.dueDate).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedInvoice(invoice);
-                                                                setShowInvoiceView(true);
-                                                            }}
-                                                            className="text-blue-600 hover:text-blue-800"
-                                                            aria-label={`View invoice ${invoice.invoiceNumber}`}
-                                                        >
-                                                            <Eye size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedInvoice(invoice);
-                                                                setShowInvoiceForm(true);
-                                                            }}
-                                                            className="text-green-600 hover:text-green-800"
-                                                            aria-label={`Edit invoice ${invoice.invoiceNumber}`}
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteItem("invoices", invoice._id)}
-                                                            className="text-red-600 hover:text-red-800"
-                                                            aria-label={`Delete invoice ${invoice.invoiceNumber}`}
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Mobile Card/List View */}
-                            <div className="sm:hidden space-y-4">
-                                {data.invoices.map((invoice) => (
-                                    <div key={invoice._id} className="bg-white shadow rounded p-4">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h3 className="font-semibold text-lg">Invoice #{invoice.invoiceNumber}</h3>
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.status === "paid"
-                                                        ? "bg-green-100 text-green-800"
-                                                        : invoice.status === "sent"
-                                                            ? "bg-blue-100 text-blue-800"
-                                                            : invoice.status === "overdue"
-                                                                ? "bg-red-100 text-red-800"
-                                                                : "bg-yellow-100 text-yellow-800"
-                                                    }`}
-                                            >
-                                                {invoice.status}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-900 font-medium">{invoice.customer.fullName}</p>
-                                        <p className="text-sm text-gray-500 mb-1">{invoice.customer.phoneNumber}</p>
-                                        <p className="text-sm text-gray-600 mb-1">Amount: {invoice.total.toFixed(3)} KWD</p>
-                                        <p className="text-sm text-gray-600 mb-3">Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</p>
-
-                                        <div className="flex gap-4">
-                                            <button
-                                                className="text-blue-600 hover:text-blue-800"
-                                                aria-label={`View invoice ${invoice.invoiceNumber}`}
-                                                onClick={() => {
-                                                    setSelectedInvoice(invoice);
-                                                    setShowInvoiceView(true);
-                                                }}
-                                            >
-                                                <Eye size={20} />
-                                            </button>
-                                            <button
-                                                className="text-green-600 hover:text-green-800"
-                                                aria-label={`Edit invoice ${invoice.invoiceNumber}`}
-                                                onClick={() => {
-                                                    setSelectedInvoice(invoice);
-                                                    setShowInvoiceForm(true);
-                                                }}
-                                            >
-                                                <Edit size={20} />
-                                            </button>
-                                            <button
-                                                className="text-red-600 hover:text-red-800"
-                                                aria-label={`Delete invoice ${invoice.invoiceNumber}`}
-                                                onClick={() => handleDeleteItem("invoices", invoice._id)}
-                                            >
-                                                <Trash2 size={20} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <InvoicesTab data={data} />
                     )}
 
                 </div>

@@ -10,6 +10,7 @@ const cartRouter = require('./routes/cart_routes');
 const adminRouter = require('./routes/admin_routes');
 const orderRouter = require('./routes/order_routes');
 const invoiceRouter = require('./routes/invoice_routes');
+const queriesRouter = require('./routes/query_routes');
 const { authMiddleware } = require('./controllers/auth_controller')
 // const {checkForAuthentication} = require("./middlewares/auth");
 
@@ -38,6 +39,7 @@ app.use('/api/cart', authMiddleware, cartRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/orders", authMiddleware, orderRouter)
 app.use("/api/invoice", authMiddleware, invoiceRouter)
+app.use('/api/queries', queriesRouter);
 
 app.use((err, req, res, next) => {
     console.error('💥 Error caught:', err); // Full backtrace in console
