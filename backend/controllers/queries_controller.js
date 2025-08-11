@@ -26,14 +26,47 @@ const createNewQuery = async (req, res) => {
 
 const getAllQueries = async (req, res) => {
   try {
-    console.log('Fetching all queries');
-    const queries = await Query.find().sort({ createdAt: -1 });
-    res.json({ success: true, queries: queries });
+    const { page = 1, limit = 20, search = "", status = "", date = "" } = req.query;
+
+    const filters = {};
+
+    if (search) {
+      // Partial case-insensitive match on multiple fields: fullName, subject, phoneNumber, message
+      const regex = new RegExp(search, "i");
+      filters.$or = [
+        { fullName: regex },
+        { subject: regex },
+        { phoneNumber: regex },
+        { message: regex },
+      ];
+    }
+
+    if (status) {
+      filters.status = status;
+    }
+
+    if (date) {
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+      filters.createdAt = { $gte: startDate, $lte: endDate };
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const queries = await Query.find(filters)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    res.json({ success: true, queries });
   } catch (error) {
-    console.error('Error fetching queries:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("Error fetching queries:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 // Update status of a query (admin)
 const updateQueryStatus = async (req, res) => {

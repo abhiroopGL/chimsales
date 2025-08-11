@@ -90,13 +90,13 @@ const Navbar = () => {
                       <p className="text-sm text-gray-600 truncate">{user?.phone}</p>
                     </div>
                     <Link to="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile Settings</Link>
-                    <Link to="/invoices" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">My Invoices</Link>
+                    {/* <Link to="/invoices" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">My Invoices</Link> */}
                     {user?.role === "admin" && (
                       <Link to="/admin" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Admin Dashboard</Link>
                     )}
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                      className="w-full px-4 py-2 text-red-600 hover:bg-gray-100"
                     >
                       Logout
                     </button>
@@ -153,13 +153,13 @@ const Navbar = () => {
                   Profile Settings
                 </Link>
 
-                <Link
+                {/* <Link
                   to="/invoices"
                   className="text-gray-800 hover:text-black px-4 py-2 transition-all duration-200 rounded-md"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   My Invoices
-                </Link>
+                </Link> */}
 
                 {user?.role === "admin" && (
                   <Link
@@ -176,7 +176,7 @@ const Navbar = () => {
                     handleLogout()
                     setIsMenuOpen(false)
                   }}
-                  className="w-full text-left text-red-600 hover:bg-gray-100 px-4 py-2 rounded-md transition-all duration-200"
+                  className="w-full text-red-600 hover:bg-gray-100 px-4 py-2 rounded-md transition-all duration-200"
                 >
                   Logout
                 </button>
