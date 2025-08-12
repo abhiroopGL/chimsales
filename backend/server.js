@@ -11,7 +11,9 @@ const adminRouter = require('./routes/admin_routes');
 const orderRouter = require('./routes/order_routes');
 const invoiceRouter = require('./routes/invoice_routes');
 const queriesRouter = require('./routes/query_routes');
-const { authMiddleware } = require('./controllers/auth_controller')
+const bookingRouter = require('./routes/booking_routes');
+const { authMiddleware } = require('./controllers/auth_controller');
+const booking = require('./models/booking');
 // const {checkForAuthentication} = require("./middlewares/auth");
 
 const PORT = process.env.PORT || 8000;
@@ -37,9 +39,10 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/products', productRouter);
 app.use('/api/cart', authMiddleware, cartRouter);
 app.use("/api/admin", adminRouter);
-app.use("/api/orders", authMiddleware, orderRouter)
+app.use("/api/orders", orderRouter)
 app.use("/api/invoice", authMiddleware, invoiceRouter)
 app.use('/api/queries', queriesRouter);
+app.use('/api/booking', bookingRouter);
 
 app.use((err, req, res, next) => {
     console.error('💥 Error caught:', err); // Full backtrace in console

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { ShoppingCart, Menu, X, UserCircle, LogOut, Settings, FileText, Shield, ChevronDown } from "lucide-react"
+import { ShoppingCart, Menu, X, UserCircle, ChevronDown } from "lucide-react"
 import { logoutUser } from "../../redux/slices/authSlice"
 import { showNotification } from "../../redux/slices/notificationSlice"
 
@@ -63,7 +63,6 @@ const Navbar = () => {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            {isAuthenticated && (
               <Link to="/cart" className="relative text-gray-800 hover:text-black transition-all duration-300">
                 <ShoppingCart className="h-6 w-6" />
                 {cartItemsCount > 0 && (
@@ -72,9 +71,8 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
-            )}
 
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -103,14 +101,16 @@ const Navbar = () => {
                   </div>
                 )}
               </div>
-            ) : (
-              <Link
-                to="/login"
-                className="bg-black text-white px-5 py-2 rounded-md font-medium hover:bg-gray-900 transition shadow-md"
-              >
-                Login
-              </Link>
-            )}
+            ) 
+            // : (
+            //   <Link
+            //     to="/login"
+            //     className="bg-black text-white px-5 py-2 rounded-md font-medium hover:bg-gray-900 transition shadow-md"
+            //   >
+            //     Login
+            //   </Link>
+            // )
+            }
 
             {/* Mobile Menu Button */}
             <button

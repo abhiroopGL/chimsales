@@ -123,8 +123,8 @@ const OrdersTab = () => {
                             <tr key={order._id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-left">{order.orderNumber}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-left">
-                                    <div>{order.customer.fullName}</div>
-                                    <div className="text-sm text-gray-500">{order.customer.phoneNumber}</div>
+                                    <div>{order.customer?.fullName}</div>
+                                    <div className="text-sm text-gray-500">{order.customer?.phoneNumber}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-left">{order.total.toFixed(3)} KWD</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-left">
@@ -191,8 +191,8 @@ const OrdersTab = () => {
                             </span>
                         </div>
                         <div className="mb-1">
-                            <div className="font-medium">{order.customer.fullName}</div>
-                            <div className="text-sm text-gray-500">{order.customer.phoneNumber}</div>
+                            <div className="font-medium">{order.customer?.fullName}</div>
+                            <div className="text-sm text-gray-500">{order.customer?.phoneNumber}</div>
                         </div>
                         <div className="mb-1 text-sm text-gray-600 font-medium">
                             Total: {order.total.toFixed(3)} KWD

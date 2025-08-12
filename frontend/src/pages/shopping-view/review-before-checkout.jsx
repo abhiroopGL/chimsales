@@ -1,110 +1,126 @@
-import { useState } from "react"
-import { useSelector, useDispatch } from "react-redux"
-import { useNavigate } from "react-router-dom"
-import { showNotification } from "../../redux/slices/notificationSlice"
-import { MapPin, Phone, CreditCard, Truck } from "lucide-react"
-import { clearCart } from "../../redux/slices/cartSlice.jsx"
-import axiosInstance from "../../api/axios-instance"
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { showNotification } from "../../redux/slices/notificationSlice";
+import { MapPin, CreditCard, Truck } from "lucide-react";
+import { clearCart } from "../../redux/slices/cartSlice.jsx";
+import axiosInstance from "../../api/axios-instance";
 
 const Review = () => {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const { items } = useSelector((state) => state.cart)
-  const user = useSelector((state) => state.authorization.user)
-  const products = useSelector((state) => state.products.publicProducts)
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { items } = useSelector((state) => state.cart);
 
-  const cartItemsWithDetails = items.map(item => {
-    const product = products.find(p => p._id === item.product);
-    return {
-      ...item,
-      product, // This will include price, name, etc.
-    };
-  });
-  console.log("Cart items with details:", cartItemsWithDetails)
-  const total = cartItemsWithDetails.reduce(
-    (sum, item) => sum + (item.product?.price || 0) * item.quantity, 0
-  );
+  const cartItemsWithDetails = items;
 
-  const [loading, setLoading] = useState(false)
+  // Calculate total price
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const [loading, setLoading] = useState(false);
   const [orderData, setOrderData] = useState({
+    fullName: "",
+    phone: "",
+    email: "",
     deliveryAddress: {
-      street: user?.address?.street || "",
-      area: user?.address?.area || "",
-      governorate: user?.address?.governorate || "",
-      block: user?.address?.block || "",
-      building: user?.address?.building || "",
-      floor: user?.address?.floor || "",
-      apartment: user?.address?.apartment || "",
+      street: "",
+      area: "",
+      governorate: "",
+      block: "",
+      building: "",
+      floor: "",
+      apartment: "",
     },
     paymentMethod: "cash",
     notes: "",
-  })
-
-  console.log("Order data:", orderData);
+  });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     if (name.startsWith("deliveryAddress.")) {
-      const addressField = name.split(".")[1]
+      const addressField = name.split(".")[1];
       setOrderData((prev) => ({
         ...prev,
         deliveryAddress: {
           ...prev.deliveryAddress,
           [addressField]: value,
         },
-      }))
+      }));
     } else {
       setOrderData((prev) => ({
         ...prev,
         [name]: value,
-      }))
+      }));
     }
-  }
+  };
 
   const handlePlaceOrder = async () => {
-    setLoading(true)
+    // Basic validation for required fields
+    if (!orderData.fullName.trim()) {
+      dispatch(showNotification({ type: "error", message: "Full Name is required" }));
+      return;
+    }
+    if (!orderData.phone.trim()) {
+      dispatch(showNotification({ type: "error", message: "Phone is required" }));
+      return;
+    }
+    if (!orderData.deliveryAddress.governorate) {
+      dispatch(showNotification({ type: "error", message: "Governorate is required" }));
+      return;
+    }
+    if (!orderData.deliveryAddress.area.trim()) {
+      dispatch(showNotification({ type: "error", message: "Area is required" }));
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const orderPayload = {
-        items: cartItemsWithDetails.map((item) => ({
-          product: item.product._id,
+        fullName: orderData.fullName,
+        phone: orderData.phone,
+        email: orderData.email,
+        items: items.map((item) => ({
+          product: item.productId,
           quantity: item.quantity,
-          price: item.product.price,
+          price: item.price,
         })),
         total,
         deliveryAddress: orderData.deliveryAddress,
         paymentMethod: orderData.paymentMethod,
         notes: orderData.notes,
-      }
+      };
 
-      console.log("Placing order with payload:", orderPayload)
+      console.log("Placing order with payload:", orderPayload);
 
-      const response = await axiosInstance.post("/api/orders", orderPayload);
-      console.log("Order response:", response.data)
+      const response = await axiosInstance.post("/api/booking", orderPayload);
+      console.log("Order response:", response.data);
 
       if (response.data.success) {
-        // dispatch(clearCart())
-        toast.success("Order placed successfully!")
-        dispatch(showNotification({
-          type: "success",
-          message: "Order placed successfully!",
-        }))
-        navigate("/")
+        dispatch(clearCart());
+        dispatch(
+          showNotification({
+            type: "success",
+            message: "Book request placed successfully!",
+          })
+        );
+        navigate("/");
       }
     } catch (error) {
-      console.error("Error placing order:", error)
-      dispatch(showNotification({
-        type: "error",
-        message: error.response?.data?.message || "Failed to place order",
-      }))
+      console.error("Error placing book request:", error);
+      dispatch(
+        showNotification({
+          type: "error",
+          message: error.response?.data?.message || "Failed to place book request",
+        })
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (items.length === 0) {
-    navigate("/cart")
-    return null
+    navigate("/cart");
+    return null;
   }
 
   return (
@@ -112,10 +128,10 @@ const Review = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-black sm:text-2xl xs:text-xl">
-            Review Your Order
+            Review Your Book Request
           </h1>
           <p className="text-gray-600">
-            Please review your order details before placing your order
+            Please provide your delivery details before submitting your book request
           </p>
         </div>
 
@@ -125,24 +141,48 @@ const Review = () => {
             {/* Customer Information */}
             <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-300">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-black">
-                <Phone size={20} />
                 Customer Information
               </h2>
-              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-800">
+              <div className="grid md:grid-cols-3 gap-4 text-gray-900">
                 <div>
-                  <span className="font-medium">Name:</span>
-                  <span className="ml-2">{user?.fullName}</span>
+                  <label className="block text-sm font-medium mb-2">
+                    Full Name <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={orderData.fullName}
+                    onChange={handleInputChange}
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
+                    required
+                    placeholder="Your full name"
+                  />
                 </div>
                 <div>
-                  <span className="font-medium">Phone:</span>
-                  <span className="ml-2">{user?.phoneNumber}</span>
+                  <label className="block text-sm font-medium mb-2">
+                    Phone <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={orderData.phone}
+                    onChange={handleInputChange}
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
+                    required
+                    placeholder="Your phone number"
+                  />
                 </div>
-                {user?.email && (
-                  <div>
-                    <span className="font-medium">Email:</span>
-                    <span className="ml-2">{user.email}</span>
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={orderData.email}
+                    onChange={handleInputChange}
+                    className="input-field bg-white border border-gray-400 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-gray-700 w-full"
+                    placeholder="Your email (optional)"
+                  />
+                </div>
               </div>
             </div>
 
@@ -155,7 +195,9 @@ const Review = () => {
               <div className="grid md:grid-cols-2 gap-4 text-gray-900">
                 {/* governorate */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Governorate *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Governorate <span className="text-red-600">*</span>
+                  </label>
                   <select
                     name="deliveryAddress.governorate"
                     value={orderData.deliveryAddress.governorate}
@@ -174,7 +216,9 @@ const Review = () => {
                 </div>
                 {/* area */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Area *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Area <span className="text-red-600">*</span>
+                  </label>
                   <input
                     type="text"
                     name="deliveryAddress.area"
@@ -299,12 +343,12 @@ const Review = () => {
               {/* Items */}
               <div className="space-y-3 mb-6 max-h-[400px] overflow-y-auto">
                 {cartItemsWithDetails.map((item) => (
-                  <div key={item.product._id} className="flex justify-between items-center text-sm">
+                  <div key={item.productId} className="flex justify-between items-center text-sm">
                     <div className="flex-1">
-                      <p className="font-medium">{item.product.name}</p>
+                      <p className="font-medium">{item.name}</p>
                       <p className="text-gray-600">Qty: {item.quantity}</p>
                     </div>
-                    <span className="font-medium">{(item.product.price * item.quantity).toFixed(3)} KWD</span>
+                    <span className="font-medium">{(item.price * item.quantity).toFixed(3)} KWD</span>
                   </div>
                 ))}
               </div>
@@ -336,17 +380,23 @@ const Review = () => {
 
               <button
                 onClick={handlePlaceOrder}
-                disabled={loading || !orderData.deliveryAddress.governorate || !orderData.deliveryAddress.area}
+                disabled={
+                  loading ||
+                  !orderData.fullName.trim() ||
+                  !orderData.phone.trim() ||
+                  !orderData.deliveryAddress.governorate ||
+                  !orderData.deliveryAddress.area.trim()
+                }
                 className="w-full bg-black text-white font-semibold py-3 rounded-md hover:bg-gray-900 disabled:opacity-50 transition"
               >
-                {loading ? "Placing Order..." : "Place Order"}
+                {loading ? "Placing Request..." : "Place Book Request"}
               </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Review
+export default Review;

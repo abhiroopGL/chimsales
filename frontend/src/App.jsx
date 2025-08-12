@@ -18,7 +18,6 @@ import Cart from "./pages/shopping-view/cart.jsx";
 import Navbar from './components/common/Navbar.jsx';
 import Products from "./pages/shopping-view/products.jsx";
 import ProductDetail from './pages/shopping-view/product-details.jsx';
-import { fetchCart } from './redux/slices/cartSlice.jsx';
 import { fetchPublicProducts } from './redux/slices/productSlice.jsx';
 
 function App() {
@@ -29,12 +28,6 @@ function App() {
         dispatch(checkAuth());
         dispatch(fetchPublicProducts());
     }, []);
-
-    useEffect(() => {
-        if (isAuthenticated && user) {
-            dispatch(fetchCart());
-        }
-    }, [isAuthenticated, user, dispatch]);
 
   return (
       <>
@@ -47,7 +40,7 @@ function App() {
               <Route path="/" element={<UserDashboard/>}/>
               {/* <Route path="/item/:id" element={<ItemDetails />} /> */}
               <Route path="/item/:id" element={<ProductDetail />} />
-              <Route path="review" element={<ReviewBeforeCheckout/>} />
+              <Route path="/review" element={<ReviewBeforeCheckout/>} />
               <Route path="/*" element={<AdminRoutes />} />
               <Route path="*" element={<NotFound/>}/>
               <Route path="/profile" element={<ProfilePage />} />

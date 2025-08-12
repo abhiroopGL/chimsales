@@ -14,7 +14,6 @@ const ProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { isAuthenticated } = useSelector((state) => state.authorization)
 
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -29,23 +28,26 @@ const ProductDetail = () => {
   }, [dispatch, id])
 
   const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      dispatch(
-        showNotification({
-          type: "error",
-          message: "Please login to add items to cart",
-        })
-      )
-      return
-    }
-    dispatch(addToCart(product._id))
+    dispatch(addToCart({ product, quantity }));
     dispatch(
       showNotification({
         type: "success",
         message: `Added ${quantity} item(s) to cart!`,
       })
-    )
-  }
+    );
+  };
+
+  const handleBookNow = () => {
+    dispatch(addToCart({ product, quantity: 1 }));
+    dispatch(
+      showNotification({
+        type: "success",
+        message: `Added ${quantity} item(s) to cart!`,
+      })
+    );
+    navigate("/cart");
+  };
+
 
   if (loading) {
     return (
@@ -175,7 +177,7 @@ const ProductDetail = () => {
                 </button>
 
                 <button
-                  onClick={() => alert("Buy Now feature coming soon!")}
+                  onClick={handleBookNow}
                   className="flex-1 bg-white border border-black text-black py-4 rounded-md font-semibold flex items-center justify-center gap-3 hover:bg-gray-100 transition"
                 >
                   <FaBolt size={24} />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Users, Package, FileText, MessageSquare, ShoppingCart, DollarSign
+  Users, Package, FileText, MessageSquare, ShoppingCart, DollarSign, CalendarDays
 } from "lucide-react";
 
 import UsersTab from "./dashboard-tabs/users.jsx";
@@ -8,6 +8,7 @@ import ProductsTab from "./dashboard-tabs/productsTab.jsx";
 import OrdersTab from "./dashboard-tabs/ordersTab.jsx";
 import QueryTab from "./dashboard-tabs/query-tab.jsx";
 import InvoicesTab from "./dashboard-tabs/invoicesTab.jsx";
+import BookingsTab from "./dashboard-tabs/bookingsTab.jsx"; // new import
 
 const StatCard = ({ title, value, icon: Icon, color, change }) => (
   <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -69,6 +70,7 @@ const AdminDashboard = () => {
         <div className="flex flex-wrap gap-2 mb-6">
           <TabButton id="users" label="Users" icon={Users} activeTab={activeTab} setActiveTab={setActiveTab} />
           <TabButton id="products" label="Products" icon={Package} activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton id="bookings" label="Bookings" icon={CalendarDays} activeTab={activeTab} setActiveTab={setActiveTab} />
           <TabButton id="orders" label="Orders" icon={FileText} activeTab={activeTab} setActiveTab={setActiveTab} />
           <TabButton id="queries" label="Queries" icon={MessageSquare} activeTab={activeTab} setActiveTab={setActiveTab} />
           <TabButton id="invoices" label="Invoices" icon={FileText} activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -80,6 +82,7 @@ const AdminDashboard = () => {
           {activeTab === "orders" && <OrdersTab />}
           {activeTab === "queries" && <QueryTab />}
           {activeTab === "invoices" && <InvoicesTab />}
+          {activeTab === "bookings" && <BookingsTab />} {/* render bookings tab */}
         </div>
       </div>
     </div>

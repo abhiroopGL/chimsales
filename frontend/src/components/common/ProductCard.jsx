@@ -8,23 +8,14 @@ import { showNotification } from "../../redux/slices/notificationSlice.js";
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch()
-    const { isAuthenticated } = useSelector((state) => state.authorization.isAuthenticated)
 
     const handleAddToCart = (e) => {
         e.preventDefault()
-        if (!isAuthenticated) {
-            dispatch(showNotification({
-                message: 'Please login to add items to cart',
-                type: 'error'
-            }));
-            return
-        }
-        dispatch(addToCart(product._id))
+        dispatch(addToCart({ product, quantity: 1 }))
         dispatch(showNotification({
             message: 'Added to cart!',
             type: 'success'
-        }));
-
+        }))
     }
 
     return (

@@ -1,45 +1,45 @@
-import { useSelector, useDispatch } from "react-redux"
-import { Link, useNavigate } from "react-router-dom"
-import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react"
-import { clearCart, removeFromCart, updateCart } from "../../redux/slices/cartSlice.jsx"
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { removeFromCart, updateQuantity, clearCart } from '../../redux/slices/cartSlice';
+import { showNotification } from '../../redux/slices/notificationSlice';
+import BookingForm from '../../components/dashboard/BookingForm.jsx';
+import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-    const { items } = useSelector((state) => state.cart)
-    const products = useSelector((state) => state.products.publicProducts)
+    const [showBookingForm, setShowBookingForm] = useState(false);
+    const dispatch = useDispatch();
+    const { items } = useSelector((state) => state.cart);
+    const navigate = useNavigate();
 
-    const cartItemsWithDetails = items.map(item => {
-        const product = products.find(p => p._id === item.product)
-        return { ...item, product }
-    })
+    const totalAmount = items.reduce((total, item) => total + (item.price * item.quantity), 0);
 
-    const total = cartItemsWithDetails.reduce(
-        (sum, item) => sum + (item.product?.price || 0) * item.quantity,
-        0
-    )
-
-    const handleUpdateQuantity = (productId, newQuantity) => {
-        if (newQuantity === 0) {
-            dispatch(removeFromCart(productId))
-        } else {
-            dispatch(updateCart({ productId, quantity: newQuantity }))
-        }
-    }
+    const handleQuantityChange = (productId, quantity) => {
+        if (quantity < 1) return;
+        dispatch(updateQuantity({ productId, quantity }));
+    };
 
     const handleRemoveItem = (productId) => {
-        dispatch(removeFromCart(productId))
-    }
+        dispatch(removeFromCart(productId));
+    };
 
     const handleClearCart = () => {
-        dispatch(clearCart())
-    }
+        dispatch(clearCart());
+    };
 
-    const handleCheckout = () => {
-        navigate("/review")
-    }
+    const handleOrderSubmit = (customerInfo) => {
+        dispatch(
+            showNotification({
+                type: 'success',
+                message: 'Order request submitted successfully! Our team will contact you shortly.',
+            })
+        );
+        dispatch(clearCart());
+        setShowBookingForm(false);
+    };
 
-    if (cartItemsWithDetails.length === 0) {
+    if (items.length === 0) {
         return (
             <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
                 <div className="max-w-md text-center">
@@ -54,7 +54,7 @@ const Cart = () => {
                     </Link>
                 </div>
             </div>
-        )
+        );
     }
 
     return (
@@ -73,29 +73,25 @@ const Cart = () => {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Cart Items */}
                     <div className="lg:col-span-2 space-y-4">
-                        {cartItemsWithDetails.map((item) => (
+                        {items.map((item) => (
                             <div
-                                key={item.product._id}
+                                key={item.productId}
                                 className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-300 flex flex-col sm:flex-row items-center gap-4"
                             >
                                 <img
-                                    src={item.product.images?.[0] || "/placeholder.svg?height=100&width=100"}
-                                    alt={item.product.name}
+                                    src={item.image || '/placeholder.svg?height=100&width=100'}
+                                    alt={item.name}
                                     className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
                                 />
                                 <div className="flex-1 w-full sm:w-auto">
-                                    <Link
-                                        to={`/item/${item.product._id}`}
-                                        className="font-semibold text-lg text-black hover:underline hover:text-gray-700 transition-colors duration-200"
-                                    >
-                                        {item.product.name}
-                                    </Link>
-                                    <p className="text-gray-600 text-sm">{item.product.category}</p>
-                                    <p className="text-lg font-bold mt-2">{item.product.price.toFixed(3)} KWD</p>
+                                    <h3 className="font-semibold text-lg text-black">{item.name}</h3>
+                                    <p className="text-gray-600 text-sm">{/* You can add category if you have it here */}</p>
+                                    <p className="text-lg font-bold mt-2">{item.price.toFixed(3)} KWD</p>
                                 </div>
+
                                 <div className="flex items-center gap-3">
                                     <button
-                                        onClick={() => handleUpdateQuantity(item.product._id, item.quantity - 1)}
+                                        onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
                                         className="w-8 h-8 rounded-full border border-gray-400 flex items-center justify-center hover:border-black transition"
                                         aria-label="Decrease quantity"
                                     >
@@ -103,15 +99,16 @@ const Cart = () => {
                                     </button>
                                     <span className="w-8 text-center font-medium">{item.quantity}</span>
                                     <button
-                                        onClick={() => handleUpdateQuantity(item.product._id, item.quantity + 1)}
+                                        onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
                                         className="w-8 h-8 rounded-full border border-gray-400 flex items-center justify-center hover:border-black transition"
                                         aria-label="Increase quantity"
                                     >
                                         <Plus size={14} />
                                     </button>
                                 </div>
+
                                 <button
-                                    onClick={() => handleRemoveItem(item.product._id)}
+                                    onClick={() => handleRemoveItem(item.productId)}
                                     className="text-red-600 hover:text-red-800 p-2 transition"
                                     aria-label="Remove item"
                                 >
@@ -128,10 +125,9 @@ const Cart = () => {
                             <div className="space-y-3 mb-6 max-h-[400px] overflow-y-auto">
                                 <div className="flex justify-between text-sm">
                                     <span>
-                                        Subtotal ({cartItemsWithDetails.reduce((sum, item) => sum + item.quantity, 0)}{" "}
-                                        items)
+                                        Subtotal ({items.reduce((sum, item) => sum + item.quantity, 0)} items)
                                     </span>
-                                    <span>{total.toFixed(3)} KWD</span>
+                                    <span>{totalAmount.toFixed(3)} KWD</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span>Shipping</span>
@@ -140,15 +136,15 @@ const Cart = () => {
                                 <div className="border-t pt-3">
                                     <div className="flex justify-between font-bold text-lg">
                                         <span>Total</span>
-                                        <span>{total.toFixed(3)} KWD</span>
+                                        <span>{totalAmount.toFixed(3)} KWD</span>
                                     </div>
                                 </div>
                             </div>
                             <button
-                                onClick={handleCheckout}
+                                onClick={() => navigate('/review')}
                                 className="w-full bg-black text-white font-semibold py-3 rounded-md hover:bg-gray-900 transition"
                             >
-                                Proceed to Checkout
+                                Place Order Request
                             </button>
                             <Link
                                 to="/products"
@@ -160,8 +156,24 @@ const Cart = () => {
                     </div>
                 </div>
             </div>
-        </div>
-    )
-}
 
-export default Cart
+            {/* Booking Form Modal */}
+            {showBookingForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                        <h3 className="text-xl font-semibold mb-4">Enter Your Details</h3>
+                        <BookingForm onSubmit={handleOrderSubmit} />
+                        <button
+                            onClick={() => setShowBookingForm(false)}
+                            className="mt-4 text-gray-600 hover:text-gray-800"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default Cart;
