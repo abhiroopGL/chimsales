@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 const statusColors = {
   Pending: "bg-yellow-100 text-yellow-800",
   "In Process": "bg-blue-100 text-blue-800",
-  Completed: "bg-green-100 text-green-800",
+  Resolved: "bg-green-100 text-green-800",
 };
 
 const QueryView = ({ query, onClose, onStatusChange, updatingId }) => {
@@ -63,7 +63,7 @@ const QueryView = ({ query, onClose, onStatusChange, updatingId }) => {
             >
               <option value="Pending">Pending</option>
               <option value="In Process">In Process</option>
-              <option value="Completed">Completed</option>
+              <option value="Resolved">Resolved</option>
             </select>
             <span
               className={`inline-flex mt-2 px-2 py-1 text-xs font-semibold rounded-full ${

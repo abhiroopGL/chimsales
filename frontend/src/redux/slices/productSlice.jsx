@@ -39,13 +39,15 @@ export const fetchProductById = createAsyncThunk(
 // Create a new product (for Admin or Manager)
 export const createProduct = createAsyncThunk(
     "/products/create",
-    async (productData) => {
+    async (productData, { dispatch }) => {
         const response = await axiosInstance.post("/api/products/create", productData,
             {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
+        await dispatch(fetchAdminProducts());
+
         return response.data;
     }
 );
@@ -71,11 +73,16 @@ export const deleteProduct = createAsyncThunk(
 
 export const restoreProduct = createAsyncThunk(
     "/products/restore",
-    async (productId) => {
+    async (productId, { dispatch }) => {
         const response = await axiosInstance.patch(`/api/products/restore/${productId}`);
+
+        // Refresh the product list after successful restore
+        await dispatch(fetchAdminProducts());
+
         return response.data;
     }
 );
+
 
 
 const productSlice = createSlice({
@@ -123,7 +130,6 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(createProduct.fulfilled, (state, action) => {
-                state.adminProducts.push(action.payload);
                 state.isLoading = false;
             })
             .addCase(createProduct.rejected, (state, action) => {
@@ -170,11 +176,12 @@ const productSlice = createSlice({
                 state.isLoading = true;
             })
             .addCase(restoreProduct.fulfilled, (state, action) => {
-                const index = state.adminProducts.findIndex(p => p._id === action.payload.id);
-                if (index !== -1) {
-                    state.adminProducts[index].deleted = false;
-                    state.adminProducts[index].deletedAt = null;
-                }
+                // const index = state.adminProducts.findIndex(p => p._id === action.payload.id);
+                // if (index !== -1) {
+                //     state.adminProducts[index].deleted = false;
+                //     state.adminProducts[index].deletedAt = null;
+                //     state.adminProducts[index].status = "draft";
+                // }
                 state.isLoading = false;
             });
 

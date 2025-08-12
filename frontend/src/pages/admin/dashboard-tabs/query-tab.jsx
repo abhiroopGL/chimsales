@@ -7,7 +7,7 @@ import SearchBar from "../../../components/admin/searchBar.jsx";
 const statusColors = {
     Pending: "bg-yellow-100 text-yellow-800",
     "In Process": "bg-blue-100 text-blue-800",
-    Completed: "bg-green-100 text-green-800",
+    Resolved: "bg-green-100 text-green-800",
 };
 
 // Helper to truncate long text with ellipsis after n chars
@@ -113,7 +113,7 @@ const QueryTab = () => {
                         <option value="">All Status</option>
                         <option value="Pending">Pending</option>
                         <option value="In Process">In Process</option>
-                        <option value="Completed">Completed</option>
+                        <option value="Resolved">Resolved</option>
                     </select>
                 </div>
             </div>

@@ -94,7 +94,7 @@ const ProductForm = ({ initialData = null }) => {
                         message: 'Product updated successfully',
                         type: 'success'
                     }));
-                    navigate("/admin/products");
+                    navigate("/admin");
                 } else {
                     dispatch(showNotification({
                         message: res.message || 'Failed to update product',
@@ -102,13 +102,13 @@ const ProductForm = ({ initialData = null }) => {
                     }));
                 }
             } else {
-                const res = await dispatch(createProduct(data)).unwrap();
+                const res = await dispatch(createProduct(data, dispatch)).unwrap();
                 if (res.success) {
                     dispatch(showNotification({
                         message: 'Product created successfully',
                         type: 'success'
                     }));
-                    navigate("/admin/products");
+                    navigate("/admin");
                 } else {
                     dispatch(showNotification({
                         message: res.message || 'Failed to create product',

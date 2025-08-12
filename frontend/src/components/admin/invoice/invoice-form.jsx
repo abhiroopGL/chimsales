@@ -125,6 +125,7 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
           productName: selectedProduct.name,
           description: selectedProduct.description,
           unitPrice: selectedProduct.price,
+          total: selectedProduct.price * newItems[index].quantity,
         }
       }
     }
@@ -163,25 +164,37 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    debugger
+    e.preventDefault();
+
+    const cleanedData = {
+      ...formData,
+      items: formData.items.map(item => ({
+        product: item.product,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        total: item.total
+      }))
+    };
+
     try {
       if (invoice) {
-        await dispatch(updateInvoice({ id: invoice._id, data: formData })).unwrap()
-        showNotification("Invoice updated successfully!", "success")
+        await dispatch(updateInvoice({ id: invoice._id, data: cleanedData })).unwrap();
+        dispatch(showNotification({message: "Invoice updated successfully!", type: "success"}));
       } else {
-        await dispatch(createInvoice(formData)).unwrap()
-        showNotification("Invoice created successfully!", "success")
+        await dispatch(createInvoice(cleanedData)).unwrap();
+        dispatch(showNotification({message: "Invoice created successfully!", type: "success"}));
       }
-      onSuccess?.()
-      onClose()
+      onSuccess?.();
+      onClose();
     } catch (error) {
-      showNotification(error || "Failed to save invoice", "error")
+      dispatch(showNotification({message: error || "Failed to save invoice", type: "error"}));
     }
-  }
+  };
+
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="invoice-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
           <h2 className="text-2xl font-bold">{invoice ? "Edit Invoice" : "Create New Invoice"}</h2>
@@ -191,28 +204,28 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
-        {/* Invoice Header */}
-        <div className="grid md:grid-cols-2 gap-6">
+          {/* Invoice Header */}
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
-                <label className="block text-sm font-medium mb-2">Invoice Number *</label>
-                <div className="input-field bg-gray-100 text-base font-mono break-all">
-                    {formData.invoiceNumber || <span className="text-gray-400">Not assigned</span>}
-                </div>
+              <label className="block text-sm font-medium mb-2">Invoice Number *</label>
+              <div className="input-field bg-gray-100 text-base font-mono break-all">
+                {formData.invoiceNumber || <span className="text-gray-400">Not assigned</span>}
+              </div>
             </div>
             <div>
-                <label className="block text-sm font-medium mb-2">Due Date *</label>
-                <input
-                    type="date"
-                    name="dueDate"
-                    value={formData.dueDate}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    required
-                />
+              <label className="block text-sm font-medium mb-2">Due Date *</label>
+              <input
+                type="date"
+                name="dueDate"
+                value={formData.dueDate}
+                onChange={handleInputChange}
+                className="input-field"
+                required
+              />
             </div>
-        </div>
+          </div>
 
-        {/* Customer Information */}
+          {/* Customer Information */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Customer Information</h3>
             <div className="grid md:grid-cols-2 gap-6">

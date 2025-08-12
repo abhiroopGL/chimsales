@@ -1,53 +1,59 @@
-import { useState, useEffect } from "react";
-import { Eye, Edit, Trash2, Plus } from "lucide-react";
-import axios from "axios";
-import useAppNavigation from '../../../hooks/useAppNavigation.jsx'
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Eye, Edit, Trash2, Plus, RotateCcw } from "lucide-react";
+import {
+    fetchAdminProducts,
+    deleteProduct,
+    restoreProduct,
+    setFilter
+} from "../../../redux/slices/productSlice.jsx";
+import { showNotification } from "../../../redux/slices/notificationSlice.js";
+import useAppNavigation from "../../../hooks/useAppNavigation.jsx";
+import FilterTabs from "../../../components/admin/Products/filter-tabs.jsx";
 
-const truncate = (text, maxLength = 30) => {
-    if (!text) return "";
-    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-};
 
 const ProductsTab = () => {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const dispatch = useDispatch();
     const { goToEditProduct, goToAddNewProduct } = useAppNavigation();
 
+    const { adminProducts: products, isLoading: loading, filter } = useSelector(
+        (state) => state.products
+    );
 
-    // Fetch products from backend
-    const fetchProducts = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await axios.get("/api/products/admin");
-            if (response.data) {
-                setProducts(response.data);
-            } else {
-                setError("Failed to fetch products");
-                console.log("Error fetching products:", response);
-            }
-        } catch (err) {
-            setError("Server error while fetching products");
-        } finally {
-            setLoading(false);
-        }
+    const truncate = (text, maxLength = 30) => {
+        if (!text) return "";
+        return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
     };
 
     useEffect(() => {
-        fetchProducts();
-    }, []);
+        dispatch(fetchAdminProducts());
+    }, [dispatch]);
 
-    const handleDeleteItem = async (id) => {
+    const handleDelete = (id) => {
         if (!window.confirm("Are you sure you want to delete this product?")) return;
-        try {
-            await axios.delete(`/api/products/${id}`);
-            // Refetch products after delete
-            fetchProducts();
-        } catch (err) {
-            alert("Failed to delete product");
-        }
+        dispatch(deleteProduct(id)).then(() => {
+            dispatch(showNotification({ message: "Product deleted successfully", type: "success" }));
+        });
     };
+
+    const handleRestore = (id) => {
+        dispatch(restoreProduct(id, dispatch)).then(() => {
+            dispatch(showNotification({ message: "Product restored successfully", type: "success" }));
+        });
+    };
+
+    const filteredItems = products.filter((product) => {
+        switch (filter) {
+            case "published":
+                return product.status === "published" && !product.deleted;
+            case "draft":
+                return product.status === "draft" && !product.deleted;
+            case "archived":
+                return product.deleted;
+            default:
+                return !product.deleted;
+        }
+    });
 
     if (loading) {
         return (
@@ -56,53 +62,37 @@ const ProductsTab = () => {
             </div>
         );
     }
-
-    if (error) {
-        return (
-            <div className="p-6 text-center text-red-600">
-                <p>{error}</p>
-            </div>
-        );
-    }
-
+    debugger
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold">Products Management</h2>
-                <button className="btn-primary flex items-center gap-2"
-                    onClick={goToAddNewProduct}>
+                <button
+                    className="btn-primary flex items-center gap-2"
+                    onClick={goToAddNewProduct}
+                >
                     <Plus size={18} />
                     Add Product
                 </button>
             </div>
 
+            <FilterTabs onChange={(newFilter) => dispatch(setFilter(newFilter))} />
+
             {/* Desktop Table */}
-            <div className="hidden sm:block overflow-x-auto">
+            <div className="hidden sm:block overflow-x-auto mt-4">
                 <table className="w-full">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Product
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Category
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Price
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Stock
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Actions
-                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {products.map((product) => (
+                        {filteredItems.map((product) => (
                             <tr key={product._id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 text-left font-medium text-gray-900">
                                     {truncate(product.name, 30)}
@@ -119,10 +109,10 @@ const ProductsTab = () => {
                                 <td className="px-6 py-4 text-left">
                                     <span
                                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.status === "published"
-                                                ? "bg-green-100 text-green-800"
-                                                : product.status === "draft"
-                                                    ? "bg-yellow-100 text-yellow-800"
-                                                    : "bg-red-100 text-red-800"
+                                            ? "bg-green-100 text-green-800"
+                                            : product.status === "draft"
+                                                ? "bg-yellow-100 text-yellow-800"
+                                                : "bg-red-100 text-red-800"
                                             }`}
                                     >
                                         {product.status}
@@ -130,15 +120,6 @@ const ProductsTab = () => {
                                 </td>
                                 <td className="px-6 py-4 text-left text-sm font-medium">
                                     <div className="flex gap-2">
-                                        {/* <button
-                                            className="text-blue-600 hover:text-blue-800"
-                                            aria-label={`View ${product.name}`}
-                                            onClick={() => {
-                                                // Add view product logic here
-                                            }}
-                                        >
-                                            <Eye size={16} />
-                                        </button> */}
                                         <button
                                             className="text-green-600 hover:text-green-800"
                                             aria-label={`Edit ${product.name}`}
@@ -146,13 +127,23 @@ const ProductsTab = () => {
                                         >
                                             <Edit size={16} />
                                         </button>
-                                        <button
-                                            onClick={() => handleDeleteItem(product._id)}
-                                            className="text-red-600 hover:text-red-800"
-                                            aria-label={`Delete ${product.name}`}
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {filter === "archived" ? (
+                                            <button
+                                                onClick={() => handleRestore(product._id)}
+                                                className="text-blue-600 hover:text-blue-800"
+                                                aria-label={`Restore ${product.name}`}
+                                            >
+                                                <RotateCcw size={16} />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleDelete(product._id)}
+                                                className="text-red-600 hover:text-red-800"
+                                                aria-label={`Delete ${product.name}`}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
@@ -162,17 +153,17 @@ const ProductsTab = () => {
             </div>
 
             {/* Mobile Card/List View */}
-            <div className="sm:hidden space-y-4">
-                {products.map((product) => (
+            <div className="sm:hidden space-y-4 mt-4">
+                {filteredItems.map((product) => (
                     <div key={product._id} className="bg-white shadow rounded p-4">
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="font-semibold text-lg">{truncate(product.name, 30)}</h3>
                             <span
                                 className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.status === "published"
-                                        ? "bg-green-100 text-green-800"
-                                        : product.status === "draft"
-                                            ? "bg-yellow-100 text-yellow-800"
-                                            : "bg-red-100 text-red-800"
+                                    ? "bg-green-100 text-green-800"
+                                    : product.status === "draft"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
                                     }`}
                             >
                                 {product.status}
@@ -186,24 +177,29 @@ const ProductsTab = () => {
 
                         <div className="flex gap-4">
                             <button
-                                className="text-blue-600 hover:text-blue-800"
-                                aria-label={`View ${product.name}`}
-                            >
-                                <Eye size={20} />
-                            </button>
-                            <button
                                 className="text-green-600 hover:text-green-800"
                                 aria-label={`Edit ${product.name}`}
+                                onClick={() => goToEditProduct(product._id)}
                             >
                                 <Edit size={20} />
                             </button>
-                            <button
-                                onClick={() => handleDeleteItem(product._id)}
-                                className="text-red-600 hover:text-red-800"
-                                aria-label={`Delete ${product.name}`}
-                            >
-                                <Trash2 size={20} />
-                            </button>
+                            {filter === "archived" ? (
+                                <button
+                                    onClick={() => handleRestore(product._id)}
+                                    className="text-blue-600 hover:text-blue-800"
+                                    aria-label={`Restore ${product.name}`}
+                                >
+                                    <RotateCcw size={20} />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => handleDelete(product._id)}
+                                    className="text-red-600 hover:text-red-800"
+                                    aria-label={`Delete ${product.name}`}
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

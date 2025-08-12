@@ -147,7 +147,7 @@ const InvoicesTab = () => {
                         {invoices.map((invoice) => (
                             <tr key={invoice._id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 text-left font-medium text-gray-900">
-                                    {truncate(invoice.invoiceNumber, 25)}
+                                    {truncate(invoice.invoiceNumber, 50)}
                                 </td>
                                 <td className="px-6 py-4 text-left">
                                     <div className="text-sm text-gray-900">
