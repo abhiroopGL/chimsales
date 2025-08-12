@@ -78,40 +78,62 @@ const getSingleInvoice = async (req, res) => {
 }
 
 
+// controllers/invoiceController.js
 const createNewInvoice = async (req, res) => {
   try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation error",
-        errors: errors.array(),
-      })
-    }
+    // Generate invoice number if not provided
+    const latestInvoice = await Invoice.findOne().sort({ createdAt: -1 });
+    const nextNumber = latestInvoice ? latestInvoice.invoiceNumber + 1 : 1001;
+
+    // Clean items (remove frontend-only fields)
+    const cleanItems = req.body.items.map(item => ({
+      product: item.product || null,
+      description: item.description || "",
+      quantity: item.quantity || 1,
+      unitPrice: item.unitPrice || 0,
+      total: item.total || 0
+    }));
 
     const invoiceData = {
-      ...req.body,
-      createdBy: req.user.userId,
-    }
+      invoiceNumber: req.body.invoiceNumber || nextNumber,
+      customer: req.body.customer,
+      items: cleanItems,
+      subtotal: req.body.subtotal || 0,
+      taxRate: req.body.taxRate || 0,
+      taxAmount: req.body.taxAmount || 0,
+      discountRate: req.body.discountRate || 0,
+      discountAmount: req.body.discountAmount || 0,
+      total: req.body.total || 0,
+      dueDate: req.body.dueDate,
+      notes: req.body.notes || "",
+      terms: req.body.terms || "Payment is due within 30 days of invoice date.",
+      status: "draft", // default status
+      createdBy: req.user.id
+    };
 
-    const invoice = new Invoice(invoiceData)
-    await invoice.save()
+    console.log("Creating invoice with data:", invoiceData);
+    console.log("Body", req.body)
 
-    await invoice.populate("createdBy", "fullName")
+    const invoice = new Invoice(invoiceData);
+    await invoice.save();
+
+    await invoice.populate("createdBy", "fullName");
 
     res.status(201).json({
       success: true,
       message: "Invoice created successfully",
       invoice,
-    })
+    });
   } catch (error) {
-    console.error("Create invoice error:", error)
+    console.error("Create invoice error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to create invoice",
-    })
+      error: error.message
+    });
   }
-}
+};
+
 
 
 const updateInvoice = async (req, res) => {

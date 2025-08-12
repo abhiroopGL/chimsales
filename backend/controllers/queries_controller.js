@@ -73,7 +73,7 @@ const updateQueryStatus = async (req, res) => {
   try {
     const { status } = req.body;
     console.log(`Updating query status for ID ${req.params.id} to ${status}`);
-    if (!['Pending', 'In Process', 'Completed'].includes(status)) {
+    if (!['Pending', 'In Process', 'Resolved'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status' });
     }
 

@@ -6,7 +6,7 @@ const createProduct = async (req, res) => {
         const images = req.files.map(file => `/uploads/products/${file.filename}`);
         const product = new Product({ name, description, price, images, stock });
         await product.save();
-        res.status(201).json({success: true, ...product});
+        res.status(201).json({ success: true, ...product });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -29,8 +29,13 @@ const getPublicProducts = async (req, res) => {
 const getAdminProducts = async (req, res) => {
     try {
         const { filter } = req.query;
-        // const query = { deleted: filter === 'deleted' };
-        const products = await Product.find({});
+        let query = {};
+
+        if (filter && filter !== "all") {
+            query.status = filter;
+        }
+
+        const products = await Product.find(query).sort({ createdAt: -1 });
         res.json(products);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -137,6 +142,7 @@ const restoreProduct = async (req, res) => {
 
         product.deleted = false;
         product.deletedAt = null;
+        product.status = "draft";
         await product.save();
 
         return res.status(200).json({ success: true, message: "Product restored successfully", id });
