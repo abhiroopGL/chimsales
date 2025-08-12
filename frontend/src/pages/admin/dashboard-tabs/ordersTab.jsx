@@ -121,13 +121,13 @@ const OrdersTab = () => {
                     <tbody className="divide-y divide-gray-200">
                         {orders.map((order) => (
                             <tr key={order._id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">{order.orderNumber}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-6 py-4 whitespace-nowrap text-left">{order.orderNumber}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-left">
                                     <div>{order.customer.fullName}</div>
                                     <div className="text-sm text-gray-500">{order.customer.phoneNumber}</div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">{order.total.toFixed(3)} KWD</td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-6 py-4 whitespace-nowrap text-left">{order.total.toFixed(3)} KWD</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-left">
                                     <span
                                         className={`px-2 py-1 text-xs rounded-full ${order.status === "completed"
                                                 ? "bg-green-100 text-green-800"
@@ -139,10 +139,10 @@ const OrdersTab = () => {
                                         {order.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-6 py-4 whitespace-nowrap text-left">
                                     {new Date(order.createdAt).toLocaleDateString()}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-gray-700 flex gap-3">
+                                <td className="px-6 py-4 whitespace-nowrap text-left text-gray-700 flex gap-3">
                                     <button
                                         onClick={() => {
                                             setSelectedItem(order);
