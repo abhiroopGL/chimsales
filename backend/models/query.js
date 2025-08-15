@@ -1,17 +1,33 @@
-const mongoose = require('mongoose');
+'use strict';
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Query extends Model {
+    static associate(models) {
+      // Associate to user (optional)
+      Query.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+    }
+  }
 
-const querySchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
-  email: { type: String },
-  address: { type: String },
-  subject: { type: String, required: true },
-  message: { type: String, required: true },
-  status: {
-    type: String, 
-    enum: ['Pending', 'In Process', 'Resolved'], 
-    default: 'Pending' 
-  },
-}, { timestamps: true });
+  Query.init({
+    userId: DataTypes.INTEGER,
+    fullName: DataTypes.STRING,
+    phoneNumber: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    email: DataTypes.STRING,
+    address: DataTypes.STRING,
+    subject: DataTypes.STRING,
+    message: DataTypes.TEXT,
+    status: {
+      type: DataTypes.ENUM('pending', 'resolved', 'closed'),
+      allowNull: false,
+      defaultValue: 'pending'
+    }
+  }, {
+    sequelize,
+    modelName: 'Query',
+  });
 
-module.exports = mongoose.model('Query', querySchema);
+  return Query;
+};

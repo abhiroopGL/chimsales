@@ -1,31 +1,21 @@
-const Booking = require('../models/booking');
+const { Booking } = require('../models');
+const { Op, Sequelize } = require('sequelize');
+
+// Create new booking
 const createNewBooking = async (req, res) => {
     try {
-        console.log("Creating new booking with data:", req.body);
-
         const { items, total, deliveryAddress, paymentMethod, notes, fullName, email, phone } = req.body;
 
-        // Validate required fields
         if (!deliveryAddress || !deliveryAddress.governorate || !deliveryAddress.area) {
-            return res.status(400).json({
-                success: false,
-                message: "Delivery address with governorate and area is required",
-            });
+            return res.status(400).json({ success: false, message: "Delivery address with governorate and area is required" });
         }
 
         if (!fullName || !phone || !email) {
-            return res.status(400).json({
-                success: false,
-                message: "Full name, phone, and email are required for booking",
-            });
+            return res.status(400).json({ success: false, message: "Full name, phone, and email are required" });
         }
 
         const newBookingData = {
-            customerInfo: {
-                fullName,
-                email,
-                phone,
-            },
+            customerInfo: { fullName, email, phone },
             items,
             total,
             deliveryAddress,
@@ -34,97 +24,72 @@ const createNewBooking = async (req, res) => {
             status: "pending",
         };
 
-        console.log("New booking data:", newBookingData);
-
         const newBooking = await Booking.create(newBookingData);
-
-        console.log("New booking created:", newBooking);
-
-        res.status(201).json({
-            success: true,
-            message: "Booking placed successfully",
-            booking: newBooking,
-        });
+        res.status(201).json({ success: true, message: "Booking placed successfully", booking: newBooking });
     } catch (error) {
         console.error("Create booking error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to create booking",
-        });
+        res.status(500).json({ success: false, message: "Failed to create booking" });
     }
-}
+};
 
+// Get all bookings with filters
 const getAllBookings = async (req, res) => {
     try {
         const { startDate, endDate, search, status } = req.query;
 
-        let filter = {};
+        const where = {};
 
-        // Filter by date range if provided
+        // Date filter
         if (startDate || endDate) {
-            filter.createdAt = {};
-            if (startDate) filter.createdAt.$gte = new Date(startDate);
-            if (endDate) filter.createdAt.$lte = new Date(endDate);
+            where.createdAt = {};
+            if (startDate) where.createdAt[Op.gte] = new Date(startDate);
+            if (endDate) where.createdAt[Op.lte] = new Date(endDate);
         }
 
-        // Filter by search term in customerInfo.fullName, email, or phone
+        // Status filter
+        if (status) where.status = status;
+
+        // Search filter on JSONB field
         if (search) {
-            filter.$or = [
-                { "customerInfo.fullName": { $regex: search, $options: "i" } },
-                { "customerInfo.email": { $regex: search, $options: "i" } },
-                { "customerInfo.phone": { $regex: search, $options: "i" } },
+            where[Op.or] = [
+                Sequelize.where(Sequelize.json('customerInfo.fullName'), { [Op.iLike]: `%${search}%` }),
+                Sequelize.where(Sequelize.json('customerInfo.email'), { [Op.iLike]: `%${search}%` }),
+                Sequelize.where(Sequelize.json('customerInfo.phone'), { [Op.iLike]: `%${search}%` }),
             ];
         }
 
-        // Filter by status if provided
-        if (status) {
-            filter.status = status;
-        }
-
-        const bookings = await Booking.find(filter).sort({ createdAt: -1 }).lean();
-
-        res.json({
-            success: true,
-            bookings,
+        const bookings = await Booking.findAll({
+            where,
+            order: [['createdAt', 'DESC']]
         });
+
+        res.json({ success: true, bookings });
     } catch (error) {
         console.error("Error fetching bookings:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch bookings",
-        });
+        res.status(500).json({ success: false, message: "Failed to fetch bookings" });
     }
 };
 
-
+// Update booking status
 const updateBookingStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
-        if (!status) {
-            return res.status(400).json({ success: false, message: "Status is required" });
-        }
-        const booking = await Booking.findByIdAndUpdate(
-            id,
+
+        if (!status) return res.status(400).json({ success: false, message: "Status is required" });
+
+        const [updatedCount, [updatedBooking]] = await Booking.update(
             { status },
-            { new: true }
+            { where: { id }, returning: true }
         );
-        if (!booking) {
-            return res.status(404).json({ success: false, message: "Booking not found" });
-        }
-        res.json({ success: true, booking });
+
+        if (updatedCount === 0) return res.status(404).json({ success: false, message: "Booking not found" });
+
+        res.json({ success: true, booking: updatedBooking });
     } catch (error) {
+        console.error("Update booking status error:", error);
         res.status(500).json({ success: false, message: "Failed to update status" });
     }
 };
 
-module.exports = {
-    // ...other exports
-    updateBookingStatus,
-};
-
-module.exports = {
-    createNewBooking,
-    getAllBookings,
-    updateBookingStatus
-};
+module.exports = { createNewBooking, getAllBookings, updateBookingStatus };

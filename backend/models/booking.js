@@ -1,98 +1,53 @@
-const mongoose = require("mongoose");
-
-const bookingItemSchema = new mongoose.Schema({
-    product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-    },
-    quantity: {
-        type: Number,
-        required: true,
-        min: 1,
-    },
-    price: {
-        type: Number,
-        required: true,
-        min: 0,
-    },
-});
-
-const bookingSchema = new mongoose.Schema(
-    {
-        bookingNumber: {
-            type: String,
-            unique: true,
-        },
-
-        customerInfo: {
-            fullName: {
-                type: String,
-                required: true,
-                trim: true,
-            },
-            email: {
-                type: String,
-                trim: true,
-                lowercase: true,
-            },
-            phone: {
-                type: String,
-                required: true,
-                trim: true,
-            },
-        },
-
-        items: [bookingItemSchema],
-
-        total: {
-            type: Number,
-            required: true,
-            min: 0,
-        },
-
-        status: {
-            type: String,
-            enum: ["pending", "confirmed", "cancelled"],
-            default: "pending",
-        },
-
-        paymentMethod: {
-            type: String,
-            enum: ["cash", "card", "bank_transfer"],
-            required: true,
-            default: "cash",
-        },
-
-        deliveryAddress: {
-            street: String,
-            area: String,
-            governorate: {
-                type: String,
-                required: true,
-            },
-            block: String,
-            building: String,
-            floor: String,
-            apartment: String,
-        },
-
-        notes: {
-            type: String,
-        },
-    },
-    {
-        timestamps: true,
+'use strict';
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Booking extends Model {
+    static associate(models) {
+      Booking.hasMany(models.BookingItem, { foreignKey: 'bookingId', as: 'items', onDelete: 'CASCADE' });
     }
-);
+  }
 
-// Auto-generate booking number before save
-bookingSchema.pre("save", async function (next) {
-    if (!this.bookingNumber) {
-        const count = await mongoose.model("Booking").countDocuments();
-        this.bookingNumber = `BOOK-${String(count + 1).padStart(5, "0")}`;
-    }
-    next();
-});
+  Booking.init({
+    bookingNumber: DataTypes.STRING,
+    total: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      validate: { min: 0 }
+    },
+    status: {
+      type: DataTypes.ENUM("pending", "confirmed", "cancelled"),
+      allowNull: false,
+      defaultValue: "pending"
+    },
+    paymentMethod: {
+      type: DataTypes.ENUM("cash", "card", "bank_transfer"),
+      allowNull: false,
+      defaultValue: "cash"
+    },
+    notes: DataTypes.TEXT,
+    customerFullName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    customerEmail: DataTypes.STRING,
+    customerPhone: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    deliveryStreet: DataTypes.STRING,
+    deliveryArea: DataTypes.STRING,
+    deliveryGovernorate: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    deliveryBlock: DataTypes.STRING,
+    deliveryBuilding: DataTypes.STRING,
+    deliveryFloor: DataTypes.STRING,
+    deliveryApartment: DataTypes.STRING,
+  }, {
+    sequelize,
+    modelName: 'Booking',
+  });
 
-module.exports = mongoose.model("Booking", bookingSchema);
+  return Booking;
+};

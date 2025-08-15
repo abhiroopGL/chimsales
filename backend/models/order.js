@@ -1,93 +1,46 @@
-const mongoose = require("mongoose")
+'use strict';
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Order extends Model {
+    static associate(models) {
+      Order.belongsTo(models.User, { foreignKey: 'userId', as : 'customer' });
+      Order.hasMany(models.OrderItem, { foreignKey: 'orderId' });
+      Order.hasOne(models.Invoice, { foreignKey: 'orderId' });
+    }
+  }
 
-const orderItemSchema = new mongoose.Schema({
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-    required: true,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-})
-
-const orderSchema = new mongoose.Schema(
-  {
-    orderNumber: {
-      type: String,
-      unique: true,
-    },
-    customer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    items: [orderItemSchema],
-    total: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
+  Order.init({
+    orderNumber: DataTypes.STRING,
+    total: DataTypes.FLOAT,
     status: {
-      type: String,
-      enum: ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"],
-      default: "pending",
+      type: DataTypes.ENUM("pending", "confirmed", "processing", "shipped", "delivered", "cancelled"),
+      allowNull: false,
+      defaultValue: "pending",
     },
     paymentMethod: {
-      type: String,
-      enum: ["cash", "card", "bank_transfer"],
-      required: true,
+      type: DataTypes.ENUM("cash", "card", "bank_transfer"),
+      allowNull: false,
+      defaultValue: "cash",
     },
     paymentStatus: {
-      type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
+      type: DataTypes.ENUM("pending", "paid", "failed", "refunded"),
+      allowNull: false,
+      defaultValue: "pending",
     },
-    deliveryAddress: {
-      street: String,
-      area: String,
-      governorate: {
-        type: String,
-        required: true,
-      },
-      block: String,
-      building: String,
-      floor: String,
-      apartment: String,
-    },
-    notes: {
-      type: String,
-    },
-    invoice: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Invoice",
-    },
-    deletedAt: {
-        type: Date, default: null
-    },
+    notes: DataTypes.TEXT,
     deleted: {
-        type: Boolean, default: false
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
-  },
-  {
-    timestamps: true,
-  },
-)
+    deletedAt: DataTypes.DATE,
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    }
+  }, {
+    sequelize,
+    modelName: 'Order',
+  });
 
-// Auto-generate order number
-orderSchema.pre("save", async function (next) {
-  if (!this.orderNumber) {
-    const count = await mongoose.model("Order").countDocuments()
-    this.orderNumber = `ORD-${String(count + 1).padStart(4, "0")}`
-  }
-  next()
-})
-
-module.exports = mongoose.model("Order", orderSchema)
+  return Order;
+};

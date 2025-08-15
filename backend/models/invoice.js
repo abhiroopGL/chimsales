@@ -1,152 +1,34 @@
-const mongoose = require('mongoose');
-const generateInvoiceNumber = require('../utils/generate_invoice_number');
+'use strict';
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Invoice extends Model {
+    static associate(models) {
+      // Each invoice belongs to a booking
+      Invoice.belongsTo(models.Booking, { foreignKey: 'bookingId', as: 'booking', onDelete: 'CASCADE' });
+    }
+  }
 
-const invoiceItemSchema = new mongoose.Schema({
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-  },
-  productName: {
-    type: String,
-  },
-  description: {
-    type: String,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  unitPrice: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  total: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-})
-
-const invoiceSchema = new mongoose.Schema(
-  {
-    invoiceNumber: {
-      type: String,
-      unique: true,
-      default: () => generateInvoiceNumber(),
-    },
-    customer: {
-      fullName: {
-        type: String,
-        required: true,
-      },
-      phoneNumber: {
-        type: String,
-        required: true,
-      },
-      email: {
-        type: String,
-      },
-      address: {
-        street: String,
-        area: String,
-        governorate: String,
-        block: String,
-        building: String,
-        floor: String,
-        apartment: String,
-      },
-    },
-    items: [invoiceItemSchema],
-    subtotal: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    taxRate: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
-    },
-    taxAmount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    discountRate: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
-    },
-    discountAmount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    total: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
+  Invoice.init({
+    invoiceNumber: DataTypes.STRING,
+    subtotal: DataTypes.FLOAT,
+    taxRate: DataTypes.FLOAT,
+    taxAmount: DataTypes.FLOAT,
+    discountRate: DataTypes.FLOAT,
+    discountAmount: DataTypes.FLOAT,
+    total: DataTypes.FLOAT,
     status: {
-      type: String,
-      enum: ["draft", "sent", "paid", "overdue", "cancelled"],
-      default: "draft",
+      type: DataTypes.ENUM('draft', 'sent', 'paid', 'overdue'),
+      defaultValue: 'draft'
     },
-    dueDate: {
-      type: Date,
-      required: true,
-    },
-    paidDate: {
-      type: Date,
-    },
-    sentAt: {
-      type: Date,
-    },
-    notes: {
-      type: String,
-    },
-    terms: {
-      type: String,
-      default: "Payment is due within 30 days of invoice date.",
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    order: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Order",
-    },
-  },
-  {
-    timestamps: true,
-  },
-)
+    dueDate: DataTypes.DATE,
+    paidDate: DataTypes.DATE,
+    sentAt: DataTypes.DATE,
+    notes: DataTypes.TEXT,
+    terms: DataTypes.TEXT
+  }, {
+    sequelize,
+    modelName: 'Invoice',
+  });
 
-// Auto-generate invoice number if not provided
-invoiceSchema.pre("save", async function (next) {
-  if (!this.invoiceNumber) {
-    this.invoiceNumber = generateInvoiceNumber();
-  }
-  next()
-})
-
-// Update status based on due date
-invoiceSchema.methods.updateStatus = function () {
-  if (this.status === "sent" && new Date() > this.dueDate) {
-    this.status = "overdue"
-  }
-}
-
-// Index for efficient queries
-invoiceSchema.index({ invoiceNumber: 1 })
-invoiceSchema.index({ "customer.phoneNumber": 1 })
-invoiceSchema.index({ status: 1, dueDate: 1 })
-invoiceSchema.index({ createdAt: -1 })
-
-module.exports = mongoose.model("Invoice", invoiceSchema)
+  return Invoice;
+};

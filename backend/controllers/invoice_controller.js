@@ -1,32 +1,31 @@
-const Invoice = require("../models/invoice.js")
-const Order = require("../models/order.js")
+const { Invoice, User, Order, InvoiceItem } = require("../models");
+const { Op } = require("sequelize");
 
+// Get all invoices
 const getAllInvoices = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
-    const skip = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
     const { search, status } = req.query;
     const filter = {};
 
-    if (status) {
-      filter.status = status;
-    }
+    if (status) filter.status = status;
+    if (search) filter.invoiceNumber = { [Op.iLike]: `%${search}%` };
 
-    if (search) {
-      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      filter.invoiceNumber = { $regex: escapedSearch, $options: "i" };
-    }
+    const totalCount = await Invoice.count({ where: filter });
 
-    const totalCount = await Invoice.countDocuments(filter);
-
-    const invoices = await Invoice.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate("createdBy", "fullName")
-      .populate("order");
+    const invoices = await Invoice.findAll({
+      where: filter,
+      order: [['createdAt', 'DESC']],
+      offset,
+      limit,
+      include: [
+        { model: User, as: 'createdBy', attributes: ['fullName'] },
+        { model: Order }
+      ]
+    });
 
     res.json({
       success: true,
@@ -37,67 +36,44 @@ const getAllInvoices = async (req, res) => {
     });
   } catch (error) {
     console.error("Get invoices error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch invoices",
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch invoices" });
   }
 };
 
-
+// Get single invoice
 const getSingleInvoice = async (req, res) => {
   try {
-    const invoice = await Invoice.findById(req.params.id).populate("createdBy", "fullName").populate("order")
+    const invoice = await Invoice.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'createdBy', attributes: ['fullName'] },
+        { model: Order }
+      ]
+    });
 
-    if (!invoice) {
-      return res.status(404).json({
-        success: false,
-        message: "Invoice not found",
-      })
+    if (!invoice) return res.status(404).json({ success: false, message: "Invoice not found" });
+
+    if (req.user.role !== "admin" && invoice.customerPhone !== req.user.phoneNumber) {
+      return res.status(403).json({ success: false, message: "Access denied" });
     }
 
-    // Check permissions
-    if (req.user.role !== "admin" && invoice.customer.phoneNumber !== req.userDoc.phoneNumber) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      })
-    }
-
-    res.json({
-      success: true,
-      invoice,
-    })
+    res.json({ success: true, invoice });
   } catch (error) {
-    console.error("Get invoice error:", error)
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch invoice",
-    })
+    console.error("Get invoice error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch invoice" });
   }
-}
+};
 
-
-// controllers/invoiceController.js
+// Create new invoice
 const createNewInvoice = async (req, res) => {
   try {
-    // Generate invoice number if not provided
-    const latestInvoice = await Invoice.findOne().sort({ createdAt: -1 });
+    const latestInvoice = await Invoice.findOne({ order: [['createdAt', 'DESC']] });
     const nextNumber = latestInvoice ? latestInvoice.invoiceNumber + 1 : 1001;
-
-    // Clean items (remove frontend-only fields)
-    const cleanItems = req.body.items.map(item => ({
-      product: item.product || null,
-      description: item.description || "",
-      quantity: item.quantity || 1,
-      unitPrice: item.unitPrice || 0,
-      total: item.total || 0
-    }));
 
     const invoiceData = {
       invoiceNumber: req.body.invoiceNumber || nextNumber,
-      customer: req.body.customer,
-      items: cleanItems,
+      customerName: req.body.customerName,
+      customerEmail: req.body.customerEmail,
+      customerPhone: req.body.customerPhone,
       subtotal: req.body.subtotal || 0,
       taxRate: req.body.taxRate || 0,
       taxAmount: req.body.taxAmount || 0,
@@ -107,61 +83,38 @@ const createNewInvoice = async (req, res) => {
       dueDate: req.body.dueDate,
       notes: req.body.notes || "",
       terms: req.body.terms || "Payment is due within 30 days of invoice date.",
-      status: "draft", // default status
-      createdBy: req.user.id
+      status: "draft",
+      createdById: req.user.id
     };
 
-    console.log("Creating invoice with data:", invoiceData);
-    console.log("Body", req.body)
-
-    const invoice = new Invoice(invoiceData);
-    await invoice.save();
-
-    await invoice.populate("createdBy", "fullName");
+    const invoice = await Invoice.create(invoiceData, { include: [InvoiceItem] });
 
     res.status(201).json({
       success: true,
       message: "Invoice created successfully",
-      invoice,
+      invoice
     });
   } catch (error) {
     console.error("Create invoice error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to create invoice",
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: "Failed to create invoice", error: error.message });
   }
 };
 
-
-
+// Update invoice
 const updateInvoice = async (req, res) => {
   try {
-    const invoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    }).populate("createdBy", "fullName")
+    const [updatedRows, [updatedInvoice]] = await Invoice.update(req.body, {
+      where: { id: req.params.id },
+      returning: true,
+    });
 
-    if (!invoice) {
-      return res.status(404).json({
-        success: false,
-        message: "Invoice not found",
-      })
-    }
+    if (!updatedInvoice) return res.status(404).json({ success: false, message: "Invoice not found" });
 
-    res.json({
-      success: true,
-      message: "Invoice updated successfully",
-      invoice,
-    })
+    res.json({ success: true, message: "Invoice updated successfully", invoice: updatedInvoice });
   } catch (error) {
-    console.error("Update invoice error:", error)
-    res.status(500).json({
-      success: false,
-      message: "Failed to update invoice",
-    })
+    console.error("Update invoice error:", error);
+    res.status(500).json({ success: false, message: "Failed to update invoice" });
   }
-}
+};
 
 module.exports = { getAllInvoices, getSingleInvoice, createNewInvoice, updateInvoice };

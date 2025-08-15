@@ -1,34 +1,36 @@
-const User = require("../models/User");
-
-// Assuming Express.js + Mongoose User model
+const { User } = require("../models");
+const { Op } = require("sequelize");
 
 const getAllUsers = async (req, res) => {
   try {
     const { search = "", page = 1, limit = 20 } = req.query;
 
-    // Convert to number safely
+    // Convert to numbers safely
     const pageNum = Math.max(parseInt(page, 10), 1);
     const limitNum = Math.min(Math.max(parseInt(limit, 10), 1), 100);
+    const offset = (pageNum - 1) * limitNum;
 
-    // Build filter for partial case-insensitive match on fullName, phoneNumber, or email
-    const filter = search
+    // Build filter for partial case-insensitive match
+    const whereClause = search
       ? {
-          $or: [
-            { fullName: { $regex: search, $options: "i" } },
-            { phoneNumber: { $regex: search, $options: "i" } },
-            { email: { $regex: search, $options: "i" } },
-          ],
-        }
+        [Op.or]: [
+          { fullName: { [Op.iLike]: `%${search}%` } },
+          { phone: { [Op.iLike]: `%${search}%` } },
+          { email: { [Op.iLike]: `%${search}%` } },
+        ],
+      }
       : {};
 
-    // Get total count for pagination info
-    const total = await User.countDocuments(filter);
+    // Get total count
+    const total = await User.count({ where: whereClause });
 
-    // Fetch paginated data
-    const users = await User.find(filter)
-      .skip((pageNum - 1) * limitNum)
-      .limit(limitNum)
-      .sort({ createdAt: -1 });
+    // Fetch paginated users
+    const users = await User.findAll({
+      where: whereClause,
+      offset,
+      limit: limitNum,
+      order: [["createdAt", "DESC"]],
+    });
 
     res.status(200).json({
       success: true,

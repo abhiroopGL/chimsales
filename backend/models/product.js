@@ -1,14 +1,37 @@
-const mongoose =  require("mongoose");
+'use strict';
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Product extends Model {
+    static associate(models) {
+      Product.hasMany(models.OrderItem, { foreignKey: 'productId' });
+      Product.hasMany(models.CartItem, { foreignKey: 'productId' });
+      Product.hasMany(models.InvoiceItem, { foreignKey: 'productId' });
+      Product.hasMany(models.ProductImage, { foreignKey: 'productId', as: 'images' });
+    }
+  }
 
-const ProductSchema = new mongoose.Schema({
-    name: String,
-    description: String,
-    price: Number,
-    images: [String], // Array of image URLs
-    status: { type: String, enum: ['draft', 'published', 'deleted'], default: 'draft' },
-    deleted: { type: Boolean, default: false },
-    stock: { type: Number, default: 0 },
-    deletedAt: { type: Date, default: null },
-}, { timestamps: true });
+  Product.init({
+    name: DataTypes.STRING,
+    description: DataTypes.TEXT,
+    price: DataTypes.FLOAT,
+    stock: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    status: {
+      type: DataTypes.ENUM('draft', 'published', 'deleted'),
+      allowNull: false,
+      defaultValue: 'draft',
+    },
+    deleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    deletedAt: DataTypes.DATE
+  }, {
+    sequelize,
+    modelName: 'Product',
+  });
 
-module.exports = mongoose.model('Product', ProductSchema);
+  return Product;
+};
