@@ -1,6 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import axiosInstance from "../../../api/axios-instance";
 import SearchBar from "../../../components/admin/searchBar";
+import BookingView from "../../../components/admin/booking/bookingView";
+import {
+    Eye,
+    Trash2,
+} from "lucide-react";
 
 const BookingsTab = () => {
     const [bookings, setBookings] = useState([]);
@@ -12,6 +17,34 @@ const BookingsTab = () => {
     const [search, setSearch] = useState("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const handleOpenModal = (booking) => {
+        setSelectedBooking(booking);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedBooking(null);
+    };
+
+    const handleStatusUpdate = async (bookingId, newStatus) => {
+        try {
+            await axiosInstance.patch(`/api/booking/${bookingId}/status`, { status: newStatus });
+            setBookings((prev) =>
+                prev.map((b) =>
+                    b._id === bookingId ? { ...b, status: newStatus } : b
+                )
+            );
+            handleCloseModal();
+        } catch {
+            setError("Failed to update status.");
+        }
+    };
 
     // Fetch bookings for current page & filters
     const fetchBookings = useCallback(async () => {
@@ -26,6 +59,7 @@ const BookingsTab = () => {
             if (search) params.search = search;
             if (startDate) params.startDate = startDate;
             if (endDate) params.endDate = endDate;
+            if (statusFilter) params.status = statusFilter; // NEW: add status filter
 
             const res = await axiosInstance.get("/api/booking", { params });
             const fetched = res.data.bookings || [];
@@ -44,14 +78,14 @@ const BookingsTab = () => {
         } finally {
             setLoading(false);
         }
-    }, [page, hasMore, loading, search, startDate, endDate]);
+    }, [page, hasMore, loading, search, startDate, endDate, statusFilter]); // NEW: add statusFilter dependency
 
     // Reset on filters change
     useEffect(() => {
         setPage(1);
         setHasMore(true);
         setBookings([]);
-    }, [search, startDate, endDate]);
+    }, [search, startDate, endDate, statusFilter]); // NEW: add statusFilter dependency
 
     // Fetch bookings when page or filters change
     useEffect(() => {
@@ -75,6 +109,7 @@ const BookingsTab = () => {
         setSearch("");
         setStartDate("");
         setEndDate("");
+        setStatusFilter(""); // NEW: clear status filter
     };
 
     return (
@@ -103,6 +138,16 @@ const BookingsTab = () => {
                         onChange={(e) => setEndDate(e.target.value)}
                         placeholder="End date"
                     />
+                    <select
+                        className="border rounded px-3 py-2"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
                     <button
                         onClick={clearFilters}
                         className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md"
@@ -122,10 +167,10 @@ const BookingsTab = () => {
                             <th className="px-6 py-3 text-left border-b border-gray-200">Booking #</th>
                             <th className="px-6 py-3 text-left border-b border-gray-200">Customer</th>
                             <th className="px-6 py-3 text-left border-b border-gray-200">Phone</th>
-                            <th className="px-6 py-3 text-left border-b border-gray-200">Email</th>
                             <th className="px-6 py-3 text-left border-b border-gray-200">Total</th>
                             <th className="px-6 py-3 text-left border-b border-gray-200">Status</th>
-                            <th className="px-6 py-3 text-left border-b border-gray-200">Created At</th>
+                            <th className="px-6 py-3 text-left border-b border-gray-200">Booked on</th>
+                            <th className="px-6 py-3 text-left border-b border-gray-200">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -134,7 +179,6 @@ const BookingsTab = () => {
                                 <td className="px-6 py-4 whitespace-nowrap">{b.bookingNumber}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{b.customerInfo.fullName}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{b.customerInfo.phone}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{b.customerInfo.email}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{b.total.toFixed(3)} KWD</td>
                                 <td className="px-6 py-4 whitespace-nowrap capitalize">
                                     <span
@@ -150,6 +194,22 @@ const BookingsTab = () => {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {new Date(b.createdAt).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap flex gap-2">
+                                    <button
+                                        title="Change Status"
+                                        onClick={() => handleOpenModal(b)}
+                                        className="p-2 rounded hover:bg-blue-100 transition"
+                                    >
+                                        <Eye className="h-5 w-5 text-blue-600" />
+                                    </button>
+                                    <button
+                                        title="Delete Booking"
+                                        onClick={() => handleDelete(b._id)}
+                                        className="p-2 rounded hover:bg-red-100 transition"
+                                    >
+                                        <Trash2 className="h-5 w-5 text-red-600" />
+                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -188,6 +248,22 @@ const BookingsTab = () => {
                         <div className="mb-3 text-sm text-gray-600">
                             Date: {new Date(b.createdAt).toLocaleDateString()}
                         </div>
+                        <div className="flex gap-3">
+                            <button
+                                title="Change Status"
+                                onClick={() => handleOpenModal(b)}
+                                className="p-2 rounded hover:bg-blue-100 transition"
+                            >
+                                <Eye className="h-5 w-5 text-blue-600" />
+                            </button>
+                            <button
+                                title="Delete Booking"
+                                onClick={() => handleDelete(b._id)}
+                                className="p-2 rounded hover:bg-red-100 transition"
+                            >
+                                <Trash2 className="h-5 w-5 text-red-600" />
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -198,6 +274,14 @@ const BookingsTab = () => {
             )}
             {!loading && bookings.length === 0 && (
                 <p className="text-center py-4 text-gray-500">No bookings found</p>
+            )}
+
+            {showModal && selectedBooking && (
+                <BookingView
+                    booking={selectedBooking}
+                    onClose={handleCloseModal}
+                    onStatusUpdate={handleStatusUpdate}
+                />
             )}
         </div>
     );

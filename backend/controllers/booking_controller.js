@@ -56,7 +56,7 @@ const createNewBooking = async (req, res) => {
 
 const getAllBookings = async (req, res) => {
     try {
-        const { startDate, endDate, search } = req.query;
+        const { startDate, endDate, search, status } = req.query;
 
         let filter = {};
 
@@ -67,7 +67,7 @@ const getAllBookings = async (req, res) => {
             if (endDate) filter.createdAt.$lte = new Date(endDate);
         }
 
-        // Filter by search term in customerInfo.fullName or customerInfo.email
+        // Filter by search term in customerInfo.fullName, email, or phone
         if (search) {
             filter.$or = [
                 { "customerInfo.fullName": { $regex: search, $options: "i" } },
@@ -76,6 +76,10 @@ const getAllBookings = async (req, res) => {
             ];
         }
 
+        // Filter by status if provided
+        if (status) {
+            filter.status = status;
+        }
 
         const bookings = await Booking.find(filter).sort({ createdAt: -1 }).lean();
 
@@ -92,7 +96,35 @@ const getAllBookings = async (req, res) => {
     }
 };
 
+
+const updateBookingStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        if (!status) {
+            return res.status(400).json({ success: false, message: "Status is required" });
+        }
+        const booking = await Booking.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found" });
+        }
+        res.json({ success: true, booking });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to update status" });
+    }
+};
+
+module.exports = {
+    // ...other exports
+    updateBookingStatus,
+};
+
 module.exports = {
     createNewBooking,
-    getAllBookings
+    getAllBookings,
+    updateBookingStatus
 };
