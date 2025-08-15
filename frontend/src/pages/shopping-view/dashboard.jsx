@@ -57,7 +57,7 @@ export default function Dashboard() {
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
                             {products.slice(0, 6).map((product) => (
                                 <div
-                                    key={product._id}
+                                    key={product.id}
                                     className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 transform hover:scale-105"
                                 >
                                     <ProductCard product={product} />

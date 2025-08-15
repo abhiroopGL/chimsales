@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     subject: DataTypes.STRING,
     message: DataTypes.TEXT,
     status: {
-      type: DataTypes.ENUM('pending', 'resolved', 'closed'),
+      type: DataTypes.ENUM('pending', 'in process', 'resolved'),
       allowNull: false,
       defaultValue: 'pending'
     }

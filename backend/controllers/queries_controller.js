@@ -14,6 +14,8 @@ const createNewQuery = async (req, res) => {
       });
     }
 
+    console.log("Creating new query:", req.body);
+
     const newQuery = await Query.create({
       fullName,
       phoneNumber,
@@ -21,7 +23,7 @@ const createNewQuery = async (req, res) => {
       address,
       subject,
       message,
-      status: "Pending", // default status
+      status: "pending", // default status
     });
 
     res.status(201).json({
@@ -95,7 +97,7 @@ const getAllQueries = async (req, res) => {
 const updateQueryStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const validStatuses = ["Pending", "In Process", "Resolved"];
+    const validStatuses = ["pending", "in process", "resolved"];
 
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ success: false, message: "Invalid status" });

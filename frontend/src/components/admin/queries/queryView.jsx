@@ -4,9 +4,9 @@ import { useState } from "react";
 import { X } from "lucide-react";
 
 const statusColors = {
-  Pending: "bg-yellow-100 text-yellow-800",
-  "In Process": "bg-blue-100 text-blue-800",
-  Resolved: "bg-green-100 text-green-800",
+  pending: "bg-yellow-100 text-yellow-800",
+  "in process": "bg-blue-100 text-blue-800",
+  resolved: "bg-green-100 text-green-800",
 };
 
 const QueryView = ({ query, onClose, onStatusChange, updatingId }) => {
@@ -15,7 +15,7 @@ const QueryView = ({ query, onClose, onStatusChange, updatingId }) => {
   const handleChange = async (e) => {
     const newStatus = e.target.value;
     setLocalStatus(newStatus);
-    await onStatusChange(query._id, newStatus);
+    await onStatusChange(query.id, newStatus);
   };
 
   return (
@@ -58,12 +58,12 @@ const QueryView = ({ query, onClose, onStatusChange, updatingId }) => {
             <select
               value={localStatus}
               onChange={handleChange}
-              disabled={updatingId === query._id}
+              disabled={updatingId === query.id}
               className="border rounded px-3 py-2 text-base w-full max-w-xs"
             >
-              <option value="Pending">Pending</option>
-              <option value="In Process">In Process</option>
-              <option value="Resolved">Resolved</option>
+              <option value="pending">Pending</option>
+              <option value="in process">In Process</option>
+              <option value="resolved">Resolved</option>
             </select>
             <span
               className={`inline-flex mt-2 px-2 py-1 text-xs font-semibold rounded-full ${

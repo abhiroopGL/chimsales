@@ -27,6 +27,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    featured: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    category: {
+      type: DataTypes.ENUM(
+        'Wall-Mounted',
+        'Island',
+        'Built-In',
+        'Downdraft',
+        'Ceiling-Mounted'
+      ),
+      allowNull: false,
+      defaultValue: 'Wall-Mounted'
+    },
     deletedAt: DataTypes.DATE
   }, {
     sequelize,

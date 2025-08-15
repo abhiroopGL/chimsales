@@ -4,13 +4,15 @@ const { Op } = require("sequelize");
 // Create product
 const createProduct = async (req, res) => {
     try {
-        const { name, description, price, stock } = req.body;
+        const { name, description, price, stock, featured, category } = req.body;
 
         const product = await Product.create({
             name,
             description,
             price,
-            stock
+            stock,
+            featured: featured === "true" || featured === true,
+            category
         });
 
         // Save images separately
@@ -22,7 +24,6 @@ const createProduct = async (req, res) => {
             await ProductImage.bulkCreate(imagesData);
         }
 
-        // Fetch product with images
         const productWithImages = await Product.findByPk(product.id, {
             include: [{ model: ProductImage, as: "images" }]
         });
@@ -31,6 +32,26 @@ const createProduct = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// Get featured products
+const getFeaturedProducts = async (req, res) => {
+    try {
+        const products = await Product.findAll({
+            where: {
+                featured: true,
+                status: "published",
+                deleted: { [Op.ne]: true },
+            },
+            order: [["createdAt", "DESC"]],
+            include: [{ model: ProductImage, as: "images" }]
+        });
+
+        res.json(products);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Server error" });
     }
 };
 
@@ -109,11 +130,14 @@ const updateProduct = async (req, res) => {
         const updates = {};
         for (const key in req.body) {
             if (req.body[key] != existingProduct[key]) {
-                updates[key] = req.body[key];
+                if (key === "featured") {
+                    updates[key] = req.body[key] === "true" || req.body[key] === true;
+                } else {
+                    updates[key] = req.body[key];
+                }
             }
         }
 
-        // Update product fields
         if (Object.keys(updates).length > 0) {
             await existingProduct.update(updates);
         }
@@ -127,7 +151,6 @@ const updateProduct = async (req, res) => {
             await ProductImage.bulkCreate(newImages);
         }
 
-        // If frontend sends an array of images to keep, remove others
         if (req.body.imagesToKeep && Array.isArray(req.body.imagesToKeep)) {
             await ProductImage.destroy({
                 where: {
@@ -192,4 +215,13 @@ const restoreProduct = async (req, res) => {
     }
 };
 
-module.exports = { createProduct, getAdminProducts, getPublicProducts, fetchProductById, updateProduct, deleteProduct, restoreProduct };
+module.exports = {
+    createProduct,
+    getAdminProducts,
+    getPublicProducts,
+    getFeaturedProducts,
+    fetchProductById,
+    updateProduct,
+    deleteProduct,
+    restoreProduct
+};

@@ -18,7 +18,7 @@ import Cart from "./pages/shopping-view/cart.jsx";
 import Navbar from './components/common/Navbar.jsx';
 import Products from "./pages/shopping-view/products.jsx";
 import ProductDetail from './pages/shopping-view/product-details.jsx';
-import { fetchPublicProducts } from './redux/slices/productSlice.jsx';
+import { fetchFeaturedProducts } from './redux/slices/productSlice.jsx';
 
 function App() {
     const dispatch = useDispatch();
@@ -26,7 +26,7 @@ function App() {
 
      useEffect(() => {
         dispatch(checkAuth());
-        dispatch(fetchPublicProducts());
+        dispatch(fetchFeaturedProducts());
     }, []);
 
   return (

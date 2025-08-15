@@ -1,11 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import axiosInstance from "../../../api/axios-instance";
-import {
-    Eye,
-    Edit,
-    Trash2,
-    Plus,
-} from "lucide-react";
+import { Eye, Edit, Trash2, Plus } from "lucide-react";
 
 import InvoiceForm from "../../../components/admin/invoice/invoice-form.jsx";
 import InvoiceView from "../../../components/admin/invoice/invoice-view.jsx";
@@ -24,9 +19,12 @@ const InvoicesTab = () => {
     const [showInvoiceForm, setShowInvoiceForm] = useState(false);
     const [showInvoiceView, setShowInvoiceView] = useState(false);
 
+    const scrollTimeoutRef = useRef(null);
+
     // Fetch invoices with pagination, search, and status filters
     const fetchInvoices = useCallback(async () => {
         if (!hasMore || loading) return;
+
         setLoading(true);
         try {
             const params = { page, limit: 20 };
@@ -34,15 +32,17 @@ const InvoicesTab = () => {
             if (status !== "") params.status = status;
 
             const res = await axiosInstance.get("/api/invoice", { params });
+            const newInvoices = res.data.invoices || [];
 
-            if (res.data.invoices.length > 0) {
-                setInvoices((prev) => [...prev, ...res.data.invoices]);
+            if (newInvoices.length > 0) {
+                setInvoices((prev) => [...prev, ...newInvoices]);
                 setPage((p) => p + 1);
             } else {
                 setHasMore(false);
             }
         } catch (err) {
             console.error("Error fetching invoices:", err);
+            setHasMore(false);
         } finally {
             setLoading(false);
         }
@@ -53,33 +53,41 @@ const InvoicesTab = () => {
         setInvoices([]);
         setPage(1);
         setHasMore(true);
+        setLoading(false);
     }, [search, status]);
 
-    // Fetch invoices on load and when fetchInvoices changes
+    // Fetch invoices on initial load and after reset
     useEffect(() => {
-        fetchInvoices();
-    }, [fetchInvoices]);
-
-    // Infinite scroll handler
-    const handleScroll = (e) => {
-        const { scrollTop, scrollHeight, clientHeight } = e.target.scrollingElement;
-        if (scrollHeight - scrollTop <= clientHeight + 100) {
+        if (page === 1) {
             fetchInvoices();
         }
+    }, [page, fetchInvoices]);
+
+    // Infinite scroll handler with debounce
+    const handleScroll = (e) => {
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = setTimeout(() => {
+            const { scrollTop, scrollHeight, clientHeight } = e.target.scrollingElement;
+            if (!loading && hasMore && scrollHeight - scrollTop <= clientHeight + 100) {
+                fetchInvoices();
+            }
+        }, 150); // debounce 150ms
     };
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, [fetchInvoices]);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        };
+    }, [fetchInvoices, hasMore, loading]);
 
-    // Dummy delete handler — implement as needed
+    // Delete handler
     const handleDeleteItem = async (id) => {
         if (!confirm("Are you sure you want to delete this invoice?")) return;
         try {
             await axiosInstance.delete(`/api/invoice/${id}`);
             alert("Invoice deleted successfully");
-            // Reset to reload invoices
             setInvoices([]);
             setPage(1);
             setHasMore(true);
@@ -89,7 +97,7 @@ const InvoicesTab = () => {
         }
     };
 
-    // Add this helper function inside your component or import it
+    // Text truncate helper
     const truncate = (text, maxLength = 30) => {
         if (!text) return "";
         return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -141,7 +149,6 @@ const InvoicesTab = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
-
 
                     <tbody className="divide-y divide-gray-200">
                         {invoices.map((invoice) => (
@@ -211,7 +218,6 @@ const InvoicesTab = () => {
                             </tr>
                         ))}
                     </tbody>
-
                 </table>
             </div>
 

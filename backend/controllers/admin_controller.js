@@ -1,4 +1,4 @@
-const { User } = require("../models");
+const { User, Product, Order } = require("../models");
 const { Op } = require("sequelize");
 
 const getAllUsers = async (req, res) => {
@@ -46,4 +46,29 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-module.exports = { getAllUsers };
+const getAdminStats = async (req, res) => {
+    try {
+        const totalUsers = await User.count();
+        const totalProducts = await Product.count();
+        const totalOrders = await Order.count();
+
+        // Example: Calculate total revenue (sum of order totals)
+        const revenueResult = await Order.sum('total'); 
+        const totalRevenue = revenueResult || 0;
+        
+        res.json({
+            success: true,
+            data: {
+                totalUsers,
+                totalProducts,
+                totalOrders,
+                totalRevenue
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
+module.exports = { getAllUsers, getAdminStats};

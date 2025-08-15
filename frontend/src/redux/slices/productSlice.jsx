@@ -27,6 +27,14 @@ export const fetchPublicProducts = createAsyncThunk(
     }
 );
 
+export const fetchFeaturedProducts = createAsyncThunk(
+    "products/fetchFeatured",
+    async () => {
+        const response = await axiosInstance.get("/api/products/featured");
+        return response.data;
+    }
+);
+
 // Fetch single product by ID
 export const fetchProductById = createAsyncThunk(
     "/products/fetchById",
@@ -100,6 +108,7 @@ const productSlice = createSlice({
             })
             .addCase(fetchPublicProducts.fulfilled, (state, action) => {
                 state.publicProducts = action.payload;
+                console.log("Public products fetched:", action.payload);
                 state.isLoading = false;
             })
             .addCase(fetchAdminProducts.pending, (state) => {
@@ -183,8 +192,19 @@ const productSlice = createSlice({
                 //     state.adminProducts[index].status = "draft";
                 // }
                 state.isLoading = false;
+            })
+            .addCase(restoreProduct.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error.message;
+            })
+            .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
+                state.publicProducts = action.payload;
+                state.isLoading = false;
+            })
+            .addCase(fetchFeaturedProducts.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error.message;
             });
-
     },
 });
 
