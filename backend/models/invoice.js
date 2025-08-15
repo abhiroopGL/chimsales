@@ -1,10 +1,11 @@
 'use strict';
 const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Invoice extends Model {
     static associate(models) {
-      // Each invoice belongs to a booking
-      Invoice.belongsTo(models.Booking, { foreignKey: 'bookingId', as: 'booking', onDelete: 'CASCADE' });
+      Invoice.belongsTo(models.User, { foreignKey: 'createdById', as: 'createdBy' });
+      Invoice.hasMany(models.InvoiceItem, { foreignKey: 'invoiceId', as: 'items', onDelete: 'CASCADE' });
     }
   }
 
@@ -24,7 +25,15 @@ module.exports = (sequelize, DataTypes) => {
     paidDate: DataTypes.DATE,
     sentAt: DataTypes.DATE,
     notes: DataTypes.TEXT,
-    terms: DataTypes.TEXT
+    terms: DataTypes.TEXT,
+
+    // 📌 New customer snapshot fields
+    customerName: { type: DataTypes.STRING, allowNull: false },
+    customerPhone: { type: DataTypes.STRING, allowNull: false },
+    customerEmail: { type: DataTypes.STRING, allowNull: true },
+    customerStreet: { type: DataTypes.STRING, allowNull: true },
+    customerArea: { type: DataTypes.STRING, allowNull: true },
+    customerGovernorate: { type: DataTypes.STRING, allowNull: true },
   }, {
     sequelize,
     modelName: 'Invoice',

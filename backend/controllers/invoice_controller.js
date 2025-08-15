@@ -22,8 +22,7 @@ const getAllInvoices = async (req, res) => {
       offset,
       limit,
       include: [
-        { model: User, as: 'createdBy', attributes: ['fullName'] },
-        { model: Order }
+        { model: User, as: 'createdBy', attributes: ['fullName'], as: 'createdBy' }, // alias must match model association
       ]
     });
 
@@ -45,13 +44,24 @@ const getSingleInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findByPk(req.params.id, {
       include: [
-        { model: User, as: 'createdBy', attributes: ['fullName'] },
-        { model: Order }
+        {
+          model: User,
+          as: 'createdBy',
+          attributes: ['fullName', 'phone', 'email'],
+        },
+        {
+          model: InvoiceItem,
+          as: 'items',
+          attributes: ['productName', 'description', 'quantity', 'unitPrice', 'total']
+        }
       ]
     });
 
-    if (!invoice) return res.status(404).json({ success: false, message: "Invoice not found" });
+    if (!invoice) {
+      return res.status(404).json({ success: false, message: "Invoice not found" });
+    }
 
+    // Security check for non-admins
     if (req.user.role !== "admin" && invoice.customerPhone !== req.user.phoneNumber) {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
@@ -66,8 +76,10 @@ const getSingleInvoice = async (req, res) => {
 // Create new invoice
 const createNewInvoice = async (req, res) => {
   try {
-    const latestInvoice = await Invoice.findOne({ order: [['createdAt', 'DESC']] });
-    const nextNumber = latestInvoice ? latestInvoice.invoiceNumber + 1 : 1001;
+    const lastInvoice = await Invoice.findOne({
+      order: [['id', 'DESC']],
+    });
+    const nextNumber = `INV-${(lastInvoice?.id ?? 0) + 1}`;
 
     const invoiceData = {
       invoiceNumber: req.body.invoiceNumber || nextNumber,
@@ -84,10 +96,15 @@ const createNewInvoice = async (req, res) => {
       notes: req.body.notes || "",
       terms: req.body.terms || "Payment is due within 30 days of invoice date.",
       status: "draft",
-      createdById: req.user.id
+      createdById: req.user.id,
+      items: req.body.items || [], // <-- pass items array
     };
 
-    const invoice = await Invoice.create(invoiceData, { include: [InvoiceItem] });
+    console.log("Creating invoice with data:", invoiceData);
+
+    const invoice = await Invoice.create(invoiceData, {
+      include: [{ model: InvoiceItem, as: 'items' }] // <-- use alias 'items'
+    });
 
     res.status(201).json({
       success: true,
@@ -99,6 +116,7 @@ const createNewInvoice = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to create invoice", error: error.message });
   }
 };
+
 
 // Update invoice
 const updateInvoice = async (req, res) => {
@@ -117,4 +135,35 @@ const updateInvoice = async (req, res) => {
   }
 };
 
-module.exports = { getAllInvoices, getSingleInvoice, createNewInvoice, updateInvoice };
+
+const deleteInvoice = async (req, res) => {
+  try {
+    const invoiceId = req.params.id;
+
+    // Try to delete
+    const deletedCount = await Invoice.destroy({
+      where: { id: invoiceId }
+    });
+
+    if (deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Invoice deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete invoice error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete invoice",
+    });
+  }
+
+}
+
+module.exports = { getAllInvoices, getSingleInvoice, createNewInvoice, updateInvoice, deleteInvoice };
