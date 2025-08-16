@@ -1,41 +1,31 @@
-// backend/models/Cart.js
-const mongoose = require('mongoose');
-
-const cartItemSchema = new mongoose.Schema({
-    product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true
-    },
-    quantity: {
-        type: Number,
-        required: true,
-        min: 1,
-        default: 1
-    },
-    name: String,
-    price: Number,
-    image: String
-});
-
-const cartSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    items: [cartItemSchema],
-    total: {
-        type: Number,
-        default: 0
+'use strict';
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Cart extends Model {
+    static associate(models) {
+      Cart.belongsTo(models.User, { foreignKey: 'userId' });
+      Cart.hasMany(models.CartItem, { foreignKey: 'cartId' });
     }
-}, { timestamps: true });
+  }
 
-// Calculate total before saving
-cartSchema.pre('save', function(next) {
-    console.log("pre save", this.items);
-    this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    next();
-});
+  Cart.init({
+    total: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    deleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    deletedAt: DataTypes.DATE
+  }, {
+    sequelize,
+    modelName: 'Cart',
+  });
 
-module.exports = mongoose.model('Cart', cartSchema);
+  return Cart;
+};

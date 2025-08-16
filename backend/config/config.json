@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "abhiroop.panchal",
+    "password": "abhi27@GL",
+    "database": "chimney_store",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "abhiroop.panchal",
+    "password": "abhi27@GL",
+    "database": "chimney_store_test",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "abhiroop.panchal",
+    "password": "chimney-kuwait@prod2025",
+    "database": "chimney_store_production",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}

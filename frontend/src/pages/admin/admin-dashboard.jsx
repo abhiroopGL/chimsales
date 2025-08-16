@@ -1,33 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axiosInstance from "../../api/axios-instance.js";
 import {
   Users, Package, FileText, MessageSquare, ShoppingCart, DollarSign, CalendarDays
 } from "lucide-react";
+// import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
 import UsersTab from "./dashboard-tabs/users.jsx";
 import ProductsTab from "./dashboard-tabs/productsTab.jsx";
 import OrdersTab from "./dashboard-tabs/ordersTab.jsx";
 import QueryTab from "./dashboard-tabs/query-tab.jsx";
 import InvoicesTab from "./dashboard-tabs/invoicesTab.jsx";
-import BookingsTab from "./dashboard-tabs/bookingsTab.jsx"; // new import
+import BookingsTab from "./dashboard-tabs/bookingsTab.jsx";
+import StatCard from "./dashboard-tabs/StatCard.jsx";
 
-const StatCard = ({ title, value, icon: Icon, color, change }) => (
-  <div className="bg-white rounded-lg p-6 shadow-sm">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm font-medium text-gray-600">{title}</p>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        {change && (
-          <p className={`text-sm ${change > 0 ? "text-green-600" : "text-red-600"}`}>
-            {change > 0 ? "+" : ""}{change}% from last month
-          </p>
-        )}
-      </div>
-      <div className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center`}>
-        <Icon size={24} className="text-white" />
-      </div>
-    </div>
-  </div>
-);
+// const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const TabButton = ({ id, label, icon: Icon, activeTab, setActiveTab }) => (
   <button
@@ -41,14 +27,32 @@ const TabButton = ({ id, label, icon: Icon, activeTab, setActiveTab }) => (
 );
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState("orders");
+  const [activeTab, setActiveTab] = useState(() => {
+    // Get saved tab from localStorage, fallback to "bookings"
+    return localStorage.getItem("adminActiveTab") || "bookings";
+  });
+  const [stats, setStats] = useState(null);
 
-  const stats = {
-    totalUsers: 156,
-    totalProducts: 24,
-    totalOrders: 89,
-    totalRevenue: 12450.5,
-  };
+  useEffect(() => {
+    axiosInstance.get("/api/admin/stats")
+      .then(res => setStats(res.data.data))
+      .catch(err => console.warn(err));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("adminActiveTab", activeTab);
+  }, [activeTab]);
+
+  console.log("Admin Dashboard stats:", stats);
+
+  if (!stats) return <p className="text-center mt-10">Loading stats...</p>;
+
+  // const pieData = [
+  //   { name: "Users", value: stats.totalUsers },
+  //   { name: "Products", value: stats.totalProducts },
+  //   { name: "Orders", value: stats.totalOrders },
+  //   { name: "Revenue", value: stats.totalRevenue },
+  // ];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -59,12 +63,30 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard title="Total Users" value={stats.totalUsers} icon={Users} color="bg-blue-500" change={12} />
-          <StatCard title="Total Products" value={stats.totalProducts} icon={Package} color="bg-green-500" change={8} />
-          <StatCard title="Total Orders" value={stats.totalOrders} icon={ShoppingCart} color="bg-purple-500" change={-3} />
-          <StatCard title="Revenue" value={`${stats.totalRevenue.toFixed(3)} KWD`} icon={DollarSign} color="bg-yellow-500" change={15} />
-        </div>
+        <StatCard stats={stats} />
+
+        {/* Pie Chart */}
+        {/* IN CASE WE WANT PIE CHART, JUST UNCOMMENT IT. */}
+        {/* <div className="bg-white rounded-lg shadow-sm p-6 mb-8 flex justify-center">
+          <PieChart width={400} height={300}>
+            <Pie
+              data={pieData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              fill="#8884d8"
+              label
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </div> */}
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
@@ -82,7 +104,7 @@ const AdminDashboard = () => {
           {activeTab === "orders" && <OrdersTab />}
           {activeTab === "queries" && <QueryTab />}
           {activeTab === "invoices" && <InvoicesTab />}
-          {activeTab === "bookings" && <BookingsTab />} {/* render bookings tab */}
+          {activeTab === "bookings" && <BookingsTab />}
         </div>
       </div>
     </div>

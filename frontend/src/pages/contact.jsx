@@ -29,7 +29,9 @@ const Contact = () => {
         setLoading(true);
 
         try {
+            console.log("Contact form data:", formData);
             const response = await axiosInstance.post("/api/queries", formData);
+            console.log("Contact form response:", response);
             if (response.data.success) {
                 dispatch(
                     showNotification({

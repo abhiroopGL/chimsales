@@ -3,7 +3,7 @@ const multer = require("multer");
 const express = require("express");
 const router = express.Router();
 const { createProduct, getAdminProducts, getPublicProducts, fetchProductById, updateProduct, deleteProduct,
-    restoreProduct
+    restoreProduct, getFeaturedProducts
 } = require("../controllers/product_controller")
 
 // Configure storage
@@ -28,6 +28,7 @@ router.get("/find/:id", fetchProductById);
 router.put("/update/:id", upload.array('images', 10), updateProduct)
 router.delete("/delete/:id", deleteProduct);
 router.patch("/restore/:id", restoreProduct);
+router.get("/featured", getFeaturedProducts); // Assuming featured products are fetched from public products
 
 
 module.exports = router;

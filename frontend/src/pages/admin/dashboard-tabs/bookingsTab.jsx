@@ -37,7 +37,7 @@ const BookingsTab = () => {
             await axiosInstance.patch(`/api/booking/${bookingId}/status`, { status: newStatus });
             setBookings((prev) =>
                 prev.map((b) =>
-                    b._id === bookingId ? { ...b, status: newStatus } : b
+                    b.id === bookingId ? { ...b, status: newStatus } : b
                 )
             );
             handleCloseModal();
@@ -111,7 +111,7 @@ const BookingsTab = () => {
         setEndDate("");
         setStatusFilter(""); // NEW: clear status filter
     };
-
+    debugger
     return (
         <div className="p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
@@ -175,11 +175,11 @@ const BookingsTab = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {bookings.map((b) => (
-                            <tr key={b._id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">{b.bookingNumber}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{b.customerInfo.fullName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{b.customerInfo.phone}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{b.total.toFixed(3)} KWD</td>
+                            <tr key={b.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">{b?.bookingNumber}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{b?.customerFullName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{b?.customerPhone}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{b?.total.toFixed(3)} KWD</td>
                                 <td className="px-6 py-4 whitespace-nowrap capitalize">
                                     <span
                                         className={`px-2 py-1 text-xs rounded-full ${b.status === "confirmed"
@@ -203,13 +203,13 @@ const BookingsTab = () => {
                                     >
                                         <Eye className="h-5 w-5 text-blue-600" />
                                     </button>
-                                    <button
+                                    {/* <button
                                         title="Delete Booking"
-                                        onClick={() => handleDelete(b._id)}
+                                        onClick={() => handleDelete(b.id)}
                                         className="p-2 rounded hover:bg-red-100 transition"
                                     >
                                         <Trash2 className="h-5 w-5 text-red-600" />
-                                    </button>
+                                    </button> */}
                                 </td>
                             </tr>
                         ))}
@@ -221,11 +221,11 @@ const BookingsTab = () => {
             <div className="sm:hidden space-y-4">
                 {bookings.map((b) => (
                     <div
-                        key={b._id}
+                        key={b.id}
                         className="bg-white shadow rounded p-4 border border-gray-200"
                     >
                         <div className="flex justify-between items-center mb-2">
-                            <div className="font-semibold text-lg">{b.bookingNumber}</div>
+                            <div className="font-semibold text-lg">{b?.bookingNumber}</div>
                             <span
                                 className={`px-2 py-1 text-xs rounded-full ${b.status === "confirmed"
                                     ? "bg-green-100 text-green-800"
@@ -238,9 +238,9 @@ const BookingsTab = () => {
                             </span>
                         </div>
                         <div className="mb-1">
-                            <div className="font-medium">{b.customerInfo.fullName}</div>
-                            <div className="text-sm text-gray-500">{b.customerInfo.phone}</div>
-                            <div className="text-sm text-gray-500">{b.customerInfo.email}</div>
+                            <div className="font-medium">{b.customerFullName}</div>
+                            <div className="text-sm text-gray-500">{b?.customerPhone}</div>
+                            <div className="text-sm text-gray-500">{b?.customerEmail}</div>
                         </div>
                         <div className="mb-1 text-sm text-gray-600 font-medium">
                             Total: {b.total.toFixed(3)} KWD
@@ -256,13 +256,13 @@ const BookingsTab = () => {
                             >
                                 <Eye className="h-5 w-5 text-blue-600" />
                             </button>
-                            <button
+                            {/* <button
                                 title="Delete Booking"
-                                onClick={() => handleDelete(b._id)}
+                                onClick={() => handleDelete(b.id)}
                                 className="p-2 rounded hover:bg-red-100 transition"
                             >
                                 <Trash2 className="h-5 w-5 text-red-600" />
-                            </button>
+                            </button> */}
                         </div>
                     </div>
                 ))}

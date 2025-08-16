@@ -1,7 +1,7 @@
 "use client"
 
 import { Link } from "react-router-dom"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 import { ShoppingCart } from "lucide-react"
 import { addToCart } from "../../redux/slices/cartSlice.jsx"
 import { showNotification } from "../../redux/slices/notificationSlice.js";
@@ -20,9 +20,9 @@ const ProductCard = ({ product }) => {
 
     return (
         <div className="card hover:shadow-lg hover:scale-105 transition-transform transition-shadow duration-300 ease-in-out">
-            <Link to={`/item/${product._id}`}>
+            <Link to={`/item/${product.id}`}>
                 <img
-                    src={product.images?.[0] || "/placeholder.svg?height=300&width=300"}
+                    src={product.images?.[0]?.url || "/placeholder.svg?height=300&width=300"}
                     alt={product.name}
                     className="w-full h-48 object-cover rounded-lg mb-4"
                 />

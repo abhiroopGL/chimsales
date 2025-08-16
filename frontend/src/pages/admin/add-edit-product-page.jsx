@@ -19,26 +19,6 @@ const AddEditProductPage = () => {
         }
     }, [id]);
 
-    // const handleSubmit = (formData) => {
-    //     if (id) {
-    //         dispatch(updateProduct({ id: id, data: formData })).then((res) => {
-    //             dispatch(showNotification({
-    //                 message: 'Product updated successfully',
-    //                 type: 'success'
-    //             }))
-    //             navigate("/admin/products");
-    //         });
-    //     } else {
-    //         dispatch(createProduct(formData)).then(() => {
-    //             navigate("/admin/products");
-    //             dispatch(showNotification({
-    //                 message: 'Product created successfully',
-    //                 type: 'success'
-    //             }))
-    //         });
-    //     }
-    // };
-
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-8 text-center">{id ? "Edit Product" : "Add New Product"}</h1>

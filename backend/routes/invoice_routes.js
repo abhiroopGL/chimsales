@@ -2,7 +2,7 @@ const express = require('express');
 const Invoice = require("../models/invoice.js")
 const Order = require("../models/order.js")
 const { admin } = require('../middleware/checkAdmin.js');
-const { getAllInvoices, getSingleInvoice, updateInvoice, createNewInvoice } = require("../controllers/invoice_controller.js")
+const { getAllInvoices, getSingleInvoice, updateInvoice, createNewInvoice, deleteInvoice } = require("../controllers/invoice_controller.js")
 
 const router = express.Router()
 
@@ -19,29 +19,7 @@ router.post("/", createNewInvoice)
 router.put("/:id", updateInvoice)
 
 // Delete invoice (admin only)
-router.delete("/:id", admin, async (req, res) => {
-  try {
-    const invoice = await Invoice.findByIdAndDelete(req.params.id)
-
-    if (!invoice) {
-      return res.status(404).json({
-        success: false,
-        message: "Invoice not found",
-      })
-    }
-
-    res.json({
-      success: true,
-      message: "Invoice deleted successfully",
-    })
-  } catch (error) {
-    console.error("Delete invoice error:", error)
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete invoice",
-    })
-  }
-})
+router.delete("/:id", deleteInvoice)
 
 // Send invoice
 router.post("/:id/send", admin, async (req, res) => {

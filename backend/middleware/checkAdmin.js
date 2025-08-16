@@ -1,5 +1,6 @@
 const admin = (req, res, next) => {
     // Check if the user has admin role
+    console.log("Checking admin access for user:", req.user);
     if (req.user && req.user.role === 'admin') {
         next(); // User is admin, proceed to the next middleware or route handler
     } else {
