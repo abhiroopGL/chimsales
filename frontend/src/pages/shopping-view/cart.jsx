@@ -13,7 +13,7 @@ const Cart = () => {
     const { items } = useSelector((state) => state.cart);
     const navigate = useNavigate();
 
-    const totalAmount = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const totalAmount = items.reduce((total, item) => total + (item.unitPrice * item.quantity), 0);
 
     const handleQuantityChange = (productId, quantity) => {
         if (quantity < 1) return;
@@ -84,9 +84,9 @@ const Cart = () => {
                                     className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
                                 />
                                 <div className="flex-1 w-full sm:w-auto">
-                                    <h3 className="font-semibold text-lg text-black">{item.name}</h3>
+                                    <h3 className="font-semibold text-lg text-black">{item.productName}</h3>
                                     <p className="text-gray-600 text-sm">{/* You can add category if you have it here */}</p>
-                                    <p className="text-lg font-bold mt-2">{item.price.toFixed(3)} KWD</p>
+                                    <p className="text-lg font-bold mt-2">{item.unitPrice.toFixed(3)} KWD</p>
                                 </div>
 
                                 <div className="flex items-center gap-3">

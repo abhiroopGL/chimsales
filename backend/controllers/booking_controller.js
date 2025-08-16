@@ -1,30 +1,65 @@
-const { Booking } = require('../models');
+const { Booking, BookingItem, Product, ProductImage } = require("../models");
 const { Op, Sequelize } = require('sequelize');
 
 // Create new booking
 const createNewBooking = async (req, res) => {
     try {
-        const { items, total, deliveryAddress, paymentMethod, notes, fullName, email, phone } = req.body;
+        const { items,
+            total,
+            deliveryArea,
+            deliveryStreet,
+            deliveryGovernorate,
+            paymentMethod,
+            notes,
+            fullName,
+            email,
+            phone,
+            deliveryBlock,
+            deliveryBuilding,
+            deliveryFloor,
+            deliveryApartment } = req.body;
 
-        if (!deliveryAddress || !deliveryAddress.governorate || !deliveryAddress.area) {
-            return res.status(400).json({ success: false, message: "Delivery address with governorate and area is required" });
+        console.log("Body: ", req.body)
+        // Validation
+        if (!deliveryArea || !deliveryGovernorate) {
+            return res.status(400).json({ success: false, message: "Delivery address area and governorate are required" });
         }
-
-        if (!fullName || !phone || !email) {
+        if (!fullName || !phone) {
             return res.status(400).json({ success: false, message: "Full name, phone, and email are required" });
         }
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ success: false, message: "Booking items are required" });
+        }
 
-        const newBookingData = {
-            customerInfo: { fullName, email, phone },
-            items,
+        // Create the Booking
+        const newBooking = await Booking.create({
+            customerFullName: fullName,
+            customerEmail: email,
+            customerPhone: phone,
             total,
-            deliveryAddress,
+            deliveryStreet: deliveryStreet || null,
+            deliveryArea: deliveryArea,
+            deliveryGovernorate: deliveryGovernorate,
+            deliveryBlock: deliveryBlock || null,
+            deliveryBuilding: deliveryBuilding || null,
+            deliveryFloor: deliveryFloor || null,
+            deliveryApartment: deliveryApartment || null,
             paymentMethod,
             notes: notes || "",
             status: "pending",
-        };
+        });
 
-        const newBooking = await Booking.create(newBookingData);
+        // Create associated BookingItems
+        const bookingItemsData = items.map(item => ({
+            bookingId: newBooking.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.unitPrice, // per unit price
+        }));
+
+
+        await BookingItem.bulkCreate(bookingItemsData);
+
         res.status(201).json({ success: true, message: "Booking placed successfully", booking: newBooking });
     } catch (error) {
         console.error("Create booking error:", error);
@@ -49,21 +84,55 @@ const getAllBookings = async (req, res) => {
         // Status filter
         if (status) where.status = status;
 
-        // Search filter on JSONB field
+        // Search filter on customer fields
         if (search) {
             where[Op.or] = [
-                Sequelize.where(Sequelize.json('customerInfo.fullName'), { [Op.iLike]: `%${search}%` }),
-                Sequelize.where(Sequelize.json('customerInfo.email'), { [Op.iLike]: `%${search}%` }),
-                Sequelize.where(Sequelize.json('customerInfo.phone'), { [Op.iLike]: `%${search}%` }),
+                { customerFullName: { [Op.iLike]: `%${search}%` } },
+                { customerEmail: { [Op.iLike]: `%${search}%` } },
+                { customerPhone: { [Op.iLike]: `%${search}%` } },
             ];
         }
 
         const bookings = await Booking.findAll({
             where,
-            order: [['createdAt', 'DESC']]
+            order: [["createdAt", "DESC"]],
+            include: [
+                {
+                    model: BookingItem,
+                    as: "items",
+                    include: [
+                        {
+                            model: Product,
+                            as: "product",
+                            include: [
+                                {
+                                    model: ProductImage,
+                                    as: "images",
+                                    separate: true,
+                                    limit: 1, // fetch only first image
+                                    order: [["createdAt", "ASC"]],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
-        res.json({ success: true, bookings });
+        // Format response: add imageUrl field
+        const formattedBookings = bookings.map((booking) => {
+            const bookingJson = booking.toJSON();
+            bookingJson.items = bookingJson.items.map((item) => ({
+                ...item,
+                product: {
+                    ...item.product,
+                    imageUrl: item.product.images[0]?.url || null,
+                },
+            }));
+            return bookingJson;
+        });
+
+        res.json({ success: true, bookings: formattedBookings });
     } catch (error) {
         console.error("Error fetching bookings:", error);
         res.status(500).json({ success: false, message: "Failed to fetch bookings" });
@@ -72,24 +141,29 @@ const getAllBookings = async (req, res) => {
 
 // Update booking status
 const updateBookingStatus = async (req, res) => {
+    console.log("Body:", req.body);
+    console.log("Params:", req.params);
+
     try {
         const { id } = req.params;
         const { status } = req.body;
 
+        if (!id) return res.status(400).json({ success: false, message: "Booking ID is required" });
         if (!status) return res.status(400).json({ success: false, message: "Status is required" });
 
-        const [updatedCount, [updatedBooking]] = await Booking.update(
-            { status },
-            { where: { id }, returning: true }
-        );
+        // Update booking
+        const booking = await Booking.findByPk(id);
+        if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
 
-        if (updatedCount === 0) return res.status(404).json({ success: false, message: "Booking not found" });
+        booking.status = status;
+        await booking.save();
 
-        res.json({ success: true, booking: updatedBooking });
+        res.json({ success: true, booking });
     } catch (error) {
         console.error("Update booking status error:", error);
         res.status(500).json({ success: false, message: "Failed to update status" });
     }
 };
+
 
 module.exports = { createNewBooking, getAllBookings, updateBookingStatus };

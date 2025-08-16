@@ -28,15 +28,6 @@ const Products = () => {
   // };
 
   const handleAddToCart = (product) => {
-    if (!isAuthenticated) {
-      dispatch(
-        showNotification({
-          type: "error",
-          message: "Please login to add items to cart",
-        })
-      );
-      return;
-    }
     dispatch(addToCart({ product, quantity: 1 }));
     dispatch(
       showNotification({

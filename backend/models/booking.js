@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     deliveryArea: DataTypes.STRING,
     deliveryGovernorate: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     deliveryBlock: DataTypes.STRING,
     deliveryBuilding: DataTypes.STRING,
@@ -47,6 +47,12 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Booking',
+  });
+
+  // 🔑 After create hook
+  Booking.afterCreate(async (booking) => {
+    booking.bookingNumber = booking.id; // use the auto-increment ID
+    await booking.save();
   });
 
   return Booking;
