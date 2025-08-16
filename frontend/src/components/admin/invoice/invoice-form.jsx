@@ -4,28 +4,22 @@ import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { showNotification } from "../../../redux/slices/notificationSlice"
 import { X, Plus, Trash2, Calculator } from "lucide-react"
-import { createInvoice, updateInvoice } from "../../../redux/slices/invoiceSlice"
+import { createInvoice, updateInvoice, fetchInvoiceById } from "../../../redux/slices/invoiceSlice"
 import { fetchPublicProducts } from "../../../redux/slices/productSlice"
 
-const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
+const InvoiceForm = ({ invoiceId, onClose, onSuccess }) => {
   const dispatch = useDispatch()
   const { publicProducts: products } = useSelector((state) => state.products)
-  const { isLoading } = useSelector((state) => state.invoices)
+  const { currentInvoice, isLoading } = useSelector((state) => state.invoices)
 
   const [formData, setFormData] = useState({
     invoiceNumber: "",
     customerName: "",
     customerPhone: "",
     customerEmail: "",
-    customerAddress: {
-      street: "",
-      area: "",
-      governorate: "",
-      block: "",
-      building: "",
-      floor: "",
-      apartment: "",
-    },
+    customerStreet: "",
+    customerArea: "",
+    customerGovernorate: "",
     items: [
       {
         productId: "",
@@ -47,39 +41,49 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
     terms: "Payment is due within 30 days of invoice date.",
   })
 
+  // Fetch products and invoice details
   useEffect(() => {
     dispatch(fetchPublicProducts())
   }, [dispatch])
 
   useEffect(() => {
-    if (invoice) {
+    if (invoiceId) dispatch(fetchInvoiceById(invoiceId))
+  }, [dispatch, invoiceId])
+
+  // Populate form once invoice is fetched
+  useEffect(() => {
+    if (currentInvoice) {
       setFormData({
-        ...formData,
-        invoiceNumber: invoice.invoiceNumber,
-        customerName: invoice.customerName || "",
-        customerPhone: invoice.customerPhone || "",
-        customerEmail: invoice.customerEmail || "",
-        subtotal: invoice.subtotal || 0,
-        taxRate: invoice.taxRate || 0,
-        taxAmount: invoice.taxAmount || 0,
-        discountRate: invoice.discountRate || 0,
-        discountAmount: invoice.discountAmount || 0,
-        total: invoice.total || 0,
-        dueDate: invoice.dueDate ? invoice.dueDate.split("T")[0] : "",
-        notes: invoice.notes || "",
-        terms: invoice.terms || formData.terms,
-        items: invoice.items?.map((item) => ({
-          productId: item.id,
-          productName: item.productName,
-          description: item.description,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          total: item.total,
-        })) || formData.items,
+        invoiceNumber: currentInvoice.invoiceNumber,
+        customerName: currentInvoice.customerName || "",
+        customerPhone: currentInvoice.customerPhone || "",
+        customerEmail: currentInvoice.customerEmail || "",
+        customerStreet: currentInvoice.customerStreet || formData.customerStreet,
+        customerArea: currentInvoice.customerArea || formData.customerArea,
+        customerGovernorate: currentInvoice.customerGovernorate || formData.customerGovernorate,
+        subtotal: currentInvoice.subtotal || 0,
+        taxRate: currentInvoice.taxRate || 0,
+        taxAmount: currentInvoice.taxAmount || 0,
+        discountRate: currentInvoice.discountRate || 0,
+        discountAmount: currentInvoice.discountAmount || 0,
+        total: currentInvoice.total || 0,
+        dueDate: currentInvoice.dueDate ? currentInvoice.dueDate.split("T")[0] : "",
+        notes: currentInvoice.notes || "",
+        terms: currentInvoice.terms || formData.terms,
+        items:
+          currentInvoice.items?.map((item) => ({
+            productId: item.productId,
+            productName: item.productName,
+            description: item.description,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            total: item.total,
+          })) || formData.items,
       })
     }
-  }, [invoice])
+  }, [currentInvoice])
 
+  // Recalculate totals when items/tax/discount change
   useEffect(() => {
     calculateTotals()
   }, [formData.items, formData.taxRate, formData.discountRate])
@@ -102,39 +106,61 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    if (name.startsWith("customerAddress.")) {
-      const field = name.split(".")[1]
-      setFormData((prev) => ({
-        ...prev,
-        customerAddress: { ...prev.customerAddress, [field]: value },
-      }))
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
-    }
+
+    // Directly update the field in formData
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
   }
 
-    const handleItemChange = (index, field, value) => {
-      const newItems = [...formData.items]
-      newItems[index] = { ...newItems[index], [field]: value }
+  // Replacing handleItemChange
+  const handleItemChange = (index, field, value) => {
+    const newItems = [...formData.items]
 
-      if (field === "product" && value) {
-        const selectedProduct = products.find((p) => p.id == value || p._id == value)
-        if (selectedProduct) {
-          newItems[index] = {
-            ...newItems[index],
-            productName: selectedProduct.name,
-            description: selectedProduct.description,
-            unitPrice: selectedProduct.price,
-            total: selectedProduct.price * newItems[index].quantity,
-          }
+    if (field === "product") {
+      const selectedProduct = products.find((p) => p.id == value || p._id == value)
+      if (selectedProduct) {
+        newItems[index] = {
+          ...newItems[index],
+          productId: selectedProduct.id || selectedProduct._id,
+          productName: selectedProduct.name,
+          description: selectedProduct.description,
+          unitPrice: selectedProduct.price,
+          total: selectedProduct.price * newItems[index].quantity,
+        }
+      } else {
+        // Reset if no product selected
+        newItems[index] = {
+          ...newItems[index],
+          productId: "",
+          productName: "",
+          description: "",
+          unitPrice: 0,
+          total: 0,
         }
       }
-
-    if (field === "quantity" || field === "unitPrice") {
-      newItems[index].total = newItems[index].quantity * newItems[index].unitPrice
+    } else if (field === "quantity" || field === "unitPrice") {
+      newItems[index] = {
+        ...newItems[index],
+        [field]: value,
+        total: field === "quantity" ? value * newItems[index].unitPrice : newItems[index].quantity * value,
+      }
+    } else {
+      newItems[index] = { ...newItems[index], [field]: value }
     }
 
     setFormData((prev) => ({ ...prev, items: newItems }))
+  }
+
+
+  const removeItem = (index) => {
+    if (formData.items.length > 1) {
+      setFormData((prev) => ({
+        ...prev,
+        items: prev.items.filter((_, i) => i !== index),
+      }))
+    }
   }
 
   const addItem = () => {
@@ -147,26 +173,18 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
     }))
   }
 
-  const removeItem = (index) => {
-    if (formData.items.length > 1) {
-      setFormData((prev) => ({
-        ...prev,
-        items: prev.items.filter((_, i) => i !== index),
-      }))
-    }
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     const cleanedData = {
       invoiceNumber: formData.invoiceNumber,
       customerName: formData.customerName,
       customerPhone: formData.customerPhone,
       customerEmail: formData.customerEmail,
-      customerAddress: formData.customerAddress,
+      customerStreet: formData.customerStreet,
+      customerArea: formData.customerArea,
+      customerGovernorate: formData.customerGovernorate,
       items: formData.items.map((item) => ({
-        productId: item.id,
+        productId: item.productId,
         productName: item.productName,
         description: item.description,
         quantity: item.quantity,
@@ -185,25 +203,35 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
     }
 
     try {
-      if (invoice) {
-        await dispatch(updateInvoice({ id: invoice.id, data: cleanedData })).unwrap()
-        dispatch(showNotification({ message: "Invoice updated successfully!", type: "success" }))
+      if (currentInvoice) {
+        await dispatch(updateInvoice({ id: invoiceId, data: cleanedData })).unwrap()
+        dispatch(showNotification({ type: "success", message: "Invoice updated successfully!" }))
       } else {
         await dispatch(createInvoice(cleanedData)).unwrap()
-        dispatch(showNotification({ message: "Invoice created successfully!", type: "success" }))
+        dispatch(showNotification({ type: "success", message: "Invoice created successfully!" }))
       }
       onSuccess?.()
       onClose()
     } catch (error) {
-      dispatch(showNotification({ message: error || "Failed to save invoice", type: "error" }))
+      dispatch(showNotification({ type: "error", message: error || "Failed to save invoice" }))
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="invoice-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold">{invoice ? "Edit Invoice" : "Create New Invoice"}</h2>
+          <h2 className="text-2xl font-bold">{currentInvoice ? "Edit Invoice" : "Create New Invoice"}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X size={24} />
           </button>
@@ -270,8 +298,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
               <div>
                 <label className="block text-sm font-medium mb-2">Governorate</label>
                 <select
-                  name="customerAddress.governorate"
-                  value={formData.customerAddress.governorate}
+                  name="customerGovernorate"
+                  value={formData.customerGovernorate}
                   onChange={handleInputChange}
                   className="input-field"
                 >
@@ -288,8 +316,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                 <label className="block text-sm font-medium mb-2">Area</label>
                 <input
                   type="text"
-                  name="customerAddress.area"
-                  value={formData.customerAddress.area}
+                  name="customerArea"
+                  value={formData.customerArea}
                   onChange={handleInputChange}
                   className="input-field"
                 />
@@ -298,8 +326,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                 <label className="block text-sm font-medium mb-2">Street</label>
                 <input
                   type="text"
-                  name="customerAddress.street"
-                  value={formData.customerAddress.street}
+                  name="customerStreet"
+                  value={formData.customerStreet}
                   onChange={handleInputChange}
                   className="input-field"
                 />
@@ -324,7 +352,7 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium mb-2">Product</label>
                       <select
-                        value={item.product}
+                        value={item.productId || ''}
                         onChange={(e) => handleItemChange(index, "product", e.target.value)}
                         className="input-field"
                       >
@@ -488,7 +516,7 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
               Cancel
             </button>
             <button type="submit" disabled={isLoading} className="btn-primary">
-              {isLoading ? "Saving..." : invoice ? "Update Invoice" : "Create Invoice"}
+              {isLoading ? "Saving..." : currentInvoice ? "Update Invoice" : "Create Invoice"}
             </button>
           </div>
         </form>

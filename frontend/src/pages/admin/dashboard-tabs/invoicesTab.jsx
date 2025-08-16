@@ -13,7 +13,7 @@ const InvoicesTab = () => {
     const [loading, setLoading] = useState(false);
 
     const [search, setSearch] = useState("");
-    const [status, setStatus] = useState("");
+    // const [status, setStatus] = useState("");
 
     const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [showInvoiceForm, setShowInvoiceForm] = useState(false);
@@ -29,7 +29,7 @@ const InvoicesTab = () => {
         try {
             const params = { page, limit: 20 };
             if (search.trim() !== "") params.search = search.trim();
-            if (status !== "") params.status = status;
+            // if (status !== "") params.status = status;
 
             const res = await axiosInstance.get("/api/invoice", { params });
             const newInvoices = res.data.invoices || [];
@@ -46,7 +46,7 @@ const InvoicesTab = () => {
         } finally {
             setLoading(false);
         }
-    }, [page, hasMore, loading, search, status]);
+    }, [page, hasMore, loading, search]);
 
     // Reset invoices when filters/search change
     useEffect(() => {
@@ -54,7 +54,7 @@ const InvoicesTab = () => {
         setPage(1);
         setHasMore(true);
         setLoading(false);
-    }, [search, status]);
+    }, [search]);
 
     // Fetch invoices on initial load and after reset
     useEffect(() => {
@@ -73,7 +73,7 @@ const InvoicesTab = () => {
             }
         }, 150); // debounce 150ms
     };
-
+    debugger
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
         return () => {
@@ -117,7 +117,7 @@ const InvoicesTab = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-4 mb-4">
+            {/* <div className="flex flex-wrap gap-4 mb-4">
                 <SearchBar
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -134,7 +134,7 @@ const InvoicesTab = () => {
                     <option value="overdue">Overdue</option>
                     <option value="pending">Pending</option>
                 </select>
-            </div>
+            </div> */}
 
             {/* Desktop Table */}
             <div className="hidden sm:block overflow-x-auto">
@@ -144,30 +144,31 @@ const InvoicesTab = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice #</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+                            {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th> */}
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody className="divide-y divide-gray-200">
                         {invoices.map((invoice) => (
-                            <tr key={invoice._id} className="hover:bg-gray-50">
+                            <tr key={invoice.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 text-left font-medium text-gray-900">
                                     {truncate(invoice.invoiceNumber, 50)}
                                 </td>
                                 <td className="px-6 py-4 text-left">
                                     <div className="text-sm text-gray-900">
-                                        {truncate(invoice.customer?.fullName || invoice.createdBy?.fullName || "N/A", 25)}
+                                        {truncate(invoice?.customerName || "N/A", 25)}
                                     </div>
                                     <div className="text-sm text-gray-500">
-                                        {truncate(invoice.customer?.phoneNumber || "-", 20)}
+                                        {truncate(invoice.customerPhone || "-", 20)}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-left text-sm text-gray-600 whitespace-nowrap">
                                     {invoice.total?.toFixed(3)} KWD
                                 </td>
-                                <td className="px-6 py-4 text-left">
+                                {/* <td className="px-6 py-4 text-left">
                                     <span
                                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.status === "paid"
                                             ? "bg-green-100 text-green-800"
@@ -180,9 +181,12 @@ const InvoicesTab = () => {
                                     >
                                         {invoice.status}
                                     </span>
-                                </td>
-                                <td className="px-6 py-4 text-left text-sm text-gray-600 whitespace-nowrap">
+                                </td> */}
+                                {/* <td className="px-6 py-4 text-left text-sm text-gray-600 whitespace-nowrap">
                                     {new Date(invoice.dueDate).toLocaleDateString()}
+                                </td> */}
+                                <td className="px-6 py-4 text-left text-sm text-gray-600 whitespace-nowrap">
+                                    {new Date(invoice.createdAt).toLocaleString()}
                                 </td>
                                 <td className="px-6 py-4 text-left text-sm font-medium">
                                     <div className="flex gap-2">
@@ -227,7 +231,7 @@ const InvoicesTab = () => {
                     <div key={invoice._id} className="bg-white shadow rounded p-4">
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="font-semibold text-lg">Invoice #{invoice.invoiceNumber}</h3>
-                            <span
+                            {/* <span
                                 className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.status === "paid"
                                     ? "bg-green-100 text-green-800"
                                     : invoice.status === "sent"
@@ -238,12 +242,13 @@ const InvoicesTab = () => {
                                     }`}
                             >
                                 {invoice.status}
-                            </span>
+                            </span> */}
                         </div>
                         <p className="text-sm text-gray-900 font-medium">{invoice.customer?.fullName || invoice.createdBy?.fullName || "N/A"}</p>
                         <p className="text-sm text-gray-500 mb-1">{invoice.customer?.phoneNumber || "-"}</p>
                         <p className="text-sm text-gray-600 mb-1">Amount: {invoice.total?.toFixed(3)} KWD</p>
-                        <p className="text-sm text-gray-600 mb-3">Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</p>
+                        {/* <p className="text-sm text-gray-600 mb-3">Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</p> */}
+                        <p className="text-sm text-gray-600 mb-3">Created At: {new Date(invoice.createdAt).toLocaleString}</p>
 
                         <div className="flex gap-4">
                             <button
@@ -281,7 +286,7 @@ const InvoicesTab = () => {
             {/* Invoice Form Modal */}
             {showInvoiceForm && (
                 <InvoiceForm
-                    invoice={selectedInvoice}
+                    invoiceId={selectedInvoice?.id}
                     onClose={() => {
                         setShowInvoiceForm(false);
                         setSelectedInvoice(null);
