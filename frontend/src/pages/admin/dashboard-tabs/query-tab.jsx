@@ -111,9 +111,9 @@ const QueryTab = () => {
                         onChange={(e) => setStatus(e.target.value)}
                     >
                         <option value="">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="In Process">In Process</option>
-                        <option value="Resolved">Resolved</option>
+                        <option value="pending">Pending</option>
+                        <option value="in process">In Process</option>
+                        <option value="resolved">Resolved</option>
                     </select>
                 </div>
             </div>
