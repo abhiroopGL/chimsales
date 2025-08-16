@@ -14,23 +14,21 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
 
   const [formData, setFormData] = useState({
     invoiceNumber: "",
-    customer: {
-      fullName: "",
-      phoneNumber: "",
-      email: "",
-      address: {
-        street: "",
-        area: "",
-        governorate: "",
-        block: "",
-        building: "",
-        floor: "",
-        apartment: "",
-      },
+    customerName: "",
+    customerPhone: "",
+    customerEmail: "",
+    customerAddress: {
+      street: "",
+      area: "",
+      governorate: "",
+      block: "",
+      building: "",
+      floor: "",
+      apartment: "",
     },
     items: [
       {
-        product: "",
+        productId: "",
         productName: "",
         description: "",
         quantity: 1,
@@ -56,8 +54,28 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
   useEffect(() => {
     if (invoice) {
       setFormData({
-        ...invoice,
+        ...formData,
+        invoiceNumber: invoice.invoiceNumber,
+        customerName: invoice.customerName || "",
+        customerPhone: invoice.customerPhone || "",
+        customerEmail: invoice.customerEmail || "",
+        subtotal: invoice.subtotal || 0,
+        taxRate: invoice.taxRate || 0,
+        taxAmount: invoice.taxAmount || 0,
+        discountRate: invoice.discountRate || 0,
+        discountAmount: invoice.discountAmount || 0,
+        total: invoice.total || 0,
         dueDate: invoice.dueDate ? invoice.dueDate.split("T")[0] : "",
+        notes: invoice.notes || "",
+        terms: invoice.terms || formData.terms,
+        items: invoice.items?.map((item) => ({
+          productId: item.id,
+          productName: item.productName,
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          total: item.total,
+        })) || formData.items,
       })
     }
   }, [invoice])
@@ -84,51 +102,33 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    if (name.startsWith("customer.address.")) {
-      const addressField = name.split(".")[2]
+    if (name.startsWith("customerAddress.")) {
+      const field = name.split(".")[1]
       setFormData((prev) => ({
         ...prev,
-        customer: {
-          ...prev.customer,
-          address: {
-            ...prev.customer.address,
-            [addressField]: value,
-          },
-        },
-      }))
-    } else if (name.startsWith("customer.")) {
-      const customerField = name.split(".")[1]
-      setFormData((prev) => ({
-        ...prev,
-        customer: {
-          ...prev.customer,
-          [customerField]: value,
-        },
+        customerAddress: { ...prev.customerAddress, [field]: value },
       }))
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }))
+      setFormData((prev) => ({ ...prev, [name]: value }))
     }
   }
 
-  const handleItemChange = (index, field, value) => {
-    const newItems = [...formData.items]
-    newItems[index] = { ...newItems[index], [field]: value }
+    const handleItemChange = (index, field, value) => {
+      const newItems = [...formData.items]
+      newItems[index] = { ...newItems[index], [field]: value }
 
-    if (field === "product" && value) {
-      const selectedProduct = products.find((p) => p._id === value)
-      if (selectedProduct) {
-        newItems[index] = {
-          ...newItems[index],
-          productName: selectedProduct.name,
-          description: selectedProduct.description,
-          unitPrice: selectedProduct.price,
-          total: selectedProduct.price * newItems[index].quantity,
+      if (field === "product" && value) {
+        const selectedProduct = products.find((p) => p.id == value || p._id == value)
+        if (selectedProduct) {
+          newItems[index] = {
+            ...newItems[index],
+            productName: selectedProduct.name,
+            description: selectedProduct.description,
+            unitPrice: selectedProduct.price,
+            total: selectedProduct.price * newItems[index].quantity,
+          }
         }
       }
-    }
 
     if (field === "quantity" || field === "unitPrice") {
       newItems[index].total = newItems[index].quantity * newItems[index].unitPrice
@@ -142,14 +142,7 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
       ...prev,
       items: [
         ...prev.items,
-        {
-          product: "",
-          productName: "",
-          description: "",
-          quantity: 1,
-          unitPrice: 0,
-          total: 0,
-        },
+        { productId: "", productName: "", description: "", quantity: 1, unitPrice: 0, total: 0 },
       ],
     }))
   }
@@ -164,34 +157,47 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     const cleanedData = {
-      ...formData,
-      items: formData.items.map(item => ({
-        product: item.product,
+      invoiceNumber: formData.invoiceNumber,
+      customerName: formData.customerName,
+      customerPhone: formData.customerPhone,
+      customerEmail: formData.customerEmail,
+      customerAddress: formData.customerAddress,
+      items: formData.items.map((item) => ({
+        productId: item.id,
+        productName: item.productName,
         description: item.description,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        total: item.total
-      }))
-    };
+        total: item.total,
+      })),
+      subtotal: formData.subtotal,
+      taxRate: formData.taxRate,
+      taxAmount: formData.taxAmount,
+      discountRate: formData.discountRate,
+      discountAmount: formData.discountAmount,
+      total: formData.total,
+      dueDate: formData.dueDate,
+      notes: formData.notes,
+      terms: formData.terms,
+    }
 
     try {
       if (invoice) {
-        await dispatch(updateInvoice({ id: invoice._id, data: cleanedData })).unwrap();
-        dispatch(showNotification({message: "Invoice updated successfully!", type: "success"}));
+        await dispatch(updateInvoice({ id: invoice.id, data: cleanedData })).unwrap()
+        dispatch(showNotification({ message: "Invoice updated successfully!", type: "success" }))
       } else {
-        await dispatch(createInvoice(cleanedData)).unwrap();
-        dispatch(showNotification({message: "Invoice created successfully!", type: "success"}));
+        await dispatch(createInvoice(cleanedData)).unwrap()
+        dispatch(showNotification({ message: "Invoice created successfully!", type: "success" }))
       }
-      onSuccess?.();
-      onClose();
+      onSuccess?.()
+      onClose()
     } catch (error) {
-      dispatch(showNotification({message: error || "Failed to save invoice", type: "error"}));
+      dispatch(showNotification({ message: error || "Failed to save invoice", type: "error" }))
     }
-  };
-
+  }
 
   return (
     <div className="invoice-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -233,8 +239,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                 <label className="block text-sm font-medium mb-2">Full Name *</label>
                 <input
                   type="text"
-                  name="customer.fullName"
-                  value={formData.customer.fullName}
+                  name="customerName"
+                  value={formData.customerName}
                   onChange={handleInputChange}
                   className="input-field"
                   required
@@ -244,8 +250,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                 <label className="block text-sm font-medium mb-2">Phone Number *</label>
                 <input
                   type="tel"
-                  name="customer.phoneNumber"
-                  value={formData.customer.phoneNumber}
+                  name="customerPhone"
+                  value={formData.customerPhone}
                   onChange={handleInputChange}
                   className="input-field"
                   required
@@ -255,8 +261,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <input
                   type="email"
-                  name="customer.email"
-                  value={formData.customer.email}
+                  name="customerEmail"
+                  value={formData.customerEmail}
                   onChange={handleInputChange}
                   className="input-field"
                 />
@@ -264,8 +270,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
               <div>
                 <label className="block text-sm font-medium mb-2">Governorate</label>
                 <select
-                  name="customer.address.governorate"
-                  value={formData.customer.address.governorate}
+                  name="customerAddress.governorate"
+                  value={formData.customerAddress.governorate}
                   onChange={handleInputChange}
                   className="input-field"
                 >
@@ -282,8 +288,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                 <label className="block text-sm font-medium mb-2">Area</label>
                 <input
                   type="text"
-                  name="customer.address.area"
-                  value={formData.customer.address.area}
+                  name="customerAddress.area"
+                  value={formData.customerAddress.area}
                   onChange={handleInputChange}
                   className="input-field"
                 />
@@ -292,8 +298,8 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                 <label className="block text-sm font-medium mb-2">Street</label>
                 <input
                   type="text"
-                  name="customer.address.street"
-                  value={formData.customer.address.street}
+                  name="customerAddress.street"
+                  value={formData.customerAddress.street}
                   onChange={handleInputChange}
                   className="input-field"
                 />
@@ -324,7 +330,7 @@ const InvoiceForm = ({ invoice = null, onClose, onSuccess }) => {
                       >
                         <option value="">Select Product</option>
                         {products.map((product) => (
-                          <option key={product._id} value={product._id}>
+                          <option key={product.id} value={product.id}>
                             {product.name}
                           </option>
                         ))}

@@ -207,7 +207,7 @@ const InvoicesTab = () => {
                                             <Edit size={16} />
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteItem(invoice._id)}
+                                            onClick={() => handleDeleteItem(invoice.id)}
                                             className="text-red-600 hover:text-red-800"
                                             aria-label={`Delete invoice ${invoice.invoiceNumber}`}
                                         >
@@ -269,7 +269,7 @@ const InvoicesTab = () => {
                             <button
                                 className="text-red-600 hover:text-red-800"
                                 aria-label={`Delete invoice ${invoice.invoiceNumber}`}
-                                onClick={() => handleDeleteItem(invoice._id)}
+                                onClick={() => handleDeleteItem(invoice.id)}
                             >
                                 <Trash2 size={20} />
                             </button>
@@ -297,7 +297,7 @@ const InvoicesTab = () => {
             {/* Invoice View Modal */}
             {showInvoiceView && selectedInvoice && (
                 <InvoiceView
-                    invoiceId={selectedInvoice._id}
+                    invoiceId={selectedInvoice.id}
                     onClose={() => {
                         setShowInvoiceView(false);
                         setSelectedInvoice(null);

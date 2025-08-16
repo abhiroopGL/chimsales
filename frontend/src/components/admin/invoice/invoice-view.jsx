@@ -57,6 +57,8 @@ const InvoiceView = ({ invoiceId, onClose, onEdit }) => {
     )
   }
 
+  debugger
+
   if (!currentInvoice) return null
 
   return (
@@ -137,15 +139,15 @@ const InvoiceView = ({ invoiceId, onClose, onEdit }) => {
           <div className="mb-8">
             <h3 className="text-lg font-semibold mb-3 sm:text-base xs:text-sm">Bill To:</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="font-semibold">{currentInvoice.customer.fullName}</p>
-              <p className="text-gray-600">{currentInvoice.customer.phoneNumber}</p>
-              {currentInvoice.customer.email && <p className="text-gray-600">{currentInvoice.customer.email}</p>}
-              {currentInvoice.customer.address && (
+              <p className="font-semibold">{currentInvoice?.createdBy?.fullName}</p>
+              <p className="text-gray-600">{currentInvoice?.createdBy?.phone}</p>
+              {currentInvoice?.createdBy?.email && <p className="text-gray-600">{currentInvoice.createdBy.email}</p>}
+              {currentInvoice?.createdBy?.address && (
                 <div className="text-gray-600 text-sm mt-2">
                   {[
-                    currentInvoice.customer.address.street,
-                    currentInvoice.customer.address.area,
-                    currentInvoice.customer.address.governorate,
+                    currentInvoice?.createdBy?.address?.street,
+                    currentInvoice?.createdBy?.address?.area,
+                    currentInvoice?.createdBy?.address?.governorate,
                   ]
                     .filter(Boolean)
                     .join(", ")}
