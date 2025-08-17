@@ -48,6 +48,16 @@ app.use(cors({
   credentials: true
 }));
 
+app.options('*', cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS not allowed for this origin: ' + origin));
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
+
 // Routes
 app.use('/api/auth', userRouter);
 // app.use(authMiddleware); // can enable for protected routes
