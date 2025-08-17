@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 8000;
 // const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const allowedOrigins = [
-  'https://chimsales-lt1666jr4-abhirooppanchalv01-6383s-projects.vercel.app/', // your deployed frontend
+  'https://chimsales-lt1666jr4-abhirooppanchalv01-6383s-projects.vercel.app', // your deployed frontend
   'http://localhost:5173'           // local dev
 ];
 
