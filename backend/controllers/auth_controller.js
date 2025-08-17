@@ -60,9 +60,9 @@ const loginUser = async (req, res) => {
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 24 * 60 * 60 * 1000
+            secure: process.env.NODE_ENV === "production", // true in production
+            sameSite: "none",  // required for cross-domain cookies
+            maxAge: 10 * 24 * 60 * 60 * 1000 // 10 days in milliseconds
         }).json({
             success: true,
             message: "Logged in successfully",
