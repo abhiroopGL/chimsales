@@ -3,6 +3,7 @@ const path = require("path");
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const errorHandler = require('./middleware/errorHandler')
 
 // Import Sequelize models
 const { sequelize } = require('./models'); // automatically picks up models/index.js
@@ -21,7 +22,7 @@ const bookingRouter = require('./routes/booking_routes');
 const { authMiddleware } = require('./controllers/auth_controller');
 
 const PORT = process.env.PORT || 8000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+// const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const app = express();
 
@@ -30,7 +31,7 @@ app.use(express.json());
 app.use(express.static(path.resolve('./public')));
 app.use(cookieParser());
 app.use(cors({
-    origin: FRONTEND_URL,
+    origin: '*',
     credentials: true,
 }));
 
@@ -45,6 +46,9 @@ app.use("/api/orders", orderRouter);
 app.use("/api/invoice", authMiddleware, invoiceRouter);
 app.use('/api/queries', queriesRouter);
 app.use('/api/booking', bookingRouter);
+
+
+app.use(errorHandler)
 
 // Error handler
 app.use((err, req, res, next) => {
