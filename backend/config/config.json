@@ -14,10 +14,13 @@
     "dialect": "postgres"
   },
   "production": {
-    "username": "abhiroop.panchal",
-    "password": "chimney-kuwait@prod2025",
-    "database": "chimney_store_production",
-    "host": "127.0.0.1",
-    "dialect": "postgres"
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
   }
 }
