@@ -9,7 +9,6 @@ import { addToCart } from "../../redux/slices/cartSlice.jsx";
 const Products = () => {
   const dispatch = useDispatch();
   const { publicProducts, isLoading } = useSelector((state) => state.products);
-  const { isAuthenticated } = useSelector((state) => state.authorization);
 
   const [filters, setFilters] = useState({
     search: "",

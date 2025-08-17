@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { Route, Routes } from "react-router-dom";
 import './App.css'
-import NotFound from './pages/not-found';
 import AuthLogin from "./pages/auth/login.jsx";
 import AuthRegister from "./pages/auth/register.jsx";
 import UserDashboard from "./pages/shopping-view/dashboard.jsx";
@@ -18,6 +17,7 @@ import Navbar from './components/common/Navbar.jsx';
 import Products from "./pages/shopping-view/products.jsx";
 import ProductDetail from './pages/shopping-view/product-details.jsx';
 import { fetchFeaturedProducts } from './redux/slices/productSlice.jsx';
+import Directions from './components/common/Directions.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -48,6 +48,8 @@ function App() {
           {/* Admin Routes */}
           <Route path="/*" element={<AdminRoutes />} />
         </Routes>
+        {/* ✅ Floating Action Button always above everything */}
+        <Directions />
       </div>
     </>
   )

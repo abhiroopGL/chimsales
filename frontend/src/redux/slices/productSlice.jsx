@@ -4,6 +4,7 @@ import axiosInstance from "../../api/axios-instance.js";
 const initialState = {
     adminProducts: [],
     publicProducts: [],
+    featuredProducts: [],
     product: null,
     isLoading: true,
     error: null,
@@ -198,7 +199,7 @@ const productSlice = createSlice({
                 state.error = action.error.message;
             })
             .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
-                state.publicProducts = action.payload;
+                state.featuredProducts = action.payload;
                 state.isLoading = false;
             })
             .addCase(fetchFeaturedProducts.rejected, (state, action) => {
