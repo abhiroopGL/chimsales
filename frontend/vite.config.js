@@ -8,10 +8,10 @@ export default defineConfig({
       react(),
       tailwindcss(),
   ],
-  server: {
-    allowedHosts: ['crucial-escargot-concrete.ngrok-free.app'],
-    proxy: {
-      '/api': 'http://localhost:8000',
-    },
-  },
+  // server: {
+  //   allowedHosts: ['crucial-escargot-concrete.ngrok-free.app'],
+  //   proxy: {
+  //     '/api': 'http://localhost:8000',
+  //   },
+  // },
 })
