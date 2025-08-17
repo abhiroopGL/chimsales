@@ -70,3 +70,5 @@ npx sequelize-cli db:migrate
 
 # Start server
 npm run dev
+
+
