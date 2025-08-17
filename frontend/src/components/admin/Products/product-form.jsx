@@ -144,29 +144,58 @@ const ProductForm = ({ initialData = null }) => {
 
                 {/* Image upload & preview */}
                 <div className="flex flex-wrap gap-4 mt-4">
+                    {/* Existing Images */}
                     {existingImages.map((img, idx) => (
-                        <div key={img.id} className="relative w-24 h-24 border rounded-lg overflow-hidden">
-                            <img src={img.url} alt={`existing-${idx}`} className="w-full h-full object-cover" />
-                            <button type="button" onClick={() => removeImage(idx, true)} className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100">
+                        <div key={img.id} className="relative w-24 h-24">
+                            <img
+                                src={img.url}
+                                alt={`existing-${idx}`}
+                                className="w-full h-full object-cover rounded-lg border"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => removeImage(idx, true)}
+                                className="absolute -top-2 -right-2 z-20 bg-white text-black border border-gray-300 rounded-full p-1 shadow hover:bg-gray-100 transition"
+                            >
                                 <FiX size={16} />
                             </button>
                         </div>
                     ))}
 
+                    {/* New Images */}
                     {newImages.map((file, idx) => (
-                        <div key={idx} className="relative w-24 h-24 border rounded-lg overflow-hidden">
-                            <img src={URL.createObjectURL(file)} alt={`new-${idx}`} className="w-full h-full object-cover" />
-                            <button type="button" onClick={() => removeImage(idx, false)} className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100">
+                        <div key={file.name + file.size} className="relative w-24 h-24">
+                            <img
+                                src={URL.createObjectURL(file)}
+                                alt={`new-${idx}`}
+                                className="w-full h-full object-cover rounded-lg border"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setNewImages(prev => prev.filter(f => f !== file))}
+                                className="absolute -top-2 -right-2 z-20 bg-white text-black border border-gray-300 rounded-full p-1 shadow hover:bg-gray-100 transition"
+                            >
                                 <FiX size={16} />
                             </button>
+
+
                         </div>
                     ))}
 
+                    {/* Add New Image */}
                     <label className="w-24 h-24 flex items-center justify-center border rounded-lg cursor-pointer hover:bg-gray-100">
                         <FiPlus size={24} />
-                        <input type="file" name="images" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+                        <input
+                            type="file"
+                            name="images"
+                            accept="image/*"
+                            multiple
+                            onChange={handleImageUpload}
+                            className="hidden"
+                        />
                     </label>
                 </div>
+
 
                 <button type="submit" className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition">
                     {initialData ? "Update Product" : "Add Product"}

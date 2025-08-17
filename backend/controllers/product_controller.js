@@ -115,10 +115,11 @@ const fetchProductById = async (req, res) => {
     }
 };
 
-// Update product
 const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
+
+        // Fetch the existing product along with images
         const existingProduct = await Product.findByPk(id, {
             include: [{ model: ProductImage, as: "images" }]
         });
@@ -127,8 +128,10 @@ const updateProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
+        // Prepare updates for basic fields
         const updates = {};
         for (const key in req.body) {
+            if (key === "imagesToDelete") continue; // skip deletion field
             if (req.body[key] != existingProduct[key]) {
                 if (key === "featured") {
                     updates[key] = req.body[key] === "true" || req.body[key] === true;
@@ -142,7 +145,7 @@ const updateProduct = async (req, res) => {
             await existingProduct.update(updates);
         }
 
-        // Handle images
+        // Handle new image uploads
         if (req.files && req.files.length > 0) {
             const newImages = req.files.map(file => ({
                 productId: existingProduct.id,
@@ -151,20 +154,32 @@ const updateProduct = async (req, res) => {
             await ProductImage.bulkCreate(newImages);
         }
 
-        if (req.body.imagesToKeep && Array.isArray(req.body.imagesToKeep)) {
+        // Handle image deletions
+        if (req.body.imagesToDelete) {
+            let idsToDelete = req.body.imagesToDelete;
+            if (typeof idsToDelete === "string") {
+                // parse JSON string from frontend
+                idsToDelete = JSON.parse(idsToDelete);
+            }
+
             await ProductImage.destroy({
                 where: {
                     productId: existingProduct.id,
-                    id: { [Op.notIn]: req.body.imagesToKeep }
+                    id: idsToDelete
                 }
             });
         }
 
+        // Fetch updated product
         const updatedProduct = await Product.findByPk(id, {
             include: [{ model: ProductImage, as: "images" }]
         });
 
-        return res.status(200).json({ success: true, message: "Product updated successfully", product: updatedProduct });
+        return res.status(200).json({
+            success: true,
+            message: "Product updated successfully",
+            product: updatedProduct
+        });
 
     } catch (error) {
         console.error(error);
