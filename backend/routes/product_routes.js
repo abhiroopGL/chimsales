@@ -1,34 +1,28 @@
-const path = require('path');
-const multer = require("multer");
 const express = require("express");
+const multer = require("multer");
 const router = express.Router();
-const { createProduct, getAdminProducts, getPublicProducts, fetchProductById, updateProduct, deleteProduct,
-    restoreProduct, getFeaturedProducts
-} = require("../controllers/product_controller")
+const {
+    createProduct,
+    getAdminProducts,
+    getPublicProducts,
+    fetchProductById,
+    updateProduct,
+    deleteProduct,
+    restoreProduct,
+    getFeaturedProducts
+} = require("../controllers/product_controller");
 
-// Configure storage
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        // Replace this below path with wherever you want to store images
-        cb(null, path.resolve('/Users/abhiroop.panchal/Documents/Node/Projects/chimsales/frontend/public/uploads/products'));    // Folder to save
-    },
-    filename: function (req, file, cb) {
-        const fileName = `${Date.now() + '-' + Math.round(Math.random() * 1E9)}.png`;
-        cb(null, fileName);
-    }
-});
-
-
+// Multer memory storage (no saving to disk)
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.post("/create", upload.array('images', 10), createProduct);
+router.post("/create", upload.array("images", 10), createProduct);
 router.get("/admin", getAdminProducts);
 router.get("/public", getPublicProducts);
 router.get("/find/:id", fetchProductById);
-router.put("/update/:id", upload.array('images', 10), updateProduct)
+router.put("/update/:id", upload.array("images", 10), updateProduct);
 router.delete("/delete/:id", deleteProduct);
 router.patch("/restore/:id", restoreProduct);
-router.get("/featured", getFeaturedProducts); // Assuming featured products are fetched from public products
-
+router.get("/featured", getFeaturedProducts);
 
 module.exports = router;

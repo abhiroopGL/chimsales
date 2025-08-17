@@ -1,31 +1,46 @@
 const { Product, ProductImage } = require("../models");
 const { Op } = require("sequelize");
+const cloudinary = require('../config/cloudinary');
 
 // Create product
 const createProduct = async (req, res) => {
     try {
         const { name, description, price, stock, featured, category } = req.body;
 
+        // First create product (without images)
         const product = await Product.create({
             name,
             description,
             price,
             stock,
             featured: featured === "true" || featured === true,
-            category
+            category,
         });
 
-        // Save images separately
+        // Upload images to Cloudinary
+        console.log("Files:", req.files)
         if (req.files && req.files.length > 0) {
-            const imagesData = req.files.map(file => ({
+            const uploadPromises = req.files.map((file) =>
+                cloudinary.uploader.upload(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`, {
+                    folder: `products/${product.id}`,
+                    resource_type: "image",
+                })
+            );
+            const uploadResults = await Promise.all(uploadPromises);
+            console.log("Results", uploadResults)
+
+            const imagesData = uploadResults.map((result) => ({
                 productId: product.id,
-                url: `/uploads/products/${file.filename}`
+                url: result.secure_url,   // Cloudinary hosted URL
+                publicId: result.public_id, // Store this if you want to delete image later
             }));
+
             await ProductImage.bulkCreate(imagesData);
         }
 
+        // Get product with images
         const productWithImages = await Product.findByPk(product.id, {
-            include: [{ model: ProductImage, as: "images" }]
+            include: [{ model: ProductImage, as: "images" }],
         });
 
         return res.status(201).json({ success: true, product: productWithImages });
@@ -116,15 +131,19 @@ const fetchProductById = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
+    const t = await Product.sequelize.transaction(); // start transaction
+
     try {
         const { id } = req.params;
 
-        // Fetch the existing product along with images
+        // Fetch existing product with images
         const existingProduct = await Product.findByPk(id, {
-            include: [{ model: ProductImage, as: "images" }]
+            include: [{ model: ProductImage, as: "images" }],
+            transaction: t
         });
 
         if (!existingProduct) {
+            await t.rollback();
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
@@ -141,34 +160,63 @@ const updateProduct = async (req, res) => {
             }
         }
 
+        // Update basic product fields
         if (Object.keys(updates).length > 0) {
-            await existingProduct.update(updates);
+            await existingProduct.update(updates, { transaction: t });
+        }
+
+        // Handle images to delete
+        if (req.body.imagesToDelete) {
+            let idsToDelete = req.body.imagesToDelete;
+            if (typeof idsToDelete === "string") {
+                idsToDelete = JSON.parse(idsToDelete);
+            }
+
+            // Find images to delete and remove from Cloudinary
+            const imagesToDelete = await ProductImage.findAll({
+                where: { productId: existingProduct.id, id: idsToDelete },
+                transaction: t
+            });
+
+            for (const img of imagesToDelete) {
+                if (img.publicId) {
+                    await cloudinary.uploader.destroy(img.publicId);
+                }
+            }
+
+            // Delete from DB
+            await ProductImage.destroy({
+                where: { productId: existingProduct.id, id: idsToDelete },
+                transaction: t
+            });
         }
 
         // Handle new image uploads
         if (req.files && req.files.length > 0) {
-            const newImages = req.files.map(file => ({
+            const uploadPromises = req.files.map((file, idx) =>
+                cloudinary.uploader.upload(
+                    `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+                    {
+                        folder: `products/${existingProduct.id}`,
+                        resource_type: "image",
+                        public_id: `img_${Date.now()}_${idx}`
+                    }
+                )
+            );
+
+            const uploadResults = await Promise.all(uploadPromises);
+
+            const newImagesData = uploadResults.map(result => ({
                 productId: existingProduct.id,
-                url: `/uploads/products/${file.filename}`
+                url: result.secure_url,
+                publicId: result.public_id
             }));
-            await ProductImage.bulkCreate(newImages);
+
+            await ProductImage.bulkCreate(newImagesData, { transaction: t });
         }
 
-        // Handle image deletions
-        if (req.body.imagesToDelete) {
-            let idsToDelete = req.body.imagesToDelete;
-            if (typeof idsToDelete === "string") {
-                // parse JSON string from frontend
-                idsToDelete = JSON.parse(idsToDelete);
-            }
-
-            await ProductImage.destroy({
-                where: {
-                    productId: existingProduct.id,
-                    id: idsToDelete
-                }
-            });
-        }
+        // Commit transaction
+        await t.commit();
 
         // Fetch updated product
         const updatedProduct = await Product.findByPk(id, {
@@ -183,7 +231,8 @@ const updateProduct = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Server error" });
+        await t.rollback(); // rollback if anything fails
+        res.status(500).json({ success: false, message: error.message || "Server error" });
     }
 };
 
