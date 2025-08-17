@@ -119,16 +119,16 @@ const UsersTab = () => {
                         ) : (
                             users.map((user) => (
                                 <tr key={user._id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                                    <td className="px-6 py-4 text-left whitespace-nowrap font-medium text-gray-900">
                                         {user.fullName}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    <td className="px-6 py-4 text-left whitespace-nowrap text-sm text-gray-600">
                                         {user.phoneNumber}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    <td className="px-6 py-4 text-left whitespace-nowrap text-sm text-gray-600">
                                         {user.email || "N/A"}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 text-left whitespace-nowrap">
                                         <span
                                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === "admin"
                                                 ? "bg-purple-100 text-purple-800"
@@ -138,7 +138,7 @@ const UsersTab = () => {
                                             {user.role}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    <td className="px-6 py-4 text-left whitespace-nowrap text-sm text-gray-600">
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

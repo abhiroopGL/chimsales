@@ -11,6 +11,7 @@ const useAppNavigation = () => {
         goToProfile: () => navigate('/profile'),
         goToAddNewProduct: () => navigate('/admin/products/new'),
         goToEditProduct: (id) => navigate(`/admin/products/${id}/edit`),
+        goToAdmin: () => navigate('/admin')
         // Add more routes as needed
     };
 };

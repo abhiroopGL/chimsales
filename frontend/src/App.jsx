@@ -28,6 +28,8 @@ function App() {
     dispatch(fetchFeaturedProducts());
   }, []);
 
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <>
       <Notification />
@@ -36,7 +38,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="login" element={<AuthLogin />} />
-          <Route path="signup" element={<AuthRegister />} />
+          {/* <Route path="signup" element={<AuthRegister />} /> */}
           <Route path="/" element={<UserDashboard />} />
           <Route path="/item/:id" element={<ProductDetail />} />
           <Route path="/review" element={<ReviewBeforeCheckout />} />
@@ -48,8 +50,8 @@ function App() {
           {/* Admin Routes */}
           <Route path="/*" element={<AdminRoutes />} />
         </Routes>
-        {/* ✅ Floating Action Button always above everything */}
-        <Directions />
+        {/* ✅ Floating Action Button always above everything except admin panel */}
+        {!isAdminRoute && <Directions />}
       </div>
     </>
   )

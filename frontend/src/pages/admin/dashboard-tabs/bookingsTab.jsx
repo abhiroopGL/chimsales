@@ -111,12 +111,12 @@ const BookingsTab = () => {
         setEndDate("");
         setStatusFilter(""); // NEW: clear status filter
     };
-    debugger
+
     return (
         <div className="p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
                 <h2 className="text-xl font-semibold">Bookings Management</h2>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
                     <SearchBar
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -124,22 +124,51 @@ const BookingsTab = () => {
                         className="w-full sm:w-64"
                     />
 
-                    <input
-                        type="date"
-                        className="border rounded px-3 py-2"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        placeholder="Start date"
-                    />
-                    <input
-                        type="date"
-                        className="border rounded px-3 py-2"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        placeholder="End date"
-                    />
+                    {/* Start Date */}
+                    <div className="relative min-w-[140px] flex-1">
+                        <input
+                            type="date"
+                            className="w-full border rounded pl-10 pr-3 py-2 text-sm appearance-none"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            placeholder="Start date"
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    {/* End Date */}
+                    <div className="relative min-w-[140px] flex-1">
+                        <input
+                            type="date"
+                            className="w-full border rounded pl-10 pr-3 py-2 text-sm appearance-none"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            placeholder="End date"
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </span>
+                    </div>
                     <select
-                        className="border rounded px-3 py-2"
+                        className="border rounded px-3 py-2 min-w-[120px] flex-1"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -150,7 +179,7 @@ const BookingsTab = () => {
                     </select>
                     <button
                         onClick={clearFilters}
-                        className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md"
+                        className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md min-w-[100px]"
                     >
                         Clear Filters
                     </button>

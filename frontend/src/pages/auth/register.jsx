@@ -11,29 +11,29 @@ const AuthRegister = () => {
     const { goToLogin, goToDashboard } = useAppNavigation();
     const dispatch = useDispatch();
 
-    const handleSignup = async (e) => {
-        e.preventDefault();
-        try{
-            if (password !== confirmPassword) {
-                dispatch(showNotification({
-                    message: 'Passwords do not match',
-                    type: 'error'
-                }));
-            } else {
-                dispatch(registerUser({email, password}));
-                dispatch(showNotification({
-                    message: 'User Registered Successfully',
-                    type: 'success'
-                }));
-                goToLogin();
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    };
+    // const handleSignup = async (e) => {
+    //     e.preventDefault();
+    //     try{
+    //         if (password !== confirmPassword) {
+    //             dispatch(showNotification({
+    //                 message: 'Passwords do not match',
+    //                 type: 'error'
+    //             }));
+    //         } else {
+    //             dispatch(registerUser({email, password}));
+    //             dispatch(showNotification({
+    //                 message: 'User Registered Successfully',
+    //                 type: 'success'
+    //             }));
+    //             goToLogin();
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
 
     const handleLoginRedirect = () => {
-        goToLogin();
+        // goToLogin();
     };
 
     return (

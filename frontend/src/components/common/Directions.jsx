@@ -8,16 +8,11 @@ const Directions = () => {
     const longitude = 47.934133;
 
     const handleDirections = () => {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        if (isMobile) {
-            window.open(`geo:${latitude},${longitude}?q=${latitude},${longitude}`, "_blank");
-        } else {
-            window.open(
-                `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
-                "_blank"
-            );
-        }
+        // const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        window.open(
+            `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
+            "_blank"
+        );
     };
 
     return (

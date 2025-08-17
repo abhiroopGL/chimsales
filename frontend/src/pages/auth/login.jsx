@@ -6,7 +6,7 @@ import { showNotification } from "../../redux/slices/notificationSlice.js";
 const AuthLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { goToSignup, goToDashboard } = useAppNavigation();
+    const { goToSignup, goToDashboard, goToAdmin } = useAppNavigation();
     const dispatch = useDispatch();
 
     const handleLogin = async (e) => {
@@ -17,7 +17,7 @@ const AuthLogin = () => {
                     message: 'Login Successful',
                     type: 'success'
                 }));
-                goToDashboard();
+                goToAdmin();
             } else {
                 dispatch(showNotification({
                     message: data.payload.message || 'Login Failed',
@@ -75,7 +75,7 @@ const AuthLogin = () => {
                     </button>
                 </form>
 
-                <div className="flex justify-end mt-2 text-sm">
+                {/* <div className="flex justify-end mt-2 text-sm">
                     <button
                         onClick={handleForgotPassword}
                         className="text-black hover:underline transition"
@@ -86,14 +86,16 @@ const AuthLogin = () => {
 
                 <div className="text-center text-sm text-black mt-8">
                     <span>Don’t have an account?</span>
-                </div>
+                </div> */}
 
-                <button
+                {/* DISABLED SIGNUP PAGE FOR NOW AS WE ARE DOING BOOKING */}
+
+                {/* <button
                     onClick={handleSignup}
                     className="w-full border border-black bg-white text-black py-3 rounded-lg hover:bg-black hover:text-white active:scale-95 transition-all duration-200 font-semibold tracking-wide mt-4"
                 >
                     Sign Up
-                </button>
+                </button> */}
 
                 <div className="text-center text-xs text-gray-500 mt-10">
                     © {new Date().getFullYear()} Chimney Store. All rights reserved.
