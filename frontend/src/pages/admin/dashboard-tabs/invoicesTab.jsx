@@ -73,7 +73,7 @@ const InvoicesTab = () => {
             }
         }, 150); // debounce 150ms
     };
-    debugger
+
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
         return () => {

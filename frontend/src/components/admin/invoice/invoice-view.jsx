@@ -57,7 +57,6 @@ const InvoiceView = ({ invoiceId, onClose, onEdit }) => {
     )
   }
 
-  debugger
 
   if (!currentInvoice) return null
 
