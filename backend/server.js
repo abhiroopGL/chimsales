@@ -24,15 +24,28 @@ const { authMiddleware } = require('./controllers/auth_controller');
 const PORT = process.env.PORT || 8000;
 // const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+const allowedOrigins = [
+  'https://chimsales-lt1666jr4-abhirooppanchalv01-6383s-projects.vercel.app/', // your deployed frontend
+  'http://localhost:5173'           // local dev
+];
+
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(express.static(path.resolve('./public')));
 app.use(cookieParser());
+
 app.use(cors({
-    origin: '*',
-    credentials: true,
+  origin: function(origin, callback){
+    // allow requests with no origin (like Postman or server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('CORS not allowed for this origin'), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
 }));
 
 // Routes
