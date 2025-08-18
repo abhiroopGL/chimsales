@@ -25,8 +25,9 @@ const PORT = process.env.PORT || 8000;
 // const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const allowedOrigins = [
-  'https://chimsales-lt1666jr4-abhirooppanchalv01-6383s-projects.vercel.app', // your deployed frontend
-  'http://localhost:5173'           // local dev
+    'https://chimneystorebackend.onrender.com',     //deployed frontend
+    'https://chimsales-lt1666jr4-abhirooppanchalv01-6383s-projects.vercel.app', // your deployed frontend preview
+    'http://localhost:5173'           // local dev
 ];
 
 const app = express();
@@ -37,25 +38,25 @@ app.use(express.static(path.resolve('./public')));
 app.use(cookieParser());
 
 app.use(cors({
-  origin: function(origin, callback){
-    // allow requests with no origin (like Postman or server-to-server)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error('CORS not allowed for this origin'), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true
+    origin: function (origin, callback) {
+        // allow requests with no origin (like Postman or server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('CORS not allowed for this origin'), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true
 }));
 
 app.options('*', cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('CORS not allowed for this origin: ' + origin));
-  },
-  credentials: true,
-  optionsSuccessStatus: 200
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        return callback(new Error('CORS not allowed for this origin: ' + origin));
+    },
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 
 // Routes
