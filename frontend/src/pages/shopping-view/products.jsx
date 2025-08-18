@@ -9,7 +9,6 @@ import { addToCart } from "../../redux/slices/cartSlice.jsx";
 const Products = () => {
   const dispatch = useDispatch();
   const { publicProducts, isLoading } = useSelector((state) => state.products);
-  const { isAuthenticated } = useSelector((state) => state.authorization);
 
   const [filters, setFilters] = useState({
     search: "",
@@ -28,15 +27,6 @@ const Products = () => {
   // };
 
   const handleAddToCart = (product) => {
-    if (!isAuthenticated) {
-      dispatch(
-        showNotification({
-          type: "error",
-          message: "Please login to add items to cart",
-        })
-      );
-      return;
-    }
     dispatch(addToCart({ product, quantity: 1 }));
     dispatch(
       showNotification({
@@ -62,13 +52,13 @@ const Products = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {publicProducts.map((product) => (
               <div
-                key={product._id}
+                key={product.id}
                 className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transform hover:scale-105 transition-transform duration-300"
                 style={{ width: "100%" }}
               >
-                <Link to={`/item/${product._id}`} className="block p-4">
+                <Link to={`/item/${product.id}`} className="block p-4">
                   <img
-                    src={product.images?.[0] || "/placeholder.svg?height=300&width=300"}
+                    src={product.images?.[0]?.url || "/placeholder.svg?height=300&width=300"}
                     alt={product.name}
                     className="w-full h-48 object-cover rounded-lg mb-4"
                   />

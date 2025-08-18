@@ -1,11 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import axiosInstance from "../../../api/axios-instance";
-import {
-    Eye,
-    Edit,
-    Trash2,
-    Plus,
-} from "lucide-react";
+import { Eye, Edit, Trash2, Plus } from "lucide-react";
 
 import InvoiceForm from "../../../components/admin/invoice/invoice-form.jsx";
 import InvoiceView from "../../../components/admin/invoice/invoice-view.jsx";
@@ -18,68 +13,81 @@ const InvoicesTab = () => {
     const [loading, setLoading] = useState(false);
 
     const [search, setSearch] = useState("");
-    const [status, setStatus] = useState("");
+    // const [status, setStatus] = useState("");
 
     const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [showInvoiceForm, setShowInvoiceForm] = useState(false);
     const [showInvoiceView, setShowInvoiceView] = useState(false);
 
+    const scrollTimeoutRef = useRef(null);
+
     // Fetch invoices with pagination, search, and status filters
     const fetchInvoices = useCallback(async () => {
         if (!hasMore || loading) return;
+
         setLoading(true);
         try {
             const params = { page, limit: 20 };
             if (search.trim() !== "") params.search = search.trim();
-            if (status !== "") params.status = status;
+            // if (status !== "") params.status = status;
 
             const res = await axiosInstance.get("/api/invoice", { params });
+            const newInvoices = res.data.invoices || [];
 
-            if (res.data.invoices.length > 0) {
-                setInvoices((prev) => [...prev, ...res.data.invoices]);
+            if (newInvoices.length > 0) {
+                setInvoices((prev) => [...prev, ...newInvoices]);
                 setPage((p) => p + 1);
             } else {
                 setHasMore(false);
             }
         } catch (err) {
             console.error("Error fetching invoices:", err);
+            setHasMore(false);
         } finally {
             setLoading(false);
         }
-    }, [page, hasMore, loading, search, status]);
+    }, [page, hasMore, loading, search]);
 
     // Reset invoices when filters/search change
     useEffect(() => {
         setInvoices([]);
         setPage(1);
         setHasMore(true);
-    }, [search, status]);
+        setLoading(false);
+    }, [search]);
 
-    // Fetch invoices on load and when fetchInvoices changes
+    // Fetch invoices on initial load and after reset
     useEffect(() => {
-        fetchInvoices();
-    }, [fetchInvoices]);
-
-    // Infinite scroll handler
-    const handleScroll = (e) => {
-        const { scrollTop, scrollHeight, clientHeight } = e.target.scrollingElement;
-        if (scrollHeight - scrollTop <= clientHeight + 100) {
+        if (page === 1) {
             fetchInvoices();
         }
-    };
+    }, [page, fetchInvoices]);
 
+    // Infinite scroll handler with debounce
+    const handleScroll = (e) => {
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = setTimeout(() => {
+            const { scrollTop, scrollHeight, clientHeight } = e.target.scrollingElement;
+            if (!loading && hasMore && scrollHeight - scrollTop <= clientHeight + 100) {
+                fetchInvoices();
+            }
+        }, 150); // debounce 150ms
+    };
+    debugger
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, [fetchInvoices]);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        };
+    }, [fetchInvoices, hasMore, loading]);
 
-    // Dummy delete handler — implement as needed
+    // Delete handler
     const handleDeleteItem = async (id) => {
         if (!confirm("Are you sure you want to delete this invoice?")) return;
         try {
             await axiosInstance.delete(`/api/invoice/${id}`);
             alert("Invoice deleted successfully");
-            // Reset to reload invoices
             setInvoices([]);
             setPage(1);
             setHasMore(true);
@@ -89,7 +97,7 @@ const InvoicesTab = () => {
         }
     };
 
-    // Add this helper function inside your component or import it
+    // Text truncate helper
     const truncate = (text, maxLength = 30) => {
         if (!text) return "";
         return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -109,7 +117,7 @@ const InvoicesTab = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-4 mb-4">
+            {/* <div className="flex flex-wrap gap-4 mb-4">
                 <SearchBar
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -126,7 +134,7 @@ const InvoicesTab = () => {
                     <option value="overdue">Overdue</option>
                     <option value="pending">Pending</option>
                 </select>
-            </div>
+            </div> */}
 
             {/* Desktop Table */}
             <div className="hidden sm:block overflow-x-auto">
@@ -136,31 +144,31 @@ const InvoicesTab = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice #</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+                            {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th> */}
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
 
-
                     <tbody className="divide-y divide-gray-200">
                         {invoices.map((invoice) => (
-                            <tr key={invoice._id} className="hover:bg-gray-50">
+                            <tr key={invoice.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 text-left font-medium text-gray-900">
                                     {truncate(invoice.invoiceNumber, 50)}
                                 </td>
                                 <td className="px-6 py-4 text-left">
                                     <div className="text-sm text-gray-900">
-                                        {truncate(invoice.customer?.fullName || invoice.createdBy?.fullName || "N/A", 25)}
+                                        {truncate(invoice?.customerName || "N/A", 25)}
                                     </div>
                                     <div className="text-sm text-gray-500">
-                                        {truncate(invoice.customer?.phoneNumber || "-", 20)}
+                                        {truncate(invoice.customerPhone || "-", 20)}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-left text-sm text-gray-600 whitespace-nowrap">
                                     {invoice.total?.toFixed(3)} KWD
                                 </td>
-                                <td className="px-6 py-4 text-left">
+                                {/* <td className="px-6 py-4 text-left">
                                     <span
                                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.status === "paid"
                                             ? "bg-green-100 text-green-800"
@@ -173,9 +181,12 @@ const InvoicesTab = () => {
                                     >
                                         {invoice.status}
                                     </span>
-                                </td>
-                                <td className="px-6 py-4 text-left text-sm text-gray-600 whitespace-nowrap">
+                                </td> */}
+                                {/* <td className="px-6 py-4 text-left text-sm text-gray-600 whitespace-nowrap">
                                     {new Date(invoice.dueDate).toLocaleDateString()}
+                                </td> */}
+                                <td className="px-6 py-4 text-left text-sm text-gray-600 whitespace-nowrap">
+                                    {new Date(invoice.createdAt).toLocaleString()}
                                 </td>
                                 <td className="px-6 py-4 text-left text-sm font-medium">
                                     <div className="flex gap-2">
@@ -200,7 +211,7 @@ const InvoicesTab = () => {
                                             <Edit size={16} />
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteItem(invoice._id)}
+                                            onClick={() => handleDeleteItem(invoice.id)}
                                             className="text-red-600 hover:text-red-800"
                                             aria-label={`Delete invoice ${invoice.invoiceNumber}`}
                                         >
@@ -211,7 +222,6 @@ const InvoicesTab = () => {
                             </tr>
                         ))}
                     </tbody>
-
                 </table>
             </div>
 
@@ -221,7 +231,7 @@ const InvoicesTab = () => {
                     <div key={invoice._id} className="bg-white shadow rounded p-4">
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="font-semibold text-lg">Invoice #{invoice.invoiceNumber}</h3>
-                            <span
+                            {/* <span
                                 className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.status === "paid"
                                     ? "bg-green-100 text-green-800"
                                     : invoice.status === "sent"
@@ -232,12 +242,13 @@ const InvoicesTab = () => {
                                     }`}
                             >
                                 {invoice.status}
-                            </span>
+                            </span> */}
                         </div>
                         <p className="text-sm text-gray-900 font-medium">{invoice.customer?.fullName || invoice.createdBy?.fullName || "N/A"}</p>
                         <p className="text-sm text-gray-500 mb-1">{invoice.customer?.phoneNumber || "-"}</p>
                         <p className="text-sm text-gray-600 mb-1">Amount: {invoice.total?.toFixed(3)} KWD</p>
-                        <p className="text-sm text-gray-600 mb-3">Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</p>
+                        {/* <p className="text-sm text-gray-600 mb-3">Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</p> */}
+                        <p className="text-sm text-gray-600 mb-3">Created At: {new Date(invoice.createdAt).toLocaleString}</p>
 
                         <div className="flex gap-4">
                             <button
@@ -263,7 +274,7 @@ const InvoicesTab = () => {
                             <button
                                 className="text-red-600 hover:text-red-800"
                                 aria-label={`Delete invoice ${invoice.invoiceNumber}`}
-                                onClick={() => handleDeleteItem(invoice._id)}
+                                onClick={() => handleDeleteItem(invoice.id)}
                             >
                                 <Trash2 size={20} />
                             </button>
@@ -275,7 +286,7 @@ const InvoicesTab = () => {
             {/* Invoice Form Modal */}
             {showInvoiceForm && (
                 <InvoiceForm
-                    invoice={selectedInvoice}
+                    invoiceId={selectedInvoice?.id}
                     onClose={() => {
                         setShowInvoiceForm(false);
                         setSelectedInvoice(null);
@@ -291,7 +302,7 @@ const InvoicesTab = () => {
             {/* Invoice View Modal */}
             {showInvoiceView && selectedInvoice && (
                 <InvoiceView
-                    invoiceId={selectedInvoice._id}
+                    invoiceId={selectedInvoice.id}
                     onClose={() => {
                         setShowInvoiceView(false);
                         setSelectedInvoice(null);

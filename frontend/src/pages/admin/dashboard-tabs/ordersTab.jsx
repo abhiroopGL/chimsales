@@ -96,12 +96,27 @@ const OrdersTab = () => {
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                     </select>
-                    <input
-                        type="date"
-                        className="border rounded px-3 py-2"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                    />
+                    <div className="relative min-w-[140px] flex-1">
+                        <input
+                            type="date"
+                            className="w-full border rounded pl-10 pr-3 py-2 text-sm appearance-none"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            placeholder="dd/mm/yyyy"
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </span>
+                    </div>
+
                 </div>
             </div>
 
@@ -130,10 +145,10 @@ const OrdersTab = () => {
                                 <td className="px-6 py-4 whitespace-nowrap text-left">
                                     <span
                                         className={`px-2 py-1 text-xs rounded-full ${order.status === "completed"
-                                                ? "bg-green-100 text-green-800"
-                                                : order.status === "pending"
-                                                    ? "bg-yellow-100 text-yellow-800"
-                                                    : "bg-red-100 text-red-800"
+                                            ? "bg-green-100 text-green-800"
+                                            : order.status === "pending"
+                                                ? "bg-yellow-100 text-yellow-800"
+                                                : "bg-red-100 text-red-800"
                                             }`}
                                     >
                                         {order.status}
@@ -181,10 +196,10 @@ const OrdersTab = () => {
                             <div className="font-semibold text-lg">{order.orderNumber}</div>
                             <span
                                 className={`px-2 py-1 text-xs rounded-full ${order.status === "completed"
-                                        ? "bg-green-100 text-green-800"
-                                        : order.status === "pending"
-                                            ? "bg-yellow-100 text-yellow-800"
-                                            : "bg-red-100 text-red-800"
+                                    ? "bg-green-100 text-green-800"
+                                    : order.status === "pending"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
                                     }`}
                             >
                                 {order.status}

@@ -147,6 +147,43 @@ const About = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Map Section */}
+            <section className="py-16 px-6 bg-gray-100">
+                <div className="max-w-7xl mx-auto text-center">
+                    <h2 className="text-3xl font-semibold mb-6 text-gray-900">Find Us on the Map</h2>
+                    <p className="text-gray-600 mb-8">
+                        Visit our store or get directions to MetalcoSteel in Kuwait.
+                    </p>
+
+                    <div className="w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden shadow-lg relative">
+                        {/* Google Map */}
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3722.977181047021!2d72.8777!3d19.0760!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDA0JzM0LjAiTiA3MsKwNTInMzkuOSJF!5e0!3m2!1sen!2sin!4v1700000000000"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen=""
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                        ></iframe>
+
+                        {/* ✅ Directions Button - top right */}
+                        <button
+                            onClick={() =>
+                                window.open(
+                                    "https://www.google.com/maps/dir/?api=1&destination=19.0760,72.8777",
+                                    "_blank"
+                                )
+                            }
+                            className="absolute top-4 right-4 bg-black text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-800 transition-all flex items-center gap-2"
+                        >
+                            📍 Get Directions
+                        </button>
+                    </div>
+                </div>
+            </section>
+
         </div>
     )
 }

@@ -57,6 +57,8 @@ const InvoiceView = ({ invoiceId, onClose, onEdit }) => {
     )
   }
 
+  debugger
+
   if (!currentInvoice) return null
 
   return (
@@ -113,10 +115,10 @@ const InvoiceView = ({ invoiceId, onClose, onEdit }) => {
               <h2 className="text-2xl font-bold text-gray-800 sm:text-xl xs:text-lg">INVOICE</h2>
               <p className="text-lg font-semibold sm:text-base">{currentInvoice.invoiceNumber}</p>
               <p className="text-sm text-gray-600">
-                Date: {new Date(currentInvoice.createdAt).toLocaleDateString()}
+                Date: {new Date(currentInvoice.createdAt).toLocaleString()}
               </p>
-              <p className="text-sm text-gray-600">Due: {new Date(currentInvoice.dueDate).toLocaleDateString()}</p>
-              <span
+              <p className="text-sm text-gray-600">Due: {new Date(currentInvoice.dueDate).toLocaleString()}</p>
+              {/* <span
                 className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-2
                   ${currentInvoice.status === "paid"
                     ? "bg-green-100 text-green-800"
@@ -129,7 +131,7 @@ const InvoiceView = ({ invoiceId, onClose, onEdit }) => {
                 `}
               >
                 {currentInvoice.status.toUpperCase()}
-              </span>
+              </span> */}
             </div>
           </div>
 
@@ -137,20 +139,21 @@ const InvoiceView = ({ invoiceId, onClose, onEdit }) => {
           <div className="mb-8">
             <h3 className="text-lg font-semibold mb-3 sm:text-base xs:text-sm">Bill To:</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="font-semibold">{currentInvoice.customer.fullName}</p>
-              <p className="text-gray-600">{currentInvoice.customer.phoneNumber}</p>
-              {currentInvoice.customer.email && <p className="text-gray-600">{currentInvoice.customer.email}</p>}
-              {currentInvoice.customer.address && (
-                <div className="text-gray-600 text-sm mt-2">
-                  {[
-                    currentInvoice.customer.address.street,
-                    currentInvoice.customer.address.area,
-                    currentInvoice.customer.address.governorate,
-                  ]
-                    .filter(Boolean)
-                    .join(", ")}
-                </div>
-              )}
+              <p className="font-semibold">{currentInvoice?.customerName}</p>
+              <p className="text-gray-600">{currentInvoice?.customerPhone}</p>
+              {currentInvoice?.customerEmail && <p className="text-gray-600">{currentInvoice?.customerEmail}</p>}
+              <div className="text-gray-600 text-sm mt-2">
+                {currentInvoice?.customerStreet && (
+                  <div>Street: {currentInvoice.customerStreet}</div>
+                )}
+                {currentInvoice?.customerArea && (
+                  <div>Area: {currentInvoice.customerArea}</div>
+                )}
+                {currentInvoice?.customerGovernorate && (
+                  <div>Governorate: {currentInvoice.customerGovernorate}</div>
+                )}
+              </div>
+
             </div>
           </div>
 

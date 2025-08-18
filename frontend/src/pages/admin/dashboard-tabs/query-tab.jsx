@@ -5,9 +5,9 @@ import QueryView from "../../../components/admin/queries/queryView";
 import SearchBar from "../../../components/admin/searchBar.jsx";
 
 const statusColors = {
-    Pending: "bg-yellow-100 text-yellow-800",
-    "In Process": "bg-blue-100 text-blue-800",
-    Resolved: "bg-green-100 text-green-800",
+    pending: "bg-yellow-100 text-yellow-800",
+    "in process": "bg-blue-100 text-blue-800",
+    resolved: "bg-green-100 text-green-800",
 };
 
 // Helper to truncate long text with ellipsis after n chars
@@ -111,9 +111,9 @@ const QueryTab = () => {
                         onChange={(e) => setStatus(e.target.value)}
                     >
                         <option value="">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="In Process">In Process</option>
-                        <option value="Resolved">Resolved</option>
+                        <option value="pending">Pending</option>
+                        <option value="in process">In Process</option>
+                        <option value="resolved">Resolved</option>
                     </select>
                 </div>
             </div>
@@ -170,7 +170,7 @@ const QueryTab = () => {
             {/* Mobile Cards */}
             <div className="sm:hidden space-y-4">
                 {queries.map((query) => (
-                    <div key={query._id} className="bg-white shadow rounded p-4">
+                    <div key={query.id} className="bg-white shadow rounded p-4">
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="font-semibold">{query.fullName}</h3>
                             <span

@@ -14,7 +14,7 @@ const Review = () => {
   const cartItemsWithDetails = items;
 
   // Calculate total price
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
 
   const [loading, setLoading] = useState(false);
   const [orderData, setOrderData] = useState({
@@ -54,7 +54,7 @@ const Review = () => {
   };
 
   const handlePlaceOrder = async () => {
-    // Basic validation for required fields
+    // Basic validation
     if (!orderData.fullName.trim()) {
       dispatch(showNotification({ type: "error", message: "Full Name is required" }));
       return;
@@ -75,48 +75,52 @@ const Review = () => {
     setLoading(true);
 
     try {
-      const orderPayload = {
+      const bookingPayload = {
         fullName: orderData.fullName,
-        phone: orderData.phone,
         email: orderData.email,
+        phone: orderData.phone,
         items: items.map((item) => ({
-          product: item.productId,
+          productId: item.productId,
           quantity: item.quantity,
-          price: item.price,
+          unitPrice: item.unitPrice
         })),
         total,
-        deliveryAddress: orderData.deliveryAddress,
+        deliveryStreet: orderData.deliveryAddress.street,
+        deliveryArea: orderData.deliveryAddress.area,
+        deliveryGovernorate: orderData.deliveryAddress.governorate,
+        deliveryBlock: orderData.deliveryAddress.block,
+        deliveryBuilding: orderData.deliveryAddress.building,
+        deliveryFloor: orderData.deliveryAddress.floor,
+        deliveryApartment: orderData.deliveryAddress.apartment,
         paymentMethod: orderData.paymentMethod,
         notes: orderData.notes,
       };
 
-      console.log("Placing order with payload:", orderPayload);
-
-      const response = await axiosInstance.post("/api/booking", orderPayload);
-      console.log("Order response:", response.data);
+      const response = await axiosInstance.post("/api/booking", bookingPayload);
 
       if (response.data.success) {
         dispatch(clearCart());
         dispatch(
           showNotification({
             type: "success",
-            message: "Book request placed successfully!",
+            message: "Booking placed successfully!",
           })
         );
         navigate("/");
       }
     } catch (error) {
-      console.error("Error placing book request:", error);
+      console.error("Error placing booking:", error);
       dispatch(
         showNotification({
           type: "error",
-          message: error.response?.data?.message || "Failed to place book request",
+          message: error.response?.data?.message || "Failed to place booking",
         })
       );
     } finally {
       setLoading(false);
     }
   };
+
 
   if (items.length === 0) {
     navigate("/cart");
@@ -348,7 +352,7 @@ const Review = () => {
                       <p className="font-medium">{item.name}</p>
                       <p className="text-gray-600">Qty: {item.quantity}</p>
                     </div>
-                    <span className="font-medium">{(item.price * item.quantity).toFixed(3)} KWD</span>
+                    <span className="font-medium">{(item.unitPrice * item.quantity).toFixed(3)} KWD</span>
                   </div>
                 ))}
               </div>

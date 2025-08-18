@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Eye, Edit, Trash2, Plus, RotateCcw } from "lucide-react";
+import { Edit, Trash2, Plus, RotateCcw } from "lucide-react";
 import {
     fetchAdminProducts,
     deleteProduct,
@@ -33,6 +33,7 @@ const ProductsTab = () => {
         if (!window.confirm("Are you sure you want to delete this product?")) return;
         dispatch(deleteProduct(id)).then(() => {
             dispatch(showNotification({ message: "Product deleted successfully", type: "success" }));
+            dispatch(fetchAdminProducts()); // Refresh products after deletion
         });
     };
 
@@ -93,7 +94,7 @@ const ProductsTab = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {filteredItems.map((product) => (
-                            <tr key={product._id} className="hover:bg-gray-50">
+                            <tr key={product.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 text-left font-medium text-gray-900">
                                     {truncate(product.name, 30)}
                                 </td>
@@ -123,13 +124,13 @@ const ProductsTab = () => {
                                         <button
                                             className="text-green-600 hover:text-green-800"
                                             aria-label={`Edit ${product.name}`}
-                                            onClick={() => goToEditProduct(product._id)}
+                                            onClick={() => goToEditProduct(product.id)}
                                         >
                                             <Edit size={16} />
                                         </button>
                                         {filter === "archived" ? (
                                             <button
-                                                onClick={() => handleRestore(product._id)}
+                                                onClick={() => handleRestore(product.id)}
                                                 className="text-blue-600 hover:text-blue-800"
                                                 aria-label={`Restore ${product.name}`}
                                             >
@@ -137,7 +138,7 @@ const ProductsTab = () => {
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={() => handleDelete(product._id)}
+                                                onClick={() => handleDelete(product.id)}
                                                 className="text-red-600 hover:text-red-800"
                                                 aria-label={`Delete ${product.name}`}
                                             >
@@ -155,7 +156,7 @@ const ProductsTab = () => {
             {/* Mobile Card/List View */}
             <div className="sm:hidden space-y-4 mt-4">
                 {filteredItems.map((product) => (
-                    <div key={product._id} className="bg-white shadow rounded p-4">
+                    <div key={product.id} className="bg-white shadow rounded p-4">
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="font-semibold text-lg">{truncate(product.name, 30)}</h3>
                             <span
@@ -179,13 +180,13 @@ const ProductsTab = () => {
                             <button
                                 className="text-green-600 hover:text-green-800"
                                 aria-label={`Edit ${product.name}`}
-                                onClick={() => goToEditProduct(product._id)}
+                                onClick={() => goToEditProduct(product.id)}
                             >
                                 <Edit size={20} />
                             </button>
                             {filter === "archived" ? (
                                 <button
-                                    onClick={() => handleRestore(product._id)}
+                                    onClick={() => handleRestore(product.id)}
                                     className="text-blue-600 hover:text-blue-800"
                                     aria-label={`Restore ${product.name}`}
                                 >
@@ -193,7 +194,7 @@ const ProductsTab = () => {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => handleDelete(product._id)}
+                                    onClick={() => handleDelete(product.id)}
                                     className="text-red-600 hover:text-red-800"
                                     aria-label={`Delete ${product.name}`}
                                 >

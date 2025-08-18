@@ -7,6 +7,8 @@ frontend/public/uploads/products
 .env
 .env.local
 
+backend/.env*
+
 # Ignore IDE/editor files
 .vscode/
 .idea/

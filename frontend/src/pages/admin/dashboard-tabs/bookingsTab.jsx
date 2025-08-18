@@ -37,7 +37,7 @@ const BookingsTab = () => {
             await axiosInstance.patch(`/api/booking/${bookingId}/status`, { status: newStatus });
             setBookings((prev) =>
                 prev.map((b) =>
-                    b._id === bookingId ? { ...b, status: newStatus } : b
+                    b.id === bookingId ? { ...b, status: newStatus } : b
                 )
             );
             handleCloseModal();
@@ -116,7 +116,7 @@ const BookingsTab = () => {
         <div className="p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
                 <h2 className="text-xl font-semibold">Bookings Management</h2>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
                     <SearchBar
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -124,22 +124,51 @@ const BookingsTab = () => {
                         className="w-full sm:w-64"
                     />
 
-                    <input
-                        type="date"
-                        className="border rounded px-3 py-2"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        placeholder="Start date"
-                    />
-                    <input
-                        type="date"
-                        className="border rounded px-3 py-2"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        placeholder="End date"
-                    />
+                    {/* Start Date */}
+                    <div className="relative min-w-[140px] flex-1">
+                        <input
+                            type="date"
+                            className="w-full border rounded pl-10 pr-3 py-2 text-sm appearance-none"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            placeholder="Start date"
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    {/* End Date */}
+                    <div className="relative min-w-[140px] flex-1">
+                        <input
+                            type="date"
+                            className="w-full border rounded pl-10 pr-3 py-2 text-sm appearance-none"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            placeholder="End date"
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </span>
+                    </div>
                     <select
-                        className="border rounded px-3 py-2"
+                        className="border rounded px-3 py-2 min-w-[120px] flex-1"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -150,7 +179,7 @@ const BookingsTab = () => {
                     </select>
                     <button
                         onClick={clearFilters}
-                        className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md"
+                        className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md min-w-[100px]"
                     >
                         Clear Filters
                     </button>
@@ -175,11 +204,11 @@ const BookingsTab = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {bookings.map((b) => (
-                            <tr key={b._id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">{b.bookingNumber}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{b.customerInfo.fullName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{b.customerInfo.phone}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{b.total.toFixed(3)} KWD</td>
+                            <tr key={b.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">{b?.bookingNumber}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{b?.customerFullName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{b?.customerPhone}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{b?.total.toFixed(3)} KWD</td>
                                 <td className="px-6 py-4 whitespace-nowrap capitalize">
                                     <span
                                         className={`px-2 py-1 text-xs rounded-full ${b.status === "confirmed"
@@ -203,13 +232,13 @@ const BookingsTab = () => {
                                     >
                                         <Eye className="h-5 w-5 text-blue-600" />
                                     </button>
-                                    <button
+                                    {/* <button
                                         title="Delete Booking"
-                                        onClick={() => handleDelete(b._id)}
+                                        onClick={() => handleDelete(b.id)}
                                         className="p-2 rounded hover:bg-red-100 transition"
                                     >
                                         <Trash2 className="h-5 w-5 text-red-600" />
-                                    </button>
+                                    </button> */}
                                 </td>
                             </tr>
                         ))}
@@ -221,11 +250,11 @@ const BookingsTab = () => {
             <div className="sm:hidden space-y-4">
                 {bookings.map((b) => (
                     <div
-                        key={b._id}
+                        key={b.id}
                         className="bg-white shadow rounded p-4 border border-gray-200"
                     >
                         <div className="flex justify-between items-center mb-2">
-                            <div className="font-semibold text-lg">{b.bookingNumber}</div>
+                            <div className="font-semibold text-lg">{b?.bookingNumber}</div>
                             <span
                                 className={`px-2 py-1 text-xs rounded-full ${b.status === "confirmed"
                                     ? "bg-green-100 text-green-800"
@@ -238,9 +267,9 @@ const BookingsTab = () => {
                             </span>
                         </div>
                         <div className="mb-1">
-                            <div className="font-medium">{b.customerInfo.fullName}</div>
-                            <div className="text-sm text-gray-500">{b.customerInfo.phone}</div>
-                            <div className="text-sm text-gray-500">{b.customerInfo.email}</div>
+                            <div className="font-medium">{b.customerFullName}</div>
+                            <div className="text-sm text-gray-500">{b?.customerPhone}</div>
+                            <div className="text-sm text-gray-500">{b?.customerEmail}</div>
                         </div>
                         <div className="mb-1 text-sm text-gray-600 font-medium">
                             Total: {b.total.toFixed(3)} KWD
@@ -256,13 +285,13 @@ const BookingsTab = () => {
                             >
                                 <Eye className="h-5 w-5 text-blue-600" />
                             </button>
-                            <button
+                            {/* <button
                                 title="Delete Booking"
-                                onClick={() => handleDelete(b._id)}
+                                onClick={() => handleDelete(b.id)}
                                 className="p-2 rounded hover:bg-red-100 transition"
                             >
                                 <Trash2 className="h-5 w-5 text-red-600" />
-                            </button>
+                            </button> */}
                         </div>
                     </div>
                 ))}

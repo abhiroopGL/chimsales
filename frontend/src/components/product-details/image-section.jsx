@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ImageGrid from "./image-grid.jsx";
 
 const ImageSection = ({ images }) => {
-    const [mainImage, setMainImage] = useState(images[0]);
+    const [mainImage, setMainImage] = useState(images[0]?.url);
 
     return (
         <div className="flex flex-col items-center">

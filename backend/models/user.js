@@ -1,16 +1,32 @@
-const mongoose = require("mongoose");
+'use strict';
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    static associate(models) {
+      User.hasOne(models.Cart, { foreignKey: 'userId', as: 'activeCart' });
 
-const userSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    fullName: { type: String, default: "" },
-    phone: { type: String, default: "" },
-    address: { type: String, default: "" },
-    role: { type: String, enum: ["user", "admin"], default: "user" },
-    profilePicture: { type: String, default: "" },
-    deletedAt: { type: Date, default: null },
-    deleted: { type: Boolean, default: false },
-    dateOfBirth: { type: Date, default: null },
-},{ timestamps: true });
-
-module.exports = mongoose.model("User", userSchema);
+    }
+  }
+  User.init({
+    email: DataTypes.STRING,
+    password: DataTypes.STRING,
+    fullName: DataTypes.STRING,
+    phone: DataTypes.STRING,
+    address: DataTypes.STRING,
+    profilePicture: DataTypes.STRING,
+    dateOfBirth: DataTypes.DATE,
+    deleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    deletedAt: DataTypes.DATE,
+    role: {
+      type: DataTypes.ENUM("user", "admin"),
+      defaultValue: "user",
+    },
+  }, {
+    sequelize,
+    modelName: 'User',
+  });
+  return User;
+};
