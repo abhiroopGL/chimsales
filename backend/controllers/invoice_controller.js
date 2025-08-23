@@ -1,5 +1,6 @@
 const { Invoice, User, Order, InvoiceItem } = require("../models");
 const { Op } = require("sequelize");
+const InvoicePDFService = require('../utils/invoicePDFService');
 
 // Get all invoices
 const getAllInvoices = async (req, res) => {
@@ -198,4 +199,104 @@ const deleteInvoice = async (req, res) => {
 
 }
 
-module.exports = { getAllInvoices, getSingleInvoice, createNewInvoice, updateInvoice, deleteInvoice };
+/**
+ * Download invoice as PDF
+ */
+const downloadInvoice = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Find invoice with items
+        const invoice = await Invoice.findByPk(id, {
+            include: [
+                {
+                    model: InvoiceItem,
+                    as: 'items'
+                }
+            ]
+        });
+
+        if (!invoice) {
+            return res.status(404).json({
+                success: false,
+                message: 'Invoice not found'
+            });
+        }
+
+        // Initialize PDF service
+        const pdfService = new InvoicePDFService();
+        
+        // Generate HTML
+        const html = pdfService.generateInvoiceHTML(invoice, invoice.items);
+        
+        // For now, return HTML (you can implement actual PDF generation later)
+        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Content-Disposition', `inline; filename="invoice-${invoice.invoiceNumber}.html"`);
+        res.send(html);
+
+    } catch (error) {
+        console.error('Error downloading invoice:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to download invoice',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Download invoice as PDF (when PDF library is available)
+ */
+const downloadInvoicePDF = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Find invoice with items
+        const invoice = await Invoice.findByPk(id, {
+            include: [
+                {
+                    model: InvoiceItem,
+                    as: 'items'
+                }
+            ]
+        });
+
+        if (!invoice) {
+            return res.status(404).json({
+                success: false,
+                message: 'Invoice not found'
+            });
+        }
+
+        // Initialize PDF service
+        const pdfService = new InvoicePDFService();
+        
+        // Generate HTML
+        const html = pdfService.generateInvoiceHTML(invoice, invoice.items);
+        
+        // Generate PDF (this will work when you install PDF libraries)
+        const pdfResult = await pdfService.generatePDF(html);
+        
+        if (pdfResult.needsPDFLibrary) {
+            // Fallback to HTML if PDF library not available
+            res.setHeader('Content-Type', 'text/html');
+            res.setHeader('Content-Disposition', `inline; filename="invoice-${invoice.invoiceNumber}.html"`);
+            res.send(html);
+        } else {
+            // Send actual PDF
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`);
+            res.send(pdfResult.pdf);
+        }
+
+    } catch (error) {
+        console.error('Error downloading invoice PDF:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to download invoice PDF',
+            error: error.message
+        });
+    }
+};
+
+module.exports = { getAllInvoices, getSingleInvoice, createNewInvoice, updateInvoice, deleteInvoice, downloadInvoice, downloadInvoicePDF };

@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axiosInstance from "../../api/axios-instance.js";
+import productService from "../../services/productService.js";
 
 const initialState = {
     adminProducts: [],
@@ -15,24 +15,24 @@ const initialState = {
 export const fetchAdminProducts = createAsyncThunk(
     "/products/fetchAll",
     async () => {
-        const response = await axiosInstance.get("/api/products/admin");
-        return response.data;
+        const response = await productService.fetchAdminProducts();
+        return response;
     }
 );
 
 export const fetchPublicProducts = createAsyncThunk(
     "products/fetchPublic",
     async () => {
-        const response = await axiosInstance.get("/api/products/public");
-        return response.data;
+        const response = await productService.fetchPublicProducts();
+        return response;
     }
 );
 
 export const fetchFeaturedProducts = createAsyncThunk(
     "products/fetchFeatured",
     async () => {
-        const response = await axiosInstance.get("/api/products/featured");
-        return response.data;
+        const response = await productService.fetchFeaturedProducts();
+        return response;
     }
 );
 
@@ -40,8 +40,8 @@ export const fetchFeaturedProducts = createAsyncThunk(
 export const fetchProductById = createAsyncThunk(
     "/products/fetchById",
     async (productId) => {
-        const response = await axiosInstance.get(`/api/products/find/${productId}`);
-        return response.data;
+        const response = await productService.fetchProductById(productId);
+        return response;
     }
 );
 
@@ -49,15 +49,9 @@ export const fetchProductById = createAsyncThunk(
 export const createProduct = createAsyncThunk(
     "/products/create",
     async (productData, { dispatch }) => {
-        const response = await axiosInstance.post("/api/products/create", productData,
-            {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+        const response = await productService.createProduct(productData);
         await dispatch(fetchAdminProducts());
-
-        return response.data;
+        return response;
     }
 );
 
@@ -65,9 +59,8 @@ export const createProduct = createAsyncThunk(
 export const updateProduct = createAsyncThunk(
     "/products/update",
     async ({ id, updatedData }) => {
-
-        const response = await axiosInstance.put(`/api/products/update/${id}`, updatedData);
-        return response.data;
+        const response = await productService.updateProduct(id, updatedData);
+        return response;
     }
 );
 
@@ -75,20 +68,18 @@ export const updateProduct = createAsyncThunk(
 export const deleteProduct = createAsyncThunk(
     "/products/delete",
     async (productId) => {
-        const response = await axiosInstance.delete(`/api/products/delete/${productId}`);
-        return response.data;
+        const response = await productService.deleteProduct(productId);
+        return response;
     }
 );
 
 export const restoreProduct = createAsyncThunk(
     "/products/restore",
     async (productId, { dispatch }) => {
-        const response = await axiosInstance.patch(`/api/products/restore/${productId}`);
-
+        const response = await productService.restoreProduct(productId);
         // Refresh the product list after successful restore
         await dispatch(fetchAdminProducts());
-
-        return response.data;
+        return response;
     }
 );
 
