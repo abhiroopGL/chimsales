@@ -62,10 +62,12 @@ app.use('/api/auth', authLimiter);
 console.log('✅ Rate limiting applied');
 
 // CORS configuration
+const allowedOrigin = process.env.CLIENT_ORIGIN;
 app.use(cors({
     origin: function (origin, callback) {
+        console.log('CORS origin:', origin);
         if (!origin) return callback(null, true);
-        if (['http://localhost:5173', 'https://chimsales.vercel.app'].indexOf(origin) !== -1) {
+        if (origin === allowedOrigin) {
             return callback(null, true);
         }
         return callback(new Error('CORS not allowed for this origin'), false);
@@ -107,7 +109,7 @@ console.log('✅ Test route added');
 // Test error route for testing error handling middleware
 app.get('/test-error', (req, res, next) => {
     const { error } = req.query;
-    
+
     switch (error) {
         case 'AppError':
             const { AppError } = require('./middleware/errorHandler');

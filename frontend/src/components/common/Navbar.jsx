@@ -72,7 +72,7 @@ const Navbar = () => {
                 )}
               </Link>
 
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -102,14 +102,14 @@ const Navbar = () => {
                 )}
               </div>
             ) 
-            // : (
-            //   <Link
-            //     to="/login"
-            //     className="bg-black text-white px-5 py-2 rounded-md font-medium hover:bg-gray-900 transition shadow-md"
-            //   >
-            //     Login
-            //   </Link>
-            // )
+            : (
+              <Link
+                to="/login"
+                className="bg-black text-white px-5 py-2 rounded-md font-medium hover:bg-gray-900 transition shadow-md"
+              >
+                Login
+              </Link>
+            )
             }
 
             {/* Mobile Menu Button */}
