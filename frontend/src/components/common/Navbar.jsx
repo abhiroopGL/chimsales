@@ -40,12 +40,36 @@ const Navbar = () => {
     <nav className="bg-white backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 font-[Poppins] shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          
+
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/your-logo.png" alt="Logo" className="h-10 w-10 rounded-lg shadow-md" />
-            <span className="text-2xl font-semibold text-black tracking-wide">MetalcoSteel</span>
+            <img
+              src="/metalcosteel-logo.png"
+              alt="Logo"
+              className="h-14 w-14 sm:h-16 sm:w-16 rounded-lg shadow-md"
+            />
+
+            <div className="flex flex-col justify-between h-14 sm:h-16">
+              {/* METAL bold */}
+              <div
+                className="flex justify-between w-[100%] text-lg sm:text-xl font-bold"
+                style={{ color: "#25599F" }}
+              >
+                {["M", "E", "T", "A", "L"].map((letter, i) => (
+                  <span key={i}>{letter}</span>
+                ))}
+              </div>
+
+              {/* CO STEEL normal weight, font-sans with underline */}
+              <div
+                className="text-base sm:text-lg font-normal font-sans border-b-2 mt-[2px] pb-[1px] text-center w-[100%]"
+                style={{ color: "#79746B", borderColor: "#25599F" }}
+              >
+                CO STEEL
+              </div>
+            </div>
           </Link>
+
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
@@ -63,14 +87,14 @@ const Navbar = () => {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-              <Link to="/cart" className="relative text-gray-800 hover:text-black transition-all duration-300">
-                <ShoppingCart className="h-6 w-6" />
-                {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-black text-white text-xs rounded-full px-1.5 py-0.5 shadow-md">
-                    {cartItemsCount > 99 ? "99+" : cartItemsCount}
-                  </span>
-                )}
-              </Link>
+            <Link to="/cart" className="relative text-gray-800 hover:text-black transition-all duration-300">
+              <ShoppingCart className="h-6 w-6" />
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-black text-white text-xs rounded-full px-1.5 py-0.5 shadow-md">
+                  {cartItemsCount > 99 ? "99+" : cartItemsCount}
+                </span>
+              )}
+            </Link>
 
             {isAuthenticated ? (
               <div className="relative" ref={profileRef}>
@@ -101,15 +125,15 @@ const Navbar = () => {
                   </div>
                 )}
               </div>
-            ) 
-            : (
-              <Link
-                to="/login"
-                className="bg-black text-white px-5 py-2 rounded-md font-medium hover:bg-gray-900 transition shadow-md"
-              >
-                Login
-              </Link>
             )
+              : (
+                <Link
+                  to="/login"
+                  className="bg-black text-white px-5 py-2 rounded-md font-medium hover:bg-gray-900 transition shadow-md"
+                >
+                  Login
+                </Link>
+              )
             }
 
             {/* Mobile Menu Button */}

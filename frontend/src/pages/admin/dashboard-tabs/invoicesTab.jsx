@@ -228,7 +228,7 @@ const InvoicesTab = () => {
             {/* Mobile Card/List View */}
             <div className="sm:hidden space-y-4">
                 {invoices.map((invoice) => (
-                    <div key={invoice._id} className="bg-white shadow rounded p-4">
+                    <div key={invoice.id} className="bg-white shadow rounded p-4">
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="font-semibold text-lg">Invoice #{invoice.invoiceNumber}</h3>
                             {/* <span
@@ -248,7 +248,7 @@ const InvoicesTab = () => {
                         <p className="text-sm text-gray-500 mb-1">{invoice.customer?.phoneNumber || "-"}</p>
                         <p className="text-sm text-gray-600 mb-1">Amount: {invoice.total?.toFixed(3)} KWD</p>
                         {/* <p className="text-sm text-gray-600 mb-3">Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</p> */}
-                        <p className="text-sm text-gray-600 mb-3">Created At: {new Date(invoice.createdAt).toLocaleString}</p>
+                        <p className="text-sm text-gray-600 mb-3">Created At: {new Date(invoice.createdAt).toLocaleString()}</p>
 
                         <div className="flex gap-4">
                             <button

@@ -62,12 +62,12 @@ app.use('/api/auth', authLimiter);
 console.log('✅ Rate limiting applied');
 
 // CORS configuration
-const allowedOrigin = process.env.CLIENT_ORIGIN;
+const allowedOrigins = ['http://localhost:5173', 'https://chimsales.vercel.app'];
 app.use(cors({
     origin: function (origin, callback) {
         console.log('CORS origin:', origin);
         if (!origin) return callback(null, true);
-        if (origin === allowedOrigin) {
+        if (allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
         return callback(new Error('CORS not allowed for this origin'), false);
@@ -101,7 +101,7 @@ app.use('/api/auth', userRouter);
 app.use('/api/products', productRouter);
 app.use('/api/cart', authMiddleware, cartRouter);
 app.use('/api/admin', authMiddleware, admin, adminRouter);
-app.use('/api/orders', admin, orderRouter);
+app.use('/api/orders', authMiddleware,admin, orderRouter);
 app.use('/api/invoice', authMiddleware, admin, invoiceRouter);
 app.use('/api/queries', queryRouter);
 app.use('/api/booking', bookingRouter);

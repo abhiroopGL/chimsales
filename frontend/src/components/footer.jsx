@@ -87,7 +87,7 @@ const Footer = () => {
             </div>
 
             <div className="text-center text-xs text-gray-400 mt-8 select-none">
-                &copy; {new Date().getFullYear()} Chimney Store. All rights reserved.
+                &copy; {new Date().getFullYear()} Metal Co Steel Kuwait. All rights reserved.
             </div>
         </footer>
     );

@@ -32,7 +32,7 @@ const InvoiceView = ({ invoiceId, onClose, onEdit }) => {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/download`, {
+      const response = await fetch(`/api/invoice/${invoiceId}/download`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       const blob = await response.blob()

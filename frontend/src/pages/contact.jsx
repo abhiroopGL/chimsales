@@ -77,46 +77,59 @@ const Contact = () => {
                     <div className="space-y-10">
                         <h2 className="text-3xl font-semibold text-gray-900 mb-6">Get in Touch</h2>
 
-                        {[
-                            {
-                                icon: <Phone size={22} />,
-                                title: "Phone",
-                                lines: ["+965 2222 3333", "+965 9999 8888 (WhatsApp)"],
-                            },
-                            {
-                                icon: <Mail size={22} />,
-                                title: "Email",
-                                lines: ["info@metalcosteel.com", "support@metalcosteel.com"],
-                            },
-                            {
-                                icon: <MapPin size={22} />,
-                                title: "Address",
-                                lines: ["Kuwait City, Kuwait", "Serving all Kuwait governorates"],
-                            },
-                            {
-                                icon: <Clock size={22} />,
-                                title: "Business Hours",
-                                lines: [
-                                    "Sunday - Thursday: 8:00 AM - 6:00 PM",
-                                    "Friday: 2:00 PM - 6:00 PM",
-                                    "Saturday: 8:00 AM - 4:00 PM",
-                                ],
-                            },
-                        ].map(({ icon, title, lines }, i) => (
-                            <div key={i} className="flex items-start gap-5">
-                                <div className="w-14 h-14 bg-black text-white rounded-lg flex items-center justify-center shadow-md">
-                                    {icon}
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-                                    {lines.map((line, idx) => (
-                                        <p key={idx} className="text-gray-600 text-sm leading-relaxed">
-                                            {line}
-                                        </p>
-                                    ))}
-                                </div>
+                        <div className="space-y-10 w-full">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 justify-items-center">
+                                {[
+                                    {
+                                        icon: <Phone size={22} />,
+                                        title: "Phone",
+                                        lines: ["+965 6635 9350", "+965 6581 3153 (WhatsApp)"],
+                                    },
+                                    {
+                                        icon: <Mail size={22} />,
+                                        title: "Email",
+                                        lines: ["info@metalcosteelkw.com", "support@metalcosteelkw.com"],
+                                    },
+                                    {
+                                        icon: <MapPin size={22} />,
+                                        title: "Address",
+                                        lines: [
+                                            "Shop 5, Bldg. 1430, St. 26, Saqabi Complex, Near Al Othman Mosque, Al Rai",
+                                        ],
+                                    },
+                                    {
+                                        icon: <Clock size={22} />,
+                                        title: "Business Hours",
+                                        lines: [
+                                            "Sunday - Thursday: 8:00 AM - 6:00 PM",
+                                            // "Friday: 2:00 PM - 6:00 PM",
+                                            "Saturday: 8:00 AM - 4:00 PM",
+                                        ],
+                                    },
+                                ].map(({ icon, title, lines }, i) => (
+                                    <div
+                                        key={i}
+                                        className="flex flex-col items-center text-center gap-2 max-w-xs"
+                                    >
+                                        <div className="w-14 h-14 bg-black text-white rounded-lg flex items-center justify-center shadow-md">
+                                            {icon}
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                                        {lines.map((line, idx) => (
+                                            <p
+                                                key={idx}
+                                                className="text-gray-600 text-sm leading-relaxed break-words"
+                                            >
+                                                {line}
+                                            </p>
+                                        ))}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
+
+
+
 
                         {/* Service Areas */}
                         <div className="mt-8 bg-gray-50 p-6 rounded-lg shadow-md">

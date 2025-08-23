@@ -43,8 +43,6 @@ const AdminDashboard = () => {
     localStorage.setItem("adminActiveTab", activeTab);
   }, [activeTab]);
 
-  console.log("Admin Dashboard stats:", stats);
-
   if (!stats) return <p className="text-center mt-10">Loading stats...</p>;
 
   // const pieData = [

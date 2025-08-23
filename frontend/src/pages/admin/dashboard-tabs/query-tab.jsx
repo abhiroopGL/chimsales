@@ -133,7 +133,7 @@ const QueryTab = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {queries.map((query) => (
-                            <tr key={query._id} className="hover:bg-gray-50">
+                            <tr key={query.id} className="hover:bg-gray-50">
                                 <td className="px-4 py-3 text-left">{query.fullName}</td>
                                 <td className="px-4 py-3 text-left">{query.phoneNumber}</td>
                                 <td className="px-4 py-3 text-left">{query.subject}</td>
