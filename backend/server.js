@@ -39,7 +39,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 console.log('✅ Express app and server created');
 
-
+app.set('trust proxy', 1);
 
 // Security middleware (apply early)
 app.use(securityHeaders);
@@ -90,6 +90,13 @@ app.get('/health', (req, res) => {
 console.log('✅ Health check route added');
 
 // Basic routes
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Welcome to API',
+    timestamp: new Date().toISOString(),
+  });
+});
 app.use('/api/auth', userRouter);
 app.use('/api/products', productRouter);
 app.use('/api/cart', authMiddleware, cartRouter);

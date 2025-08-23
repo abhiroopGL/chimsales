@@ -16,10 +16,10 @@ const createRateLimit = (windowMs, max, message) => {
 };
 
 // General API rate limiting
-const generalLimiter = createRateLimit(15 * 60 * 1000, 100, 'Too many requests, please try again later.');
+const generalLimiter = createRateLimit(60 * 1000, 100, 'Too many requests, please try again later.');
 
 // Auth-specific rate limiting (more strict)
-const authLimiter = createRateLimit(15 * 60 * 1000, 15, 'Too many authentication attempts, please try again later.');
+const authLimiter = createRateLimit(60 * 1000, 15, 'Too many authentication attempts, please try again later.');
 
 // Security headers middleware
 const securityHeaders = helmet({
