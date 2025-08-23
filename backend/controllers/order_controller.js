@@ -30,7 +30,7 @@ const getOrders = async (req, res) => {
       limit,
       include: [
         { model: User, as: "customer", attributes: ["fullName", "phone"] },
-        { model: Invoice }
+        // { model: Invoice }
       ]
     });
 

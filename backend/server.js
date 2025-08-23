@@ -101,7 +101,7 @@ app.use('/api/auth', userRouter);
 app.use('/api/products', productRouter);
 app.use('/api/cart', authMiddleware, cartRouter);
 app.use('/api/admin', authMiddleware, admin, adminRouter);
-app.use('/api/orders', authMiddleware,admin, orderRouter);
+app.use('/api/orders', authMiddleware, admin, orderRouter);
 app.use('/api/invoice', authMiddleware, admin, invoiceRouter);
 app.use('/api/queries', queryRouter);
 app.use('/api/booking', bookingRouter);
